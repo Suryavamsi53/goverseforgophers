@@ -1,0 +1,40 @@
+{{define "lesson"}}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow flex flex-col md:flex-row gap-8">
+    
+    <!-- Sidebar / Table of Contents -->
+    <aside class="hidden lg:block w-64 flex-shrink-0">
+        <div class="glass-card p-4 sticky top-24 flex flex-col h-[calc(100vh-8rem)]">
+            <div class="flex-grow overflow-y-auto">
+                <a href="/learn" class="flex items-center text-sm text-gray-400 hover:text-white mb-6 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                    Back to Academy
+                </a>
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-3">In this lesson</h3>
+                <nav class="space-y-1">
+                    <a href="#go-concurrency-goroutines-and-channels" class="block px-3 py-2 text-sm text-go-cyan font-medium bg-dark-700 rounded-md">Goroutines and Channels</a>
+                    <a href="#goroutines" class="block px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors">Goroutines</a>
+                    <a href="#channels" class="block px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors">Channels</a>
+                    <a href="#best-practices" class="block px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors">Best Practices</a>
+                </nav>
+            </div>
+            
+            <div class="mt-4 pt-4 border-t border-dark-border" id="progress-container">
+                <button 
+                    hx-post="/api/progress/lesson/concurrency" 
+                    hx-target="#progress-container"
+                    hx-swap="outerHTML"
+                    class="w-full flex items-center justify-center px-4 py-2 bg-dark-700 hover:bg-go-cyan text-gray-300 hover:text-white rounded-lg transition-colors font-medium border border-dark-border hover:border-go-cyan">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Mark as Complete
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Markdown Content -->
+    <article class="flex-grow max-w-3xl prose prose-invert prose-pre:bg-dark-800 prose-pre:border prose-pre:border-dark-border prose-a:text-go-cyan hover:prose-a:text-go-blue prose-headings:text-white prose-p:text-gray-300">
+        {{.Content}}
+    </article>
+
+</div>
+{{end}}

@@ -1,0 +1,22 @@
+# Binaries
+goverse-cli
+cmd/server/server
+
+# Environment variables
+.env
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Temporary files
+*.swp
+*~
+.DS_Store
+
+# Tailwind CLI binary (if downloaded)
+tailwindcss
+
+# Temp test files
+hello.go
+test_cli.go

@@ -1,0 +1,276 @@
+{{define "practice"}}
+<div class="flex-grow flex flex-col h-[calc(100vh-64px)] w-full overflow-hidden bg-slate-950 relative text-sm" x-data="playground()" x-init="initEditor()">
+    
+    <!-- Background glowing accents -->
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <!-- Top Action Bar -->
+    <div class="h-14 border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-xl flex items-center justify-between px-4 shrink-0 z-10">
+        <div class="flex items-center gap-3">
+            <div class="p-1.5 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-lg border border-cyan-500/20">
+                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            </div>
+            <div>
+                <h1 class="text-slate-100 font-bold tracking-wide flex items-center gap-2">
+                    GoVerse Sandbox <span class="bg-blue-500/10 text-blue-400 text-[10px] uppercase px-1.5 py-0.5 rounded font-bold tracking-wider border border-blue-500/20">Ultimate</span>
+                </h1>
+            </div>
+        </div>
+        
+        <!-- Toolbar Actions -->
+        <div class="flex items-center gap-2 bg-slate-900/50 rounded-lg p-1 border border-slate-700/50">
+            <button @click="copyCode" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center gap-1.5 transition-colors" title="Copy to Clipboard">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span class="hidden lg:inline text-xs">Copy</span>
+            </button>
+            <button @click="downloadCode" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center gap-1.5 transition-colors" title="Download main.go">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span class="hidden lg:inline text-xs">Download</span>
+            </button>
+            <div class="w-px h-4 bg-slate-700 mx-1"></div>
+            <button @click="decreaseFontSize" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center justify-center transition-colors" title="Decrease Font Size">A-</button>
+            <button @click="increaseFontSize" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center justify-center transition-colors" title="Increase Font Size">A+</button>
+            <div class="w-px h-4 bg-slate-700 mx-1"></div>
+            <button @click="resetCode" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center gap-1.5 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span class="hidden lg:inline text-xs">Reset</span>
+            </button>
+            <div class="w-px h-4 bg-slate-700 mx-1"></div>
+            <!-- Run Button -->
+            <button @click="runCode" :disabled="isRunning" class="relative group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-1.5 px-6 rounded text-xs flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)]" :class="{ 'opacity-60 cursor-not-allowed': isRunning }">
+                <svg x-show="!isRunning" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                <svg x-show="isRunning" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" style="display: none;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span x-text="isRunning ? 'Compiling...' : 'Run (Ctrl+Enter)'"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Split Workspace -->
+    <div class="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden p-4 gap-4 z-10" :class="{ 'lg:flex-col': isSplitHorizontal }">
+        
+        <!-- Editor Panel -->
+        <div class="flex-1 flex flex-col min-w-0 bg-[#0d1117] border border-slate-700/50 rounded-xl shadow-xl relative overflow-hidden group">
+            <div class="bg-[#161b22] flex items-center justify-between px-4 py-2 border-b border-slate-700/50">
+                <div class="flex items-center gap-2">
+                    <span class="text-cyan-400 font-mono text-xs tracking-wide font-medium">main.go</span>
+                    <span x-show="autoSaved" class="text-slate-500 text-[10px] uppercase ml-2 animate-pulse" style="display: none;">Saved</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button @click="formatCode" class="text-slate-400 hover:text-white text-xs px-2 py-1 bg-slate-800 rounded border border-slate-700 transition-colors" title="Format Code (gofmt)">Format</button>
+                </div>
+            </div>
+            
+            <div id="editor-container" class="absolute inset-0 top-[37px]"></div>
+        </div>
+
+        <!-- Terminal Panel -->
+        <div class="lg:w-2/5 flex flex-col bg-[#0d1117] border border-slate-700/50 rounded-xl shadow-xl relative overflow-hidden" :class="{ 'lg:w-full lg:h-1/3': isSplitHorizontal }">
+            <div class="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-slate-700/50">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span class="text-xs font-mono font-bold text-slate-300">Terminal</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button @click="isSplitHorizontal = !isSplitHorizontal" class="text-slate-500 hover:text-slate-300 transition-colors" title="Toggle Layout">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    </button>
+                    <button @click="clearTerminal" class="text-slate-500 hover:text-slate-300 transition-colors" title="Clear Terminal">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 p-4 overflow-y-auto font-mono text-sm leading-relaxed" style="background-color: #0d1117;">
+                <!-- Output History Log -->
+                <template x-for="log in executionHistory">
+                    <div class="mb-4 pb-4 border-b border-slate-800">
+                        <div class="flex items-center justify-between text-slate-500 text-xs mb-2">
+                            <div>
+                                <span class="text-green-400">~/goverse $</span> go run main.go
+                            </div>
+                            <span x-text="log.time + 'ms'" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded"></span>
+                        </div>
+                        <pre x-show="log.output" class="text-slate-200 whitespace-pre-wrap break-words" x-text="log.output"></pre>
+                        <div x-show="log.error" class="mt-2 p-2 bg-red-900/20 border border-red-500/20 rounded">
+                            <pre class="text-red-400 whitespace-pre-wrap break-words text-xs" x-text="log.error"></pre>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Current Running State -->
+                <div x-show="isRunning" class="text-cyan-500/80 animate-pulse" style="display: none;">
+                    <span class="text-slate-500">~/goverse $</span> go run main.go<br/>
+                    Compiling program...<span class="animate-ping inline-block w-1.5 h-3 ml-1 bg-cyan-500"></span>
+                </div>
+                
+                <!-- Empty State -->
+                <div x-show="executionHistory.length === 0 && !isRunning" class="h-full flex flex-col items-center justify-center text-slate-600 opacity-50 select-none">
+                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <p class="text-xs">Terminal Output</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Load Monaco Editor -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
+<script>
+    const DEFAULT_CODE = `package main
+
+import "fmt"
+
+func main() {
+\tfmt.Println("Welcome to the GoVerse Ultimate Sandbox!")
+\tfmt.Println("🚀 Press Ctrl+Enter to compile & run instantly.")
+}
+`;
+
+    let globalMonacoEditor = null;
+
+    function playground() {
+        return {
+            isRunning: false,
+            isSplitHorizontal: false,
+            autoSaved: false,
+            fontSize: 15,
+            executionHistory: [],
+            
+            initEditor() {
+                const savedCode = localStorage.getItem('goverse_sandbox_code') || DEFAULT_CODE;
+                
+                require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+                require(['vs/editor/editor.main'], () => {
+                    globalMonacoEditor = monaco.editor.create(document.getElementById('editor-container'), {
+                        value: savedCode,
+                        language: 'go',
+                        theme: 'vs-dark',
+                        automaticLayout: false, 
+                        minimap: { enabled: false },
+                        fontSize: this.fontSize,
+                        fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
+                        fontLigatures: true,
+                        scrollBeyondLastLine: false,
+                        smoothScrolling: true,
+                        cursorBlinking: "smooth",
+                        cursorSmoothCaretAnimation: "on",
+                        padding: { top: 20, bottom: 20 }
+                    });
+
+                    // Add Ctrl+Enter binding
+                    globalMonacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+                        this.runCode();
+                    });
+
+                    // Auto-save logic
+                    globalMonacoEditor.onDidChangeModelContent(() => {
+                        localStorage.setItem('goverse_sandbox_code', globalMonacoEditor.getValue());
+                        this.autoSaved = true;
+                        setTimeout(() => this.autoSaved = false, 1500);
+                    });
+
+                    window.addEventListener('resize', () => {
+                        if (globalMonacoEditor) globalMonacoEditor.layout();
+                    });
+                    
+                    this.$watch('isSplitHorizontal', () => {
+                        setTimeout(() => globalMonacoEditor.layout(), 50);
+                    });
+                });
+            },
+
+            increaseFontSize() {
+                if (this.fontSize < 30) {
+                    this.fontSize += 1;
+                    if(globalMonacoEditor) globalMonacoEditor.updateOptions({ fontSize: this.fontSize });
+                }
+            },
+            
+            decreaseFontSize() {
+                if (this.fontSize > 10) {
+                    this.fontSize -= 1;
+                    if(globalMonacoEditor) globalMonacoEditor.updateOptions({ fontSize: this.fontSize });
+                }
+            },
+
+            copyCode() {
+                if (globalMonacoEditor) {
+                    navigator.clipboard.writeText(globalMonacoEditor.getValue());
+                    alert("Code copied to clipboard!");
+                }
+            },
+
+            downloadCode() {
+                if (!globalMonacoEditor) return;
+                const blob = new Blob([globalMonacoEditor.getValue()], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'main.go';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            },
+
+            resetCode() {
+                if (globalMonacoEditor && confirm("Reset to default code? This cannot be undone.")) {
+                    globalMonacoEditor.setValue(DEFAULT_CODE);
+                    this.clearTerminal();
+                }
+            },
+            
+            formatCode() {
+                // A true format requires backend gofmt, but for now we just layout
+                if (globalMonacoEditor) globalMonacoEditor.getAction('editor.action.formatDocument').run();
+            },
+            
+            clearTerminal() {
+                this.executionHistory = [];
+            },
+
+            async runCode() {
+                if (!globalMonacoEditor || this.isRunning) return;
+                
+                const code = globalMonacoEditor.getValue();
+                this.isRunning = true;
+
+                try {
+                    const response = await fetch('/api/v1/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code })
+                    });
+                    
+                    const data = await response.json();
+                    if (!response.ok) {
+                        this.executionHistory.unshift({
+                            output: '',
+                            error: data.error || 'Execution failed',
+                            time: data.time_ms || 0
+                        });
+                    } else {
+                        this.executionHistory.unshift({
+                            output: data.output,
+                            error: data.error,
+                            time: data.time_ms
+                        });
+                    }
+                } catch (err) {
+                    this.executionHistory.unshift({
+                        output: '',
+                        error: 'Network error or server unreachable. Ensure backend is running.',
+                        time: 0
+                    });
+                } finally {
+                    this.isRunning = false;
+                    // Keep history capped at 10 items to prevent huge DOM
+                    if (this.executionHistory.length > 10) {
+                        this.executionHistory = this.executionHistory.slice(0, 10);
+                    }
+                }
+            }
+        }
+    }
+</script>
+{{end}}

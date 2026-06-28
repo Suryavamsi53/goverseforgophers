@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS user_progress;
+DROP TABLE IF EXISTS lessons;
+DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS user_profiles;
+DROP TABLE IF EXISTS users;
