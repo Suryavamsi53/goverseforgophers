@@ -8,39 +8,63 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/suryavamsivaggu/goverse/internal/domain"
 	"github.com/suryavamsivaggu/goverse/pkg/markdown"
 )
 
 var mdRenderer = markdown.NewRenderer()
 
-func RegisterLearnRoutes(r chi.Router) {
-	r.Get("/learn", HandleLearnIndex)
-	r.Get("/learn/{slug}", HandleLesson)
-	r.Post("/api/progress/lesson/{slug}", HandleMarkProgress)
+func (h *WebHandler) RegisterLearnRoutes(r chi.Router) {
+	r.Get("/learn", h.HandleLearnIndex)
+	r.Get("/learn/{course}/{lesson}", h.HandleLesson)
+	r.Post("/api/progress/lesson/{lesson}", h.HandleMarkProgress)
 }
 
-func HandleLearnIndex(w http.ResponseWriter, r *http.Request) {
+func (h *WebHandler) HandleLearnIndex(w http.ResponseWriter, r *http.Request) {
+	courses, err := h.CourseRepo.GetAll(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var coursesWithLessons []map[string]interface{}
+	for _, c := range courses {
+		lessons, err := h.CourseRepo.GetLessonsByCourseID(r.Context(), c.ID)
+		startSlug := "concurrency" // Fallback
+		if err == nil && len(lessons) > 0 {
+			startSlug = lessons[0].Slug
+		}
+		coursesWithLessons = append(coursesWithLessons, map[string]interface{}{
+			"Course":      c,
+			"StartSlug":   startSlug,
+			"LessonCount": len(lessons),
+		})
+	}
+
 	tmpl := parseTemplates()
-	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title": "Learn Golang - GoVerse",
-		"Page":  "learn_index",
+	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
+		"Title":   "Learn Golang - GoVerse",
+		"Page":    "learn_index",
+		"Courses": coursesWithLessons,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func HandleLesson(w http.ResponseWriter, r *http.Request) {
-	slug := chi.URLParam(r, "slug")
-	if slug == "" {
+func (h *WebHandler) HandleLesson(w http.ResponseWriter, r *http.Request) {
+	courseSlug := chi.URLParam(r, "course")
+	lessonSlug := chi.URLParam(r, "lesson")
+	
+	if courseSlug == "" || lessonSlug == "" {
 		http.NotFound(w, r)
 		return
 	}
 
-	// Read markdown file safely (prevent path traversal in real app)
-	// For demo, we just read from content/lessons/{slug}.md
-	cleanSlug := filepath.Base(slug)
-	contentPath := filepath.Join("content", "lessons", cleanSlug+".md")
+	// Read markdown file safely
+	cleanCourse := filepath.Base(courseSlug)
+	cleanLesson := filepath.Base(lessonSlug)
+	contentPath := filepath.Join("content", "lessons", cleanCourse, cleanLesson+".md")
 	
 	mdBytes, err := os.ReadFile(contentPath)
 	if err != nil {
@@ -54,21 +78,116 @@ func HandleLesson(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error rendering content", http.StatusInternalServerError)
 		return
 	}
+	
+	// Extract Table of Contents
+	toc, err := mdRenderer.ExtractTOC(mdBytes)
+	if err != nil {
+		http.Error(w, "Error parsing TOC", http.StatusInternalServerError)
+		return
+	}
+
+	// Fetch lesson details from DB to check completion status
+	lesson, err := h.CourseRepo.GetLessonBySlug(r.Context(), cleanLesson)
+	var isCompleted bool
+	userID := "11111111-1111-1111-1111-111111111111" // Hardcoded current user
+	
+	if err == nil && lesson != nil {
+		progressList, progressErr := h.ProgressRepo.GetProgress(r.Context(), userID)
+		if progressErr == nil {
+			for _, p := range progressList {
+				if p.EntityType == "lesson" && p.EntityID == lesson.ID && p.Status == "completed" {
+					isCompleted = true
+					break
+				}
+			}
+		}
+	}
+
+	// Get course info and lessons list for sidebar
+	course, err := h.CourseRepo.GetBySlug(r.Context(), cleanCourse)
+	var lessons []domain.Lesson
+	var courseTitle string
+	if err == nil && course != nil {
+		courseTitle = course.Title
+		lessons, _ = h.CourseRepo.GetLessonsByCourseID(r.Context(), course.ID)
+	} else {
+		// Fallback/Default
+		courseTitle = strings.Title(strings.ReplaceAll(cleanCourse, "-", " "))
+	}
+
+	// Fetch user progress for sidebar item completion statuses
+	completedLessons := make(map[string]bool)
+	progressList, progressErr := h.ProgressRepo.GetProgress(r.Context(), userID)
+	if progressErr == nil {
+		for _, p := range progressList {
+			if p.EntityType == "lesson" && p.Status == "completed" {
+				completedLessons[p.EntityID] = true
+			}
+		}
+	}
+
+	// Prepare sidebar lessons and find prev/next
+	var prevLesson, nextLesson *domain.Lesson
+	var sidebarLessons []map[string]interface{}
+	
+	for i, l := range lessons {
+		isActive := l.Slug == cleanLesson
+		isComp := completedLessons[l.ID]
+		
+		sidebarLessons = append(sidebarLessons, map[string]interface{}{
+			"Slug":        l.Slug,
+			"Title":       l.Title,
+			"IsActive":    isActive,
+			"IsCompleted": isComp,
+		})
+		
+		if isActive {
+			if i > 0 {
+				prevLesson = &lessons[i-1]
+			}
+			if i < len(lessons)-1 {
+				nextLesson = &lessons[i+1]
+			}
+		}
+	}
 
 	tmpl := parseTemplates()
 	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":   strings.Title(strings.ReplaceAll(cleanSlug, "-", " ")) + " - GoVerse",
-		"Page":    "lesson",
-		"Content": template.HTML(htmlContent), // Safe because we trust our own markdown
+		"Title":          strings.Title(strings.ReplaceAll(cleanLesson, "-", " ")) + " - GoVerse",
+		"Page":           "lesson",
+		"Content":        template.HTML(htmlContent), // Safe because we trust our own markdown
+		"TOC":            toc,
+		"Course":         cleanCourse,
+		"CourseTitle":    courseTitle,
+		"Slug":           cleanLesson,
+		"IsCompleted":    isCompleted,
+		"Lessons":        sidebarLessons,
+		"PrevLesson":     prevLesson,
+		"NextLesson":     nextLesson,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
-func HandleMarkProgress(w http.ResponseWriter, r *http.Request) {
-	// For demo purposes, we'll just return the updated HTML snippet directly via HTMX.
-	// In a real app, you would extract the user from the JWT and update the DB using domain.ProgressRepository.
+func (h *WebHandler) HandleMarkProgress(w http.ResponseWriter, r *http.Request) {
+	lessonSlug := chi.URLParam(r, "lesson")
+	cleanLesson := filepath.Base(lessonSlug)
+	
+	userID := "11111111-1111-1111-1111-111111111111" // Hardcoded user
+	
+	// Find lesson ID by slug
+	lesson, err := h.CourseRepo.GetLessonBySlug(r.Context(), cleanLesson)
+	if err != nil {
+		http.Error(w, "Lesson not found", http.StatusNotFound)
+		return
+	}
+	
+	err = h.ProgressRepo.MarkCompleted(r.Context(), userID, "lesson", lesson.ID)
+	if err != nil {
+		http.Error(w, "Failed to save progress", http.StatusInternalServerError)
+		return
+	}
 	
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusOK)

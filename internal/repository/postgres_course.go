@@ -16,8 +16,22 @@ func NewPostgresCourseRepository(db *pgxpool.Pool) domain.CourseRepository {
 }
 
 func (r *postgresCourseRepository) GetAll(ctx context.Context) ([]domain.Course, error) {
-	// Not implemented for brevity
-	return nil, nil
+	rows, err := r.db.Query(ctx, "SELECT id, slug, title, description, difficulty, created_at FROM courses ORDER BY created_at ASC")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var courses []domain.Course
+	for rows.Next() {
+		var c domain.Course
+		err := rows.Scan(&c.ID, &c.Slug, &c.Title, &c.Description, &c.Difficulty, &c.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		courses = append(courses, c)
+	}
+	return courses, nil
 }
 
 func (r *postgresCourseRepository) GetBySlug(ctx context.Context, slug string) (*domain.Course, error) {

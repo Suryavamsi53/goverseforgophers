@@ -6,57 +6,26 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Beginner Track -->
-        <a href="/learn/concurrency" class="glass-card p-6 block hover:border-go-cyan/50 transition-colors group">
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                    <span class="text-green-500 font-bold">1</span>
-                </div>
-                <span class="text-xs font-semibold text-green-500 uppercase tracking-wider bg-green-500/10 px-2 py-1 rounded">Beginner</span>
-            </div>
-            <h3 class="text-xl font-bold text-white group-hover:text-go-cyan transition-colors">Go Fundamentals</h3>
-            <p class="text-sm text-gray-400 mt-2 line-clamp-2">Learn variables, types, control structures, and the absolute basics of the language.</p>
-            
-            <div class="mt-6 flex justify-between items-center text-sm">
-                <span class="text-gray-500">12 Lessons</span>
-                <span class="text-go-cyan flex items-center gap-1">Start <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
-            </div>
-        </a>
-
-        <!-- Intermediate Track -->
-        <a href="/learn/concurrency" class="glass-card p-6 block hover:border-go-blue/50 transition-colors group border-go-blue/30 relative overflow-hidden">
-            <div class="absolute top-0 right-0 bg-go-blue text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Recommended</div>
+        {{range .Courses}}
+        <a href="/learn/{{.Course.Slug}}/{{.StartSlug}}" class="glass-card p-6 block hover:border-go-cyan/50 transition-colors group relative overflow-hidden">
+            {{if eq .Course.Slug "concurrency"}}
+                <div class="absolute top-0 right-0 bg-go-blue text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Recommended</div>
+            {{end}}
             <div class="flex justify-between items-start mb-4">
                 <div class="w-10 h-10 rounded-lg bg-go-blue/10 flex items-center justify-center">
-                    <span class="text-go-blue font-bold">2</span>
+                    <span class="text-go-cyan font-bold">★</span>
                 </div>
-                <span class="text-xs font-semibold text-go-blue uppercase tracking-wider bg-go-blue/10 px-2 py-1 rounded">Intermediate</span>
+                <span class="text-xs font-semibold text-go-cyan uppercase tracking-wider bg-go-cyan/10 px-2 py-1 rounded">{{.Course.Difficulty}}</span>
             </div>
-            <h3 class="text-xl font-bold text-white group-hover:text-go-cyan transition-colors">Concurrency in Go</h3>
-            <p class="text-sm text-gray-400 mt-2 line-clamp-2">Master Goroutines, Channels, Select statements, and the sync package.</p>
+            <h3 class="text-xl font-bold text-white group-hover:text-go-cyan transition-colors">{{.Course.Title}}</h3>
+            <p class="text-sm text-gray-400 mt-2 line-clamp-2">{{.Course.Description}}</p>
             
             <div class="mt-6 flex justify-between items-center text-sm">
-                <span class="text-gray-500">8 Lessons</span>
+                <span class="text-gray-500">{{.LessonCount}} Lessons</span>
                 <span class="text-go-cyan flex items-center gap-1">Start <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
             </div>
         </a>
-
-        <!-- Advanced Track -->
-        <a href="/learn/concurrency" class="glass-card p-6 block hover:border-purple-500/50 transition-colors group">
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                    <span class="text-purple-500 font-bold">3</span>
-                </div>
-                <span class="text-xs font-semibold text-purple-500 uppercase tracking-wider bg-purple-500/10 px-2 py-1 rounded">Advanced</span>
-            </div>
-            <h3 class="text-xl font-bold text-white group-hover:text-go-cyan transition-colors">System Design</h3>
-            <p class="text-sm text-gray-400 mt-2 line-clamp-2">Microservices, gRPC, distributed systems, and Google-level backend architecture.</p>
-            
-            <div class="mt-6 flex justify-between items-center text-sm">
-                <span class="text-gray-500">15 Lessons</span>
-                <span class="text-go-cyan flex items-center gap-1">Start <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
-            </div>
-        </a>
+        {{end}}
     </div>
 </div>
 {{end}}

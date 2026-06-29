@@ -10,17 +10,21 @@ import (
 )
 
 type WebHandler struct {
-	UserRepo domain.UserRepository
+	UserRepo     domain.UserRepository
+	CourseRepo   domain.CourseRepository
+	ProgressRepo domain.ProgressRepository
 }
 
-func RegisterRoutes(r chi.Router, userRepo domain.UserRepository) {
+func RegisterRoutes(r chi.Router, userRepo domain.UserRepository, courseRepo domain.CourseRepository, progressRepo domain.ProgressRepository) {
 	h := &WebHandler{
-		UserRepo: userRepo,
+		UserRepo:     userRepo,
+		CourseRepo:   courseRepo,
+		ProgressRepo: progressRepo,
 	}
 
 	r.Get("/", h.HandleLandingPage)
 	r.Get("/dashboard", h.HandleDashboard)
-	RegisterLearnRoutes(r)
+	h.RegisterLearnRoutes(r)
 	RegisterPracticeRoutes(r)
 }
 
@@ -60,12 +64,68 @@ func (h *WebHandler) HandleDashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Dynamic stats
+	progressList, _ := h.ProgressRepo.GetProgress(r.Context(), userID)
+	completedLessons := 0
+	for _, p := range progressList {
+		if p.EntityType == "lesson" && p.Status == "completed" {
+			completedLessons++
+		}
+	}
+
+	// Count total lessons
+	totalLessons := 0
+	courses, _ := h.CourseRepo.GetAll(r.Context())
+	for _, c := range courses {
+		lessons, _ := h.CourseRepo.GetLessonsByCourseID(r.Context(), c.ID)
+		totalLessons += len(lessons)
+	}
+
+	lessonPercent := 0
+	if totalLessons > 0 {
+		lessonPercent = (completedLessons * 100) / totalLessons
+	}
+
+	// Find the next incomplete lesson to display in "Continue Learning"
+	var nextLesson *domain.Lesson
+	var nextCourse *domain.Course
+	
+	completedMap := make(map[string]bool)
+	for _, p := range progressList {
+		if p.EntityType == "lesson" && p.Status == "completed" {
+			completedMap[p.EntityID] = true
+		}
+	}
+
+	foundIncomplete := false
+	for _, c := range courses {
+		lessons, _ := h.CourseRepo.GetLessonsByCourseID(r.Context(), c.ID)
+		for _, l := range lessons {
+			if !completedMap[l.ID] {
+				lCopy := l
+				cCopy := c
+				nextLesson = &lCopy
+				nextCourse = &cCopy
+				foundIncomplete = true
+				break
+			}
+		}
+		if foundIncomplete {
+			break
+		}
+	}
+
 	tmpl := parseTemplates()
 	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":   "Dashboard - GoVerse",
-		"Page":    "dashboard",
-		"User":    user,
-		"Profile": profile,
+		"Title":            "Dashboard - GoVerse",
+		"Page":             "dashboard",
+		"User":             user,
+		"Profile":          profile,
+		"CompletedLessons": completedLessons,
+		"TotalLessons":     totalLessons,
+		"LessonPercent":    lessonPercent,
+		"NextLesson":       nextLesson,
+		"NextCourse":       nextCourse,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

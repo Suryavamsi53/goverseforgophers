@@ -54,9 +54,11 @@ func main() {
 	defer dbPool.Close()
 
 	userRepo := repository.NewPostgresUserRepository(dbPool)
+	courseRepo := repository.NewPostgresCourseRepository(dbPool)
+	progressRepo := repository.NewPostgresProgressRepository(dbPool)
 
 	// Register web routes
-	web.RegisterRoutes(r, userRepo)
+	web.RegisterRoutes(r, userRepo, courseRepo, progressRepo)
 
 	// Server setup
 	srv := &http.Server{
