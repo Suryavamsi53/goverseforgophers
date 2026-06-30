@@ -27,14 +27,22 @@ func (h *WebHandler) HandleLearnIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var coursesWithLessons []map[string]interface{}
+	groupedCourses := make(map[string][]map[string]interface{})
+	groupOrder := []string{"beginner", "intermediate", "advanced", "expert"}
+
 	for _, c := range courses {
 		lessons, err := h.CourseRepo.GetLessonsByCourseID(r.Context(), c.ID)
-		startSlug := "concurrency" // Fallback
+		startSlug := "introduction" // Fallback
 		if err == nil && len(lessons) > 0 {
 			startSlug = lessons[0].Slug
 		}
-		coursesWithLessons = append(coursesWithLessons, map[string]interface{}{
+		
+		diff := c.Difficulty
+		if diff == "" {
+			diff = "intermediate"
+		}
+
+		groupedCourses[diff] = append(groupedCourses[diff], map[string]interface{}{
 			"Course":      c,
 			"StartSlug":   startSlug,
 			"LessonCount": len(lessons),
@@ -43,9 +51,10 @@ func (h *WebHandler) HandleLearnIndex(w http.ResponseWriter, r *http.Request) {
 
 	tmpl := parseTemplates()
 	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":   "Learn Golang - GoVerse",
-		"Page":    "learn_index",
-		"Courses": coursesWithLessons,
+		"Title":          "Learn Golang - GoVerse",
+		"Page":           "learn_index",
+		"GroupedCourses": groupedCourses,
+		"GroupOrder":     groupOrder,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -1,4 +1,7 @@
 {{define "practice"}}
+<link rel="stylesheet" href="https://unpkg.com/xterm@4.19.0/css/xterm.css" />
+<script src="https://unpkg.com/xterm@4.19.0/lib/xterm.js"></script>
+<script src="https://unpkg.com/xterm-addon-fit@0.5.0/lib/xterm-addon-fit.js"></script>
 <style>
     .monaco-editor, .monaco-editor-background, .monaco-editor .inputarea.ime-input {
         background-color: transparent !important;
@@ -27,7 +30,7 @@
     ::-webkit-scrollbar-thumb:hover { background: rgba(52, 211, 153, 0.5); }
 </style>
 
-<div class="flex-grow flex flex-col h-[calc(100vh-64px)] w-full overflow-hidden bg-[#050505] relative text-sm font-sans" x-data="playground()" x-init="initEditor()">
+<div class="flex-grow flex flex-col h-[calc(100vh-64px)] w-full overflow-hidden bg-[#050505] relative text-sm font-sans" x-data="playground()" x-init="initEditor(); initTerminal();">
     
     <!-- Ambient glowing orbs -->
     <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -71,85 +74,141 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex overflow-hidden p-5 gap-5 z-10">
+    <div class="flex-1 flex overflow-hidden z-10">
         
-        <!-- Left Panel: Project Files -->
-        <div class="w-64 glass-panel flex flex-col overflow-hidden shrink-0">
-            <div class="h-14 flex items-center justify-between px-5 border-b border-white/5 shrink-0 bg-black/20">
-                <span class="text-[11px] font-bold tracking-widest text-gray-400 uppercase">Project Files</span>
-                <button @click="createNewFile" class="text-emerald-400 hover:text-emerald-300 transition-colors p-1.5 hover:bg-emerald-500/10 rounded-md" title="Create New File">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                </button>
+        <!-- Activity Bar (Far Left) -->
+        <div class="w-14 bg-black/40 border-r border-white/5 flex flex-col items-center py-4 shrink-0">
+            <!-- Explorer Icon -->
+            <button @click="sidebarMode = 'files'" :class="sidebarMode === 'files' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-3 transition-colors" title="Explorer">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+            </button>
+            <!-- Extensions Icon -->
+            <button @click="sidebarMode = 'extensions'" :class="sidebarMode === 'extensions' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-4 transition-colors" title="Extensions">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            </button>
+        </div>
+
+        <!-- Sidebar Panel Container -->
+        <div class="w-64 bg-black/20 border-r border-white/5 flex flex-col shrink-0">
+            
+            <!-- FILES EXPLORER MODE -->
+            <div x-show="sidebarMode === 'files'" class="flex flex-col h-full" style="display: none;">
+                <div class="p-4 border-b border-white/5 flex items-center shrink-0">
+                    <h2 class="text-[11px] font-bold tracking-widest text-gray-400">PROJECT FILES</h2>
+                    <div class="ml-auto flex gap-2">
+                        <button @click="createNewFile" class="text-gray-500 hover:text-emerald-400 transition-colors p-1" title="New File">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto py-2 space-y-0.5">
+                    <template x-for="item in fileTree" :key="item.path">
+                        <div>
+                            <!-- Folder Item -->
+                            <template x-if="item.type === 'folder'">
+                                <div class="group flex items-center py-1 cursor-pointer hover:bg-white/5 transition-colors"
+                                     :style="`padding-left: ${(item.depth * 14) + 8}px; padding-right: 8px;`"
+                                     @click="toggleFolder(item.path)">
+                                    <svg class="w-4 h-4 mr-1 text-gray-500 transition-transform duration-200 shrink-0" 
+                                         :class="folderState[item.path] ? 'rotate-90' : ''"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                    
+                                    <svg class="w-4 h-4 mr-2 shrink-0 text-emerald-500/70" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
+                                    </svg>
+                                    
+                                    <span class="text-[13px] font-semibold text-gray-300 truncate" x-text="item.name"></span>
+                                    
+                                    <!-- Folder Hover Actions -->
+                                    <div class="ml-auto opacity-0 group-hover:opacity-100 flex items-center shrink-0 pl-2">
+                                        <button @click.stop="createFileInFolder(item.path)" title="New File in Folder" class="text-gray-500 hover:text-emerald-400 p-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                            
+                            <!-- File Item -->
+                            <template x-if="item.type === 'file'">
+                                <div class="group flex items-center py-1 cursor-pointer transition-colors"
+                                     :class="activeFile === item.path ? 'bg-emerald-500/15 text-emerald-400 border-r-2 border-emerald-500' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 border-r-2 border-transparent'"
+                                     :style="`padding-left: ${(item.depth * 14) + 28}px; padding-right: 8px;`"
+                                     @click="switchFile(item.path)">
+                                    
+                                    <!-- File Icon -->
+                                    <svg x-show="item.name.endsWith('.go') || item.name.endsWith('.mod')" class="w-4 h-4 mr-2 shrink-0 transition-colors" :class="activeFile === item.path ? 'text-emerald-400' : 'text-emerald-500/50'" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                                    <svg x-show="!item.name.endsWith('.go') && !item.name.endsWith('.mod')" class="w-4 h-4 mr-2 shrink-0 transition-colors" :class="activeFile === item.path ? 'text-gray-300' : 'text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                    
+                                    <!-- File Name / Input -->
+                                    <input x-show="isRenaming === item.path" :id="'input_file_' + item.path.replace(/[^a-zA-Z0-9]/g, '_')" type="text" 
+                                           class="bg-black/50 text-white outline-none border border-emerald-500/50 rounded px-1.5 py-0.5 w-full text-[13px] font-medium"
+                                           :value="item.path" 
+                                           @blur="finishRename(item.path, $event.target.value)"
+                                           @keydown.enter="finishRename(item.path, $event.target.value)"
+                                           @click.stop />
+                                    <span x-show="isRenaming !== item.path" x-text="item.name" class="font-medium truncate text-[13px] tracking-wide"></span>
+
+                                    <!-- File Hover Actions (Rename & Delete) -->
+                                    <div x-show="item.path !== 'main.go' && item.path !== 'go.mod' && isRenaming !== item.path" class="ml-auto opacity-0 group-hover:opacity-100 flex items-center shrink-0 pl-2">
+                                        <button @click.stop="startRename(item.path)" title="Rename File" class="text-gray-500 hover:text-emerald-400 p-1 transition-all mr-0.5">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                        </button>
+                                        <button @click.stop="deleteFile(item.path)" title="Delete File" class="text-gray-500 hover:text-red-400 p-1 transition-all">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
             </div>
             
-            <div class="flex-1 overflow-y-auto py-2 space-y-0.5">
-                <template x-for="item in fileTree" :key="item.path">
-                    <div>
-                        <!-- Folder Item -->
-                        <template x-if="item.type === 'folder'">
-                            <div class="group flex items-center py-1 cursor-pointer hover:bg-white/5 transition-colors"
-                                 :style="`padding-left: ${(item.depth * 14) + 8}px; padding-right: 8px;`"
-                                 @click="toggleFolder(item.path)">
-                                <svg class="w-4 h-4 mr-1 text-gray-500 transition-transform duration-200 shrink-0" 
-                                     :class="folderState[item.path] ? 'rotate-90' : ''"
-                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                                
-                                <svg class="w-4 h-4 mr-2 shrink-0 text-emerald-500/70" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
-                                </svg>
-                                
-                                <span class="text-[13px] font-semibold text-gray-300 truncate" x-text="item.name"></span>
-                                
-                                <!-- Folder Hover Actions -->
-                                <div class="ml-auto opacity-0 group-hover:opacity-100 flex items-center shrink-0 pl-2">
-                                    <button @click.stop="createFileInFolder(item.path)" title="New File in Folder" class="text-gray-500 hover:text-emerald-400 p-1">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-                        
-                        <!-- File Item -->
-                        <template x-if="item.type === 'file'">
-                            <div class="group flex items-center py-1 cursor-pointer transition-colors"
-                                 :class="activeFile === item.path ? 'bg-emerald-500/15 text-emerald-400 border-r-2 border-emerald-500' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 border-r-2 border-transparent'"
-                                 :style="`padding-left: ${(item.depth * 14) + 28}px; padding-right: 8px;`"
-                                 @click="switchFile(item.path)">
-                                
-                                <!-- File Icon -->
-                                <svg x-show="item.name.endsWith('.go') || item.name.endsWith('.mod')" class="w-4 h-4 mr-2 shrink-0 transition-colors" :class="activeFile === item.path ? 'text-emerald-400' : 'text-emerald-500/50'" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
-                                <svg x-show="!item.name.endsWith('.go') && !item.name.endsWith('.mod')" class="w-4 h-4 mr-2 shrink-0 transition-colors" :class="activeFile === item.path ? 'text-gray-300' : 'text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                                
-                                <!-- File Name / Input -->
-                                <input x-show="isRenaming === item.path" :id="'input_file_' + item.path.replace(/[^a-zA-Z0-9]/g, '_')" type="text" 
-                                       class="bg-black/50 text-white outline-none border border-emerald-500/50 rounded px-1.5 py-0.5 w-full text-[13px] font-medium"
-                                       :value="item.path" 
-                                       @blur="finishRename(item.path, $event.target.value)"
-                                       @keydown.enter="finishRename(item.path, $event.target.value)"
-                                       @click.stop />
-                                <span x-show="isRenaming !== item.path" x-text="item.name" class="font-medium truncate text-[13px] tracking-wide"></span>
-
-                                <!-- File Hover Actions (Rename & Delete) -->
-                                <div x-show="item.path !== 'main.go' && item.path !== 'go.mod' && isRenaming !== item.path" class="ml-auto opacity-0 group-hover:opacity-100 flex items-center shrink-0 pl-2">
-                                    <button @click.stop="startRename(item.path)" title="Rename File" class="text-gray-500 hover:text-emerald-400 p-1 transition-all mr-0.5">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                                    </button>
-                                    <button @click.stop="deleteFile(item.path)" title="Delete File" class="text-gray-500 hover:text-red-400 p-1 transition-all">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
+            <!-- EXTENSIONS MARKETPLACE MODE -->
+            <div x-show="sidebarMode === 'extensions'" class="flex flex-col h-full" style="display: none;">
+                <div class="p-4 border-b border-white/5 flex flex-col shrink-0">
+                    <h2 class="text-[11px] font-bold tracking-widest text-gray-400 mb-3">EXTENSIONS MARKETPLACE</h2>
+                    <div class="relative">
+                        <input type="text" x-model="extensionSearch" placeholder="Search extensions..." class="w-full bg-black/40 border border-white/10 rounded px-3 py-1.5 text-xs text-gray-200 outline-none focus:border-emerald-500/50 transition-colors" />
+                        <svg class="w-3.5 h-3.5 absolute right-3 top-2.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
-                </template>
+                </div>
+                <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                    
+                    <template x-for="ext in filteredExtensions" :key="ext.id">
+                        <div class="bg-black/30 border border-white/5 rounded-xl p-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded border flex items-center justify-center shrink-0"
+                                     :style="`background-color: ${ext.bg}; border-color: ${ext.color}40;`">
+                                    <span :style="`color: ${ext.color};`" class="font-bold text-lg font-mono" x-text="ext.icon"></span>
+                                </div>
+                                <div>
+                                    <h3 class="text-sm font-bold text-gray-200" x-text="ext.name"></h3>
+                                    <p class="text-[11px] text-gray-500 mt-1 leading-relaxed" x-text="ext.desc"></p>
+                                    <button x-show="!ext.disabled" @click="toggleExtension(ext.id)" 
+                                            class="mt-3 px-3 py-1 rounded text-xs font-bold transition-all w-full"
+                                            :class="extensions[ext.id] ? 'bg-white/10 text-white hover:bg-red-500/20 hover:text-red-400' : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'"
+                                            x-text="extensions[ext.id] ? 'Uninstall' : 'Install'"></button>
+                                    <button x-show="ext.disabled" disabled class="mt-3 px-3 py-1 rounded text-xs font-bold bg-white/5 text-gray-500 w-full cursor-not-allowed">Enabled System-Wide</button>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    <div x-show="filteredExtensions.length === 0" class="text-gray-500 text-xs text-center italic mt-4">
+                        No extensions found matching your search.
+                    </div>
+
+                </div>
             </div>
         </div>
 
         <!-- Center Area: Editor & Terminal -->
-        <div class="flex-1 flex flex-col gap-5 min-w-0">
+        <div class="flex-1 flex flex-col min-w-0 p-5" id="center-area" @mousemove="onMouseMove" @mouseup="onMouseUp" @mouseleave="onMouseUp">
             
             <!-- Editor Panel -->
-            <div class="flex-1 glass-panel flex flex-col overflow-hidden relative group">
+            <div class="glass-panel flex flex-col overflow-hidden relative group" :style="`height: ${100 - terminalHeight}%;`">
                 <!-- Floating Tabs (Custom UI) -->
                 <div class="absolute top-4 left-4 right-4 z-20 flex gap-2 overflow-x-auto no-scrollbar pb-2">
                     <template x-for="filename in Object.keys(files)" :key="filename">
@@ -180,79 +239,58 @@
                 </div>
             </div>
 
+            <!-- Resizer Handle -->
+            <div class="h-4 -my-2 z-50 cursor-row-resize flex items-center justify-center group" @mousedown.prevent="startResize">
+                <div class="w-12 h-1 bg-white/10 rounded-full group-hover:bg-emerald-500 transition-colors"></div>
+            </div>
+
             <!-- Terminal Panel -->
-            <div class="h-[32%] min-h-[150px] max-h-[60%] glass-panel flex flex-col overflow-hidden relative">
-                <div class="h-12 border-b border-white/5 flex items-center px-4 bg-black/30 shrink-0">
-                    <div class="flex gap-6 h-full overflow-x-auto no-scrollbar">
-                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
-                                :class="activePanel === 'PROBLEMS' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+            <div class="glass-panel flex flex-col overflow-hidden relative" :style="`height: ${terminalHeight}%; min-height: 100px;`">
+                <div class="h-9 border-b border-white/5 flex items-end px-4 bg-[#1e1e1e] shrink-0 select-none">
+                    <div class="flex space-x-6 h-full overflow-x-auto no-scrollbar items-end text-[11px] uppercase font-sans tracking-wide">
+                        <button class="pb-1 border-b-[1px] transition-colors whitespace-nowrap"
+                                :class="activePanel === 'PROBLEMS' ? 'border-emerald-400 text-gray-200' : 'border-transparent text-gray-500 hover:text-gray-300'"
                                 @click="activePanel = 'PROBLEMS'">
                             PROBLEMS
-                            <div x-show="activePanel === 'PROBLEMS'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
                         </button>
-                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
-                                :class="activePanel === 'OUTPUT' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                        <button class="pb-1 border-b-[1px] transition-colors whitespace-nowrap"
+                                :class="activePanel === 'OUTPUT' ? 'border-emerald-400 text-gray-200' : 'border-transparent text-gray-500 hover:text-gray-300'"
                                 @click="activePanel = 'OUTPUT'">
                             OUTPUT
-                            <div x-show="activePanel === 'OUTPUT'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
                         </button>
-                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
-                                :class="activePanel === 'DEBUG_CONSOLE' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                        <button class="pb-1 border-b-[1px] transition-colors whitespace-nowrap"
+                                :class="activePanel === 'DEBUG_CONSOLE' ? 'border-emerald-400 text-gray-200' : 'border-transparent text-gray-500 hover:text-gray-300'"
                                 @click="activePanel = 'DEBUG_CONSOLE'">
                             DEBUG CONSOLE
-                            <div x-show="activePanel === 'DEBUG_CONSOLE'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
                         </button>
-                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
-                                :class="activePanel === 'TERMINAL' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                        <button class="pb-1 border-b-[1px] transition-colors whitespace-nowrap"
+                                :class="activePanel === 'TERMINAL' ? 'border-emerald-400 text-gray-200' : 'border-transparent text-gray-500 hover:text-gray-300'"
                                 @click="activePanel = 'TERMINAL'">
                             TERMINAL
-                            <div x-show="activePanel === 'TERMINAL'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
                         </button>
-                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
-                                :class="activePanel === 'PORTS' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                        <button class="pb-1 border-b-[1px] transition-colors whitespace-nowrap"
+                                :class="activePanel === 'PORTS' ? 'border-emerald-400 text-gray-200' : 'border-transparent text-gray-500 hover:text-gray-300'"
                                 @click="activePanel = 'PORTS'">
                             PORTS
-                            <div x-show="activePanel === 'PORTS'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
                         </button>
                     </div>
-                    <div class="ml-auto pl-4">
-                        <button @click="clearPanel" class="text-gray-500 hover:text-white transition-colors bg-white/5 p-1.5 rounded-lg hover:bg-white/10" title="Clear Console">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <div class="ml-auto flex items-center gap-3 pb-1 text-gray-500">
+                        <button @click="clearPanel" title="Clear Panel" class="hover:text-gray-200 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                        <button @click="reconnectTerminal" title="Relaunch Terminal" x-show="activePanel === 'TERMINAL'" class="hover:text-gray-200 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
                         </button>
                     </div>
                 </div>
 
                 <!-- Panels Content Area -->
-                <div class="flex-1 relative overflow-hidden">
+                <div class="flex-1 relative overflow-hidden bg-black/60">
                     
-                    <!-- Terminal Content (Interactive CLI) -->
+                    <!-- Terminal Content (Real PTY Xterm.js) -->
                     <div class="absolute inset-0 flex flex-col" x-show="activePanel === 'TERMINAL'" style="display: none;">
-                        <div class="flex-1 p-5 overflow-y-auto font-mono text-[13px] leading-relaxed pb-14" id="console-scroll">
-                            <template x-for="log in terminalHistory">
-                                <div class="mb-5">
-                                    <div class="flex items-center mb-2 text-xs">
-                                        <span class="text-emerald-400 mr-2 font-bold shadow-emerald-400">$</span> 
-                                        <span class="text-gray-300 font-semibold tracking-wide" x-text="log.command"></span>
-                                        <span class="ml-auto text-gray-500 bg-black/40 px-2 py-0.5 rounded-md border border-white/5" x-text="log.time + 'ms'"></span>
-                                    </div>
-                                    <pre x-show="log.output" class="text-gray-300 whitespace-pre-wrap break-words pl-4 border-l-2 border-emerald-500/40 bg-white/[0.02] p-2 rounded-r-lg" x-text="log.output"></pre>
-                                    <pre x-show="log.error" class="text-red-400 whitespace-pre-wrap break-words pl-4 border-l-2 border-red-500/40 bg-red-500/5 p-2 rounded-r-lg mt-1" x-text="log.error"></pre>
-                                </div>
-                            </template>
-                            
-                            <div x-show="isRunning" class="text-emerald-400 animate-pulse flex items-center gap-3 font-semibold mb-4" style="display: none;">
-                                <svg class="w-4 h-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                Executing...
-                            </div>
-                        </div>
-                        
-                        <!-- Terminal Input -->
-                        <div class="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-md border-t border-white/10 p-2 flex items-center">
-                            <span class="text-emerald-400 font-bold ml-3 mr-3">$</span>
-                            <input type="text" x-model="terminalInput" @keydown.enter="submitTerminal" :disabled="isRunning"
-                                   class="flex-1 bg-transparent text-gray-200 outline-none font-mono text-[13px] placeholder-gray-600"
-                                   placeholder="Type a command (e.g. go vet, ls -la) and hit Enter..." />
-                        </div>
+                        <!-- Xterm Container -->
+                        <div id="xterm-container" class="flex-1 p-2 overflow-hidden bg-[#1e1e1e]/60"></div>
                     </div>
 
                     <!-- Output Content -->
@@ -378,9 +416,137 @@
             debugInput: '',
             terminalInput: '',
             cursorPos: "Ln 1, Col 1",
-            fontSize: 15,
+            sidebarMode: 'files',
+            extensions: {
+                'dracula': false,
+                'vim': false
+            },
+            isResizing: false,
+            terminalHeight: 32,
+            term: null,
+            fitAddon: null,
+            ws: null,
+            extensionSearch: '',
+            availableExtensions: [
+                { id: 'dracula', name: 'Dracula Theme', desc: 'A dark theme for Monaco Editor with vibrant pinks and purples.', icon: 'D', color: '#ff79c6', bg: '#282a36' },
+                { id: 'vim', name: 'Vim Keybindings', desc: 'Enables true Vim modal editing bindings directly within the editor.', icon: 'V', color: '#10b981', bg: 'rgba(16, 185, 129, 0.2)' },
+                { id: 'fmt', name: 'Go Format', desc: 'Automatically runs standard Go formatting and linting.', icon: 'fmt', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)', disabled: true }
+            ],
+
+            startResize(e) {
+                this.isResizing = true;
+                this._initialY = e.clientY;
+                this._initialHeight = this.terminalHeight;
+            },
+
+            onMouseMove(e) {
+                if (!this.isResizing) return;
+                const container = document.getElementById('center-area');
+                const deltaY = this._initialY - e.clientY;
+                const deltaPercent = (deltaY / container.clientHeight) * 100;
+                
+                let newHeight = this._initialHeight + deltaPercent;
+                if (newHeight < 10) newHeight = 10;
+                if (newHeight > 80) newHeight = 80;
+                
+                this.terminalHeight = newHeight;
+                
+                if (globalMonacoEditor) globalMonacoEditor.layout();
+                if (this.fitAddon) this.fitAddon.fit();
+                
+                // Throttle resize events to WS
+                if (!this._resizeTimeout) {
+                    this._resizeTimeout = setTimeout(() => {
+                        window.dispatchEvent(new Event('resize'));
+                        this._resizeTimeout = null;
+                    }, 100);
+                }
+            },
+
+            onMouseUp(e) {
+                if (this.isResizing) {
+                    this.isResizing = false;
+                    if (globalMonacoEditor) globalMonacoEditor.layout();
+                    if (this.fitAddon) this.fitAddon.fit();
+                    window.dispatchEvent(new Event('resize'));
+                }
+            },
             
-            folderState: {},
+            get filteredExtensions() {
+                if (this.extensionSearch.trim() === '') return this.availableExtensions;
+                const lower = this.extensionSearch.toLowerCase();
+                return this.availableExtensions.filter(e => e.name.toLowerCase().includes(lower) || e.desc.toLowerCase().includes(lower));
+            },
+            
+            toggleExtension(id) {
+                this.extensions[id] = !this.extensions[id];
+                
+                if (id === 'dracula') {
+                    if (this.extensions['dracula']) {
+                        monaco.editor.defineTheme('dracula', {
+                            base: 'vs-dark',
+                            inherit: true,
+                            rules: [
+                                { background: '282a36' },
+                                { token: 'keyword', foreground: 'ff79c6' },
+                                { token: 'string', foreground: 'f1fa8c' },
+                                { token: 'number', foreground: 'bd93f9' },
+                                { token: 'comment', foreground: '6272a4' }
+                            ],
+                            colors: {
+                                'editor.background': '#1e1e1e',
+                                'editor.foreground': '#f8f8f2',
+                            }
+                        });
+                        monaco.editor.setTheme('dracula');
+                    } else {
+                        monaco.editor.defineTheme('goverseDark', {
+                            base: 'vs-dark',
+                            inherit: true,
+                            rules: [],
+                            colors: {
+                                'editor.background': '#00000000',
+                                'editor.lineHighlightBackground': '#10b98110',
+                            }
+                        });
+                        monaco.editor.setTheme('goverseDark');
+                    }
+                }
+                
+                if (id === 'vim') {
+                    if (this.extensions['vim']) {
+                        if (window.require) {
+                            require.config({
+                                paths: {
+                                    'monaco-vim': 'https://unpkg.com/monaco-vim/dist/monaco-vim'
+                                }
+                            });
+                            require(['monaco-vim'], (MonacoVim) => {
+                                const statusNode = document.createElement('div');
+                                statusNode.id = "vim-status-node";
+                                statusNode.style.padding = '4px 10px';
+                                statusNode.style.fontFamily = 'monospace';
+                                statusNode.style.fontSize = '12px';
+                                statusNode.style.position = 'absolute';
+                                statusNode.style.bottom = '0';
+                                statusNode.style.right = '0';
+                                statusNode.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                                statusNode.style.color = '#fff';
+                                statusNode.style.zIndex = '50';
+                                document.getElementById('editor-container').appendChild(statusNode);
+                                window.activeVimMode = MonacoVim.initVimMode(globalMonacoEditor, statusNode);
+                            });
+                        }
+                    } else {
+                        if (window.activeVimMode) {
+                            window.activeVimMode.dispose();
+                            window.activeVimMode = null;
+                            const status = document.getElementById('vim-status-node');
+                            if (status) status.remove();
+                        }
+                    }
+                }
+            },
             
             get fileTree() {
                 // 1. Build a deeply nested object
@@ -469,6 +635,86 @@
 
                 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
                 require(['vs/editor/editor.main'], () => {
+                    
+                    // Register Go Snippets and IntelliSense
+                    monaco.languages.registerCompletionItemProvider('go', {
+                        triggerCharacters: ['.'],
+                        provideCompletionItems: function(model, position) {
+                            var word = model.getWordUntilPosition(position);
+                            var range = {
+                                startLineNumber: position.lineNumber,
+                                endLineNumber: position.lineNumber,
+                                startColumn: word.startColumn,
+                                endColumn: word.endColumn
+                            };
+                            
+                            var lineUntilPosition = model.getValueInRange({
+                                startLineNumber: position.lineNumber,
+                                startColumn: 1,
+                                endLineNumber: position.lineNumber,
+                                endColumn: position.column
+                            });
+                            
+                            var suggestions = [];
+                            
+                            if (lineUntilPosition.endsWith('fmt.')) {
+                                suggestions.push(
+                                    { label: 'Println', kind: monaco.languages.CompletionItemKind.Function, insertText: 'Println(${1:a ...any})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, range: range, detail: 'func Println(a ...any) (n int, err error)' },
+                                    { label: 'Printf', kind: monaco.languages.CompletionItemKind.Function, insertText: 'Printf(${1:format string}, ${2:a ...any})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, range: range },
+                                    { label: 'Sprintf', kind: monaco.languages.CompletionItemKind.Function, insertText: 'Sprintf(${1:format string}, ${2:a ...any})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, range: range }
+                                );
+                                return { suggestions: suggestions };
+                            }
+                            
+                            if (lineUntilPosition.endsWith('time.')) {
+                                suggestions.push(
+                                    { label: 'Now', kind: monaco.languages.CompletionItemKind.Function, insertText: 'Now()', range: range },
+                                    { label: 'Sleep', kind: monaco.languages.CompletionItemKind.Function, insertText: 'Sleep(${1:d Duration})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, range: range }
+                                );
+                                return { suggestions: suggestions };
+                            }
+
+                            if (lineUntilPosition.endsWith('strings.')) {
+                                suggestions.push(
+                                    { label: 'Split', kind: monaco.languages.CompletionItemKind.Function, insertText: 'Split(${1:s string}, ${2:sep string})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, range: range },
+                                    { label: 'Join', kind: monaco.languages.CompletionItemKind.Function, insertText: 'Join(${1:elems []string}, ${2:sep string})', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, range: range }
+                                );
+                                return { suggestions: suggestions };
+                            }
+                            
+                            // Only add generic keywords if not typing a method
+                            if (lineUntilPosition.charAt(lineUntilPosition.length - 1) !== '.') {
+                                const keywords = ['break', 'default', 'func', 'interface', 'select', 'case', 'defer', 'go', 'map', 'struct', 'chan', 'else', 'goto', 'package', 'switch', 'const', 'fallthrough', 'if', 'range', 'type', 'continue', 'for', 'import', 'return', 'var'];
+                                for (const kw of keywords) {
+                                    suggestions.push({
+                                        label: kw,
+                                        kind: monaco.languages.CompletionItemKind.Keyword,
+                                        insertText: kw,
+                                        range: range
+                                    });
+                                }
+                                
+                                suggestions.push(
+                                    { label: 'main', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'func main() {\n\t$0\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Main function snippet', range: range },
+                                    { label: 'forr', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'for ${1:i}, ${2:v} := range ${3:iterable} {\n\t$0\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'For range loop snippet', range: range },
+                                    { label: 'iferr', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'if err != nil {\n\treturn err\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Error check snippet', range: range }
+                                );
+                                
+                                const stdlib = ['fmt', 'os', 'strings', 'math', 'time', 'net/http', 'encoding/json', 'io', 'log', 'context'];
+                                for (const pkg of stdlib) {
+                                    suggestions.push({
+                                        label: pkg,
+                                        kind: monaco.languages.CompletionItemKind.Module,
+                                        insertText: pkg,
+                                        range: range
+                                    });
+                                }
+                            }
+
+                            return { suggestions: suggestions };
+                        }
+                    });
+
                     globalMonacoEditor = monaco.editor.create(document.getElementById('editor-container'), {
                         value: this.files[this.activeFile],
                         language: this.getFileLanguage(this.activeFile),
@@ -695,41 +941,96 @@
                 }
             },
 
-            async submitTerminal() {
-                const cmd = this.terminalInput.trim();
-                if (!cmd || this.isRunning || !globalMonacoEditor) return;
+            initTerminal() {
+                if (this.term) return; // already initialized
                 
-                this.terminalInput = '';
-                this.files[this.activeFile] = globalMonacoEditor.getValue();
-                this.isRunning = true;
+                const container = document.getElementById('xterm-container');
+                if (!container) return;
+
+                this.term = new Terminal({
+                    theme: {
+                        background: '#00000000',
+                        foreground: '#f8f8f2',
+                        cursor: '#50fa7b',
+                        selection: '#44475a',
+                        black: '#000000',
+                        red: '#ff5555',
+                        green: '#50fa7b',
+                        yellow: '#f1fa8c',
+                        blue: '#8be9fd',
+                        magenta: '#ff79c6',
+                        cyan: '#8be9fd',
+                        white: '#bfbfbf'
+                    },
+                    fontFamily: '"Fira Code", monospace',
+                    fontSize: 13,
+                    cursorBlink: true,
+                    convertEol: true
+                });
+
+                this.fitAddon = new FitAddon.FitAddon();
+                this.term.loadAddon(this.fitAddon);
+                this.term.open(container);
                 
-                try {
-                    const response = await fetch('/api/v1/terminal', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ command: cmd, files: this.files })
-                    });
-                    
-                    let errMsg = '';
-                    
-                    if (!response.ok) {
-                        try {
-                            const data = await response.json();
-                            errMsg = data.error || 'Execution failed';
-                        } catch(e) {
-                            errMsg = await response.text();
+                setTimeout(() => {
+                    this.fitAddon.fit();
+                    this.connectTerminalWS();
+                }, 50);
+
+                window.addEventListener('resize', () => {
+                    if (this.activePanel === 'TERMINAL' && this.fitAddon) {
+                        this.fitAddon.fit();
+                        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                            this.ws.send(JSON.stringify({ type: 'resize', rows: this.term.rows, cols: this.term.cols }));
                         }
-                        this.terminalHistory.push({ command: cmd, output: '', error: errMsg, time: 0 });
-                    } else {
-                        const data = await response.json();
-                        this.terminalHistory.push({ command: cmd, output: data.output, error: data.error, time: data.time_ms });
                     }
-                } catch (err) {
-                    this.terminalHistory.push({ command: cmd, output: '', error: 'Network error or server unreachable.', time: 0 });
-                } finally {
-                    this.isRunning = false;
-                    this.scrollToBottom('console-scroll');
-                }
+                });
+                
+                this.$watch('activePanel', val => {
+                    if (val === 'TERMINAL' && this.fitAddon) {
+                        setTimeout(() => this.fitAddon.fit(), 10);
+                    }
+                });
+            },
+
+            connectTerminalWS() {
+                if (this.ws) this.ws.close();
+                this.term.clear();
+                this.term.write('\x1b[32mInitializing GoVerse Studio Sandbox...\x1b[0m\r\n');
+                
+                if (globalMonacoEditor) this.files[this.activeFile] = globalMonacoEditor.getValue();
+
+                const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                const wsUrl = `${protocol}//${window.location.host}/api/v1/ws/terminal`;
+                
+                this.ws = new WebSocket(wsUrl);
+                
+                this.ws.onopen = () => {
+                    this.ws.send(JSON.stringify({
+                        type: 'init',
+                        files: this.files,
+                        rows: this.term.rows,
+                        cols: this.term.cols
+                    }));
+                };
+                
+                this.ws.onmessage = (event) => {
+                    this.term.write(event.data);
+                };
+                
+                this.ws.onclose = () => {
+                    this.term.write('\r\n\x1b[31m[Process Terminated]\x1b[0m\r\n');
+                };
+                
+                this.term.onData(data => {
+                    if (this.ws.readyState === WebSocket.OPEN) {
+                        this.ws.send(JSON.stringify({ type: 'input', data: data }));
+                    }
+                });
+            },
+
+            reconnectTerminal() {
+                if (this.term) this.connectTerminalWS();
             },
 
             async runCode() {

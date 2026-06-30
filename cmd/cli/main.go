@@ -40,7 +40,7 @@ func main() {
 
 	// Execute Code
 	ctx := context.Background()
-	result, err := runner.ExecuteCode(ctx, code)
+	result, err := runner.ExecuteCode(ctx, map[string]string{"main.go": code, "go.mod": "module example\ngo 1.21\n"})
 	if err != nil {
 		slog.Error("Execution failed completely", "error", err)
 		os.Exit(1)

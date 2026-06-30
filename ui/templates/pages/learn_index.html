@@ -5,26 +5,44 @@
         <p class="text-xl text-gray-400 max-w-3xl">Structured paths to master Go. From basic syntax to advanced concurrency patterns and system design.</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {{range .Courses}}
-        <a href="/learn/{{.Course.Slug}}/{{.StartSlug}}" class="glass-card p-6 block hover:border-go-cyan/50 transition-colors group relative overflow-hidden">
-            {{if eq .Course.Slug "concurrency"}}
-                <div class="absolute top-0 right-0 bg-go-blue text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Recommended</div>
-            {{end}}
-            <div class="flex justify-between items-start mb-4">
-                <div class="w-10 h-10 rounded-lg bg-go-blue/10 flex items-center justify-center">
-                    <span class="text-go-cyan font-bold">★</span>
+    <div class="space-y-16">
+        {{range $diff := .GroupOrder}}
+            {{$courses := index $.GroupedCourses $diff}}
+            {{if $courses}}
+            <div>
+                <div class="mb-6 flex items-center gap-3">
+                    <h2 class="text-2xl font-bold text-white capitalize">{{$diff}} Tracks</h2>
+                    <div class="h-px bg-dark-border flex-grow"></div>
                 </div>
-                <span class="text-xs font-semibold text-go-cyan uppercase tracking-wider bg-go-cyan/10 px-2 py-1 rounded">{{.Course.Difficulty}}</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {{range $courses}}
+                    <a href="/learn/{{.Course.Slug}}/{{.StartSlug}}" class="glass-card p-6 block hover:border-go-cyan/50 transition-colors group relative overflow-hidden flex flex-col h-full">
+                        {{if eq .Course.Slug "go-fundamentals"}}
+                            <div class="absolute top-0 right-0 bg-go-cyan text-dark-900 text-xs font-bold px-3 py-1 rounded-bl-lg">Start Here</div>
+                        {{end}}
+                        {{if eq .Course.Slug "system-design"}}
+                            <div class="absolute top-0 right-0 bg-go-blue text-white text-xs font-bold px-3 py-1 rounded-bl-lg">Ultimate</div>
+                        {{end}}
+                        
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 rounded-lg bg-go-cyan/10 flex items-center justify-center group-hover:bg-go-cyan/20 transition-colors">
+                                <svg class="w-5 h-5 text-go-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            </div>
+                            <span class="text-xs font-semibold {{if eq $diff "beginner"}}text-green-400 bg-green-400/10{{else if eq $diff "intermediate"}}text-yellow-400 bg-yellow-400/10{{else if eq $diff "advanced"}}text-orange-400 bg-orange-400/10{{else}}text-red-400 bg-red-400/10{{end}} uppercase tracking-wider px-2 py-1 rounded">{{$diff}}</span>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-white group-hover:text-go-cyan transition-colors mb-2">{{.Course.Title}}</h3>
+                        <p class="text-sm text-gray-400 flex-grow line-clamp-3">{{.Course.Description}}</p>
+                        
+                        <div class="mt-6 pt-4 border-t border-dark-border flex justify-between items-center text-sm">
+                            <span class="text-gray-500 font-medium">{{.LessonCount}} Lessons</span>
+                            <span class="text-go-cyan font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">Explore <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
+                        </div>
+                    </a>
+                    {{end}}
+                </div>
             </div>
-            <h3 class="text-xl font-bold text-white group-hover:text-go-cyan transition-colors">{{.Course.Title}}</h3>
-            <p class="text-sm text-gray-400 mt-2 line-clamp-2">{{.Course.Description}}</p>
-            
-            <div class="mt-6 flex justify-between items-center text-sm">
-                <span class="text-gray-500">{{.LessonCount}} Lessons</span>
-                <span class="text-go-cyan flex items-center gap-1">Start <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></span>
-            </div>
-        </a>
+            {{end}}
         {{end}}
     </div>
 </div>

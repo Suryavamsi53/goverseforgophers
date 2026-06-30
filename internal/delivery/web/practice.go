@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/websocket"
 	"github.com/suryavamsivaggu/goverse/internal/domain"
 	"github.com/suryavamsivaggu/goverse/pkg/runner"
 )
@@ -13,6 +14,7 @@ func RegisterPracticeRoutes(r chi.Router) {
 	r.Get("/practice", HandlePracticePage)
 	r.Post("/api/v1/execute", HandleExecuteCode)
 	r.Post("/api/v1/terminal", HandleTerminalCommand)
+	r.Get("/api/v1/ws/terminal", HandleWSTerminal)
 	r.Post("/api/v1/evaluate", HandleEvaluateCode)
 }
 
@@ -79,6 +81,20 @@ func HandleTerminalCommand(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true // Allow all origins for the sandbox
+	},
+}
+
+func HandleWSTerminal(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return
+	}
+	runner.HandleWSTerminalSession(conn)
 }
 
 type EvaluateRequest struct {
