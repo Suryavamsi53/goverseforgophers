@@ -1,153 +1,479 @@
 {{define "practice"}}
-<div class="flex-grow flex flex-col h-[calc(100vh-64px)] w-full overflow-hidden bg-slate-950 relative text-sm" x-data="playground()" x-init="initEditor()">
-    
-    <!-- Background glowing accents -->
-    <div class="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
-    <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+<style>
+    .monaco-editor, .monaco-editor-background, .monaco-editor .inputarea.ime-input {
+        background-color: transparent !important;
+    }
+    .monaco-editor .margin {
+        background-color: transparent !important;
+    }
+    .monaco-editor .minimap {
+        opacity: 0.5;
+    }
+    .glass-panel {
+        background: rgba(17, 17, 17, 0.6);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(52, 211, 153, 0.15);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
+    }
+    .glow-text {
+        text-shadow: 0 0 12px rgba(52, 211, 153, 0.6);
+    }
+    /* Custom Scrollbar for IDE */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(52, 211, 153, 0.2); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(52, 211, 153, 0.5); }
+</style>
 
-    <!-- Top Action Bar -->
-    <div class="h-14 border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-xl flex items-center justify-between px-4 shrink-0 z-10">
+<div class="flex-grow flex flex-col h-[calc(100vh-64px)] w-full overflow-hidden bg-[#050505] relative text-sm font-sans" x-data="playground()" x-init="initEditor()">
+    
+    <!-- Ambient glowing orbs -->
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-lime-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+    
+    <!-- Custom IDE Header -->
+    <div class="h-16 flex items-center justify-between px-6 shrink-0 z-10 border-b border-white/5 relative">
         <div class="flex items-center gap-3">
-            <div class="p-1.5 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-lg border border-cyan-500/20">
-                <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            <div class="p-2 bg-gradient-to-br from-emerald-400/20 to-lime-500/20 rounded-lg border border-emerald-500/30">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
             </div>
-            <div>
-                <h1 class="text-slate-100 font-bold tracking-wide flex items-center gap-2">
-                    GoVerse Sandbox <span class="bg-blue-500/10 text-blue-400 text-[10px] uppercase px-1.5 py-0.5 rounded font-bold tracking-wider border border-blue-500/20">Ultimate</span>
-                </h1>
-            </div>
+            <h1 class="text-white font-bold tracking-wide text-lg flex items-center gap-2">
+                GoVerse <span class="text-emerald-400 glow-text">Studio</span>
+            </h1>
         </div>
         
-        <!-- Toolbar Actions -->
-        <div class="flex items-center gap-2 bg-slate-900/50 rounded-lg p-1 border border-slate-700/50">
-            <button @click="copyCode" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center gap-1.5 transition-colors" title="Copy to Clipboard">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                <span class="hidden lg:inline text-xs">Copy</span>
+        <div class="flex items-center gap-4">
+            <button @click="showSettings = !showSettings" class="text-gray-400 hover:text-white transition-colors relative" title="Studio Settings">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                
+                <div x-show="showSettings" class="absolute top-8 right-0 w-48 glass-panel py-2 z-50 text-gray-300" style="display: none;" @click.outside="showSettings = false">
+                    <div class="px-4 py-2 hover:bg-white/10 hover:text-emerald-400 cursor-pointer flex justify-between transition-colors" @click.stop="increaseFontSize">
+                        <span>Font Size +</span>
+                    </div>
+                    <div class="px-4 py-2 hover:bg-white/10 hover:text-emerald-400 cursor-pointer flex justify-between transition-colors" @click.stop="decreaseFontSize">
+                        <span>Font Size -</span>
+                    </div>
+                    <div class="h-px bg-white/10 my-1"></div>
+                    <div class="px-4 py-2 hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors" @click.stop="resetAllFiles">
+                        Reset Workspace
+                    </div>
+                </div>
             </button>
-            <button @click="downloadCode" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center gap-1.5 transition-colors" title="Download main.go">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                <span class="hidden lg:inline text-xs">Download</span>
-            </button>
-            <div class="w-px h-4 bg-slate-700 mx-1"></div>
-            <button @click="decreaseFontSize" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center justify-center transition-colors" title="Decrease Font Size">A-</button>
-            <button @click="increaseFontSize" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center justify-center transition-colors" title="Increase Font Size">A+</button>
-            <div class="w-px h-4 bg-slate-700 mx-1"></div>
-            <button @click="resetCode" class="text-slate-400 hover:text-white hover:bg-slate-700/50 px-2.5 py-1.5 rounded flex items-center gap-1.5 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                <span class="hidden lg:inline text-xs">Reset</span>
-            </button>
-            <div class="w-px h-4 bg-slate-700 mx-1"></div>
-            <!-- Run Button -->
-            <button @click="runCode" :disabled="isRunning" class="relative group bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold py-1.5 px-6 rounded text-xs flex items-center gap-2 transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)]" :class="{ 'opacity-60 cursor-not-allowed': isRunning }">
-                <svg x-show="!isRunning" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
-                <svg x-show="isRunning" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" style="display: none;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                <span x-text="isRunning ? 'Compiling...' : 'Run (Ctrl+Enter)'"></span>
+            <button @click="formatCode" class="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xs font-bold tracking-widest">FORMAT</button>
+            <button @click="runCode" :disabled="isRunning" class="px-6 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold tracking-widest transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:shadow-[0_0_25px_rgba(52,211,153,0.5)]">
+                <svg x-show="!isRunning" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                <svg x-show="isRunning" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" style="display: none;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <span x-text="isRunning ? 'RUNNING...' : 'EXECUTE'"></span>
             </button>
         </div>
     </div>
 
-    <!-- Main Split Workspace -->
-    <div class="flex flex-col lg:flex-row flex-1 min-h-0 overflow-hidden p-4 gap-4 z-10" :class="{ 'lg:flex-col': isSplitHorizontal }">
+    <!-- Main Content Area -->
+    <div class="flex-1 flex overflow-hidden p-5 gap-5 z-10">
         
-        <!-- Editor Panel -->
-        <div class="flex-1 flex flex-col min-w-0 bg-[#0d1117] border border-slate-700/50 rounded-xl shadow-xl relative overflow-hidden group">
-            <div class="bg-[#161b22] flex items-center justify-between px-4 py-2 border-b border-slate-700/50">
-                <div class="flex items-center gap-2">
-                    <span class="text-cyan-400 font-mono text-xs tracking-wide font-medium">main.go</span>
-                    <span x-show="autoSaved" class="text-slate-500 text-[10px] uppercase ml-2 animate-pulse" style="display: none;">Saved</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button @click="formatCode" class="text-slate-400 hover:text-white text-xs px-2 py-1 bg-slate-800 rounded border border-slate-700 transition-colors" title="Format Code (gofmt)">Format</button>
-                </div>
+        <!-- Left Panel: Project Files -->
+        <div class="w-64 glass-panel flex flex-col overflow-hidden shrink-0">
+            <div class="h-14 flex items-center justify-between px-5 border-b border-white/5 shrink-0 bg-black/20">
+                <span class="text-[11px] font-bold tracking-widest text-gray-400 uppercase">Project Files</span>
+                <button @click="createNewFile" class="text-emerald-400 hover:text-emerald-300 transition-colors p-1.5 hover:bg-emerald-500/10 rounded-md" title="Create New File">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
             </div>
             
-            <div id="editor-container" class="absolute inset-0 top-[37px]"></div>
-        </div>
-
-        <!-- Terminal Panel -->
-        <div class="lg:w-2/5 flex flex-col bg-[#0d1117] border border-slate-700/50 rounded-xl shadow-xl relative overflow-hidden" :class="{ 'lg:w-full lg:h-1/3': isSplitHorizontal }">
-            <div class="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-slate-700/50">
-                <div class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span class="text-xs font-mono font-bold text-slate-300">Terminal</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button @click="isSplitHorizontal = !isSplitHorizontal" class="text-slate-500 hover:text-slate-300 transition-colors" title="Toggle Layout">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                    </button>
-                    <button @click="clearTerminal" class="text-slate-500 hover:text-slate-300 transition-colors" title="Clear Terminal">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="flex-1 p-4 overflow-y-auto font-mono text-sm leading-relaxed" style="background-color: #0d1117;">
-                <!-- Output History Log -->
-                <template x-for="log in executionHistory">
-                    <div class="mb-4 pb-4 border-b border-slate-800">
-                        <div class="flex items-center justify-between text-slate-500 text-xs mb-2">
-                            <div>
-                                <span class="text-green-400">~/goverse $</span> go run main.go
+            <div class="flex-1 overflow-y-auto py-2 space-y-0.5">
+                <template x-for="item in fileTree" :key="item.path">
+                    <div>
+                        <!-- Folder Item -->
+                        <template x-if="item.type === 'folder'">
+                            <div class="group flex items-center py-1 cursor-pointer hover:bg-white/5 transition-colors"
+                                 :style="`padding-left: ${(item.depth * 14) + 8}px; padding-right: 8px;`"
+                                 @click="toggleFolder(item.path)">
+                                <svg class="w-4 h-4 mr-1 text-gray-500 transition-transform duration-200 shrink-0" 
+                                     :class="folderState[item.path] ? 'rotate-90' : ''"
+                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                                
+                                <svg class="w-4 h-4 mr-2 shrink-0 text-emerald-500/70" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
+                                </svg>
+                                
+                                <span class="text-[13px] font-semibold text-gray-300 truncate" x-text="item.name"></span>
+                                
+                                <!-- Folder Hover Actions -->
+                                <div class="ml-auto opacity-0 group-hover:opacity-100 flex items-center shrink-0 pl-2">
+                                    <button @click.stop="createFileInFolder(item.path)" title="New File in Folder" class="text-gray-500 hover:text-emerald-400 p-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    </button>
+                                </div>
                             </div>
-                            <span x-text="log.time + 'ms'" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded"></span>
-                        </div>
-                        <pre x-show="log.output" class="text-slate-200 whitespace-pre-wrap break-words" x-text="log.output"></pre>
-                        <div x-show="log.error" class="mt-2 p-2 bg-red-900/20 border border-red-500/20 rounded">
-                            <pre class="text-red-400 whitespace-pre-wrap break-words text-xs" x-text="log.error"></pre>
-                        </div>
+                        </template>
+                        
+                        <!-- File Item -->
+                        <template x-if="item.type === 'file'">
+                            <div class="group flex items-center py-1 cursor-pointer transition-colors"
+                                 :class="activeFile === item.path ? 'bg-emerald-500/15 text-emerald-400 border-r-2 border-emerald-500' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 border-r-2 border-transparent'"
+                                 :style="`padding-left: ${(item.depth * 14) + 28}px; padding-right: 8px;`"
+                                 @click="switchFile(item.path)">
+                                
+                                <!-- File Icon -->
+                                <svg x-show="item.name.endsWith('.go') || item.name.endsWith('.mod')" class="w-4 h-4 mr-2 shrink-0 transition-colors" :class="activeFile === item.path ? 'text-emerald-400' : 'text-emerald-500/50'" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                                <svg x-show="!item.name.endsWith('.go') && !item.name.endsWith('.mod')" class="w-4 h-4 mr-2 shrink-0 transition-colors" :class="activeFile === item.path ? 'text-gray-300' : 'text-gray-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                
+                                <!-- File Name / Input -->
+                                <input x-show="isRenaming === item.path" :id="'input_file_' + item.path.replace(/[^a-zA-Z0-9]/g, '_')" type="text" 
+                                       class="bg-black/50 text-white outline-none border border-emerald-500/50 rounded px-1.5 py-0.5 w-full text-[13px] font-medium"
+                                       :value="item.path" 
+                                       @blur="finishRename(item.path, $event.target.value)"
+                                       @keydown.enter="finishRename(item.path, $event.target.value)"
+                                       @click.stop />
+                                <span x-show="isRenaming !== item.path" x-text="item.name" class="font-medium truncate text-[13px] tracking-wide"></span>
+
+                                <!-- File Hover Actions (Rename & Delete) -->
+                                <div x-show="item.path !== 'main.go' && item.path !== 'go.mod' && isRenaming !== item.path" class="ml-auto opacity-0 group-hover:opacity-100 flex items-center shrink-0 pl-2">
+                                    <button @click.stop="startRename(item.path)" title="Rename File" class="text-gray-500 hover:text-emerald-400 p-1 transition-all mr-0.5">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    </button>
+                                    <button @click.stop="deleteFile(item.path)" title="Delete File" class="text-gray-500 hover:text-red-400 p-1 transition-all">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
                     </div>
                 </template>
-
-                <!-- Current Running State -->
-                <div x-show="isRunning" class="text-cyan-500/80 animate-pulse" style="display: none;">
-                    <span class="text-slate-500">~/goverse $</span> go run main.go<br/>
-                    Compiling program...<span class="animate-ping inline-block w-1.5 h-3 ml-1 bg-cyan-500"></span>
-                </div>
-                
-                <!-- Empty State -->
-                <div x-show="executionHistory.length === 0 && !isRunning" class="h-full flex flex-col items-center justify-center text-slate-600 opacity-50 select-none">
-                    <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    <p class="text-xs">Terminal Output</p>
-                </div>
             </div>
         </div>
 
+        <!-- Center Area: Editor & Terminal -->
+        <div class="flex-1 flex flex-col gap-5 min-w-0">
+            
+            <!-- Editor Panel -->
+            <div class="flex-1 glass-panel flex flex-col overflow-hidden relative group">
+                <!-- Floating Tabs (Custom UI) -->
+                <div class="absolute top-4 left-4 right-4 z-20 flex gap-2 overflow-x-auto no-scrollbar pb-2">
+                    <template x-for="filename in Object.keys(files)" :key="filename">
+                        <div class="px-5 py-2 rounded-full text-[12px] font-bold cursor-pointer transition-all border flex items-center gap-2 shadow-lg tracking-wide"
+                             :class="activeFile === filename ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400 backdrop-blur-xl' : 'bg-black/60 border-white/10 text-gray-400 hover:bg-black/80 hover:text-gray-200 backdrop-blur-md'"
+                             @click="switchFile(filename)">
+                            <span x-text="filename"></span>
+                            <div x-show="activeFile === filename" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_#34d399]"></div>
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- Editor Container (Padding top to avoid tabs) -->
+                <div class="flex-1 relative mt-16 ml-2 mb-2 mr-2">
+                    <div id="editor-container" class="absolute inset-0"></div>
+                </div>
+                
+                <!-- Status floating pill -->
+                <div class="absolute bottom-4 right-6 z-20 pointer-events-none">
+                    <div class="bg-black/60 backdrop-blur-xl border border-white/10 rounded-full px-4 py-2 flex items-center gap-3 text-[11px] text-gray-400 font-mono shadow-2xl">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full" :class="autoSaved ? 'bg-emerald-500 shadow-[0_0_8px_#34d399]' : 'bg-gray-600'"></div>
+                            <span x-text="autoSaved ? 'Saving...' : 'Saved'" class="font-medium tracking-wide"></span>
+                        </div>
+                        <div class="w-px h-3 bg-white/20"></div>
+                        <span x-text="cursorPos" class="font-medium tracking-wider">Ln 1, Col 1</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Panel -->
+            <div class="h-[32%] min-h-[150px] max-h-[60%] glass-panel flex flex-col overflow-hidden relative">
+                <div class="h-12 border-b border-white/5 flex items-center px-4 bg-black/30 shrink-0">
+                    <div class="flex gap-6 h-full overflow-x-auto no-scrollbar">
+                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
+                                :class="activePanel === 'PROBLEMS' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                                @click="activePanel = 'PROBLEMS'">
+                            PROBLEMS
+                            <div x-show="activePanel === 'PROBLEMS'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
+                        </button>
+                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
+                                :class="activePanel === 'OUTPUT' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                                @click="activePanel = 'OUTPUT'">
+                            OUTPUT
+                            <div x-show="activePanel === 'OUTPUT'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
+                        </button>
+                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
+                                :class="activePanel === 'DEBUG_CONSOLE' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                                @click="activePanel = 'DEBUG_CONSOLE'">
+                            DEBUG CONSOLE
+                            <div x-show="activePanel === 'DEBUG_CONSOLE'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
+                        </button>
+                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
+                                :class="activePanel === 'TERMINAL' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                                @click="activePanel = 'TERMINAL'">
+                            TERMINAL
+                            <div x-show="activePanel === 'TERMINAL'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
+                        </button>
+                        <button class="relative h-full flex items-center px-2 text-[11px] font-bold tracking-widest transition-colors whitespace-nowrap"
+                                :class="activePanel === 'PORTS' ? 'text-emerald-400' : 'text-gray-500 hover:text-gray-300'"
+                                @click="activePanel = 'PORTS'">
+                            PORTS
+                            <div x-show="activePanel === 'PORTS'" class="absolute bottom-0 left-0 w-full h-0.5 bg-emerald-400 rounded-t-lg shadow-[0_0_10px_rgba(52,211,153,0.8)]"></div>
+                        </button>
+                    </div>
+                    <div class="ml-auto pl-4">
+                        <button @click="clearPanel" class="text-gray-500 hover:text-white transition-colors bg-white/5 p-1.5 rounded-lg hover:bg-white/10" title="Clear Console">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Panels Content Area -->
+                <div class="flex-1 relative overflow-hidden">
+                    
+                    <!-- Terminal Content (Interactive CLI) -->
+                    <div class="absolute inset-0 flex flex-col" x-show="activePanel === 'TERMINAL'" style="display: none;">
+                        <div class="flex-1 p-5 overflow-y-auto font-mono text-[13px] leading-relaxed pb-14" id="console-scroll">
+                            <template x-for="log in terminalHistory">
+                                <div class="mb-5">
+                                    <div class="flex items-center mb-2 text-xs">
+                                        <span class="text-emerald-400 mr-2 font-bold shadow-emerald-400">$</span> 
+                                        <span class="text-gray-300 font-semibold tracking-wide" x-text="log.command"></span>
+                                        <span class="ml-auto text-gray-500 bg-black/40 px-2 py-0.5 rounded-md border border-white/5" x-text="log.time + 'ms'"></span>
+                                    </div>
+                                    <pre x-show="log.output" class="text-gray-300 whitespace-pre-wrap break-words pl-4 border-l-2 border-emerald-500/40 bg-white/[0.02] p-2 rounded-r-lg" x-text="log.output"></pre>
+                                    <pre x-show="log.error" class="text-red-400 whitespace-pre-wrap break-words pl-4 border-l-2 border-red-500/40 bg-red-500/5 p-2 rounded-r-lg mt-1" x-text="log.error"></pre>
+                                </div>
+                            </template>
+                            
+                            <div x-show="isRunning" class="text-emerald-400 animate-pulse flex items-center gap-3 font-semibold mb-4" style="display: none;">
+                                <svg class="w-4 h-4 animate-spin text-emerald-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                Executing...
+                            </div>
+                        </div>
+                        
+                        <!-- Terminal Input -->
+                        <div class="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-md border-t border-white/10 p-2 flex items-center">
+                            <span class="text-emerald-400 font-bold ml-3 mr-3">$</span>
+                            <input type="text" x-model="terminalInput" @keydown.enter="submitTerminal" :disabled="isRunning"
+                                   class="flex-1 bg-transparent text-gray-200 outline-none font-mono text-[13px] placeholder-gray-600"
+                                   placeholder="Type a command (e.g. go vet, ls -la) and hit Enter..." />
+                        </div>
+                    </div>
+
+                    <!-- Output Content -->
+                    <div class="absolute inset-0 flex flex-col" x-show="activePanel === 'OUTPUT'" style="display: none;">
+                        <div class="flex-1 p-5 overflow-y-auto font-mono text-[13px] leading-relaxed">
+                            <template x-if="outputHistory.length > 0">
+                                <div>
+                                    <div class="flex items-center mb-4 border-b border-white/5 pb-2 text-gray-500 font-sans text-xs font-semibold uppercase tracking-widest">
+                                        Code Execution Output 
+                                        <span class="ml-auto bg-black/40 px-2 py-0.5 rounded border border-white/5" x-text="outputHistory[0].time + 'ms'"></span>
+                                    </div>
+                                    <pre x-show="outputHistory[0].output" class="text-gray-200 whitespace-pre-wrap break-words" x-text="outputHistory[0].output"></pre>
+                                    <pre x-show="outputHistory[0].error" class="text-red-400 whitespace-pre-wrap break-words mt-3" x-text="outputHistory[0].error"></pre>
+                                </div>
+                            </template>
+                            <div x-show="outputHistory.length === 0" class="text-gray-600 flex items-center h-full justify-center pb-4">
+                                <span class="italic text-sm tracking-widest font-sans">No output available. Run your code to see results.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Problems Content -->
+                    <div class="absolute inset-0 p-5 overflow-y-auto" x-show="activePanel === 'PROBLEMS'" style="display: none;">
+                        <template x-if="problems.length > 0">
+                            <div class="space-y-3">
+                                <template x-for="prob in problems">
+                                    <div class="flex items-start text-[13px] font-mono group">
+                                        <svg class="w-4 h-4 mr-3 mt-0.5 shrink-0 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                                        <div class="flex-1 border-b border-white/5 pb-2 group-last:border-0">
+                                            <span class="text-gray-300 font-bold cursor-pointer hover:underline" x-text="prob.file" @click="activeFile = prob.file"></span>
+                                            <span class="text-gray-500" x-show="prob.line !== '-'" x-text="':' + prob.line + ':' + prob.col"></span>
+                                            <span class="ml-2 text-red-400 whitespace-pre-wrap" x-text="prob.msg"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <div x-show="problems.length === 0" class="text-gray-600 flex items-center h-full justify-center pb-4">
+                            <span class="italic text-sm tracking-widest">No problems have been detected in the workspace.</span>
+                        </div>
+                    </div>
+
+                    <!-- Debug Console Content -->
+                    <div class="absolute inset-0 flex flex-col" x-show="activePanel === 'DEBUG_CONSOLE'" style="display: none;">
+                        <div class="flex-1 p-5 overflow-y-auto font-mono text-[13px] leading-relaxed pb-14" id="debug-scroll">
+                            <template x-for="log in debugHistory">
+                                <div class="mb-3 border-l-2 border-blue-500/40 pl-3">
+                                    <div class="text-blue-400 font-bold mb-1">» <span class="text-gray-300" x-text="log.expr"></span></div>
+                                    <pre class="text-gray-400 whitespace-pre-wrap" x-text="log.result"></pre>
+                                </div>
+                            </template>
+                            <div x-show="debugHistory.length === 0" class="text-gray-600 flex items-center h-full justify-center pb-4">
+                                <span class="italic text-sm tracking-widest font-sans">Type a Go expression to evaluate (e.g., 10 + 5)...</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-md border-t border-white/10 p-2 flex items-center">
+                            <span class="text-blue-400 font-bold ml-3 mr-3">»</span>
+                            <input type="text" x-model="debugInput" @keydown.enter="submitDebug" :disabled="isRunning"
+                                   class="flex-1 bg-transparent text-gray-200 outline-none font-mono text-[13px] placeholder-gray-600"
+                                   placeholder="Evaluate expression..." />
+                        </div>
+                    </div>
+
+                    <!-- Ports Content -->
+                    <div class="absolute inset-0 p-5 overflow-y-auto" x-show="activePanel === 'PORTS'" style="display: none;">
+                        <template x-if="forwardedPorts.length > 0">
+                            <table class="w-full text-left text-[13px] font-mono text-gray-400">
+                                <thead>
+                                    <tr class="border-b border-white/10 text-gray-500 text-xs">
+                                        <th class="pb-2 font-medium">PORT</th>
+                                        <th class="pb-2 font-medium">PROTOCOL</th>
+                                        <th class="pb-2 font-medium">STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="p in forwardedPorts">
+                                        <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                            <td class="py-3 text-emerald-400 font-bold" x-text="p.port"></td>
+                                            <td class="py-3" x-text="p.proto"></td>
+                                            <td class="py-3 text-blue-400 flex items-center">
+                                                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse mr-2"></span>
+                                                <span x-text="p.status"></span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+                        <div x-show="forwardedPorts.length === 0" class="text-gray-600 flex items-center h-full justify-center pb-4">
+                            <span class="italic text-sm tracking-widest">No forwarded ports detected. Start an HTTP server to see ports here.</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Load Monaco Editor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
 <script>
-    const DEFAULT_CODE = `package main
-
-import "fmt"
-
-func main() {
-\tfmt.Println("Welcome to the GoVerse Ultimate Sandbox!")
-\tfmt.Println("🚀 Press Ctrl+Enter to compile & run instantly.")
-}
-`;
+    const DEFAULT_FILES = {
+        'main.go': 'package main\n\nimport (\n\t"fmt"\n)\n\nfunc main() {\n\tfmt.Println("Welcome to the GoVerse Custom Studio!")\n}\n',
+        'go.mod': 'module example\n\ngo 1.21\n'
+    };
 
     let globalMonacoEditor = null;
 
     function playground() {
         return {
+            files: {},
+            activeFile: 'main.go',
+            activePanel: 'TERMINAL',
             isRunning: false,
-            isSplitHorizontal: false,
+            showSettings: false,
             autoSaved: false,
+            isRenaming: null,
+            terminalHistory: [],
+            outputHistory: [],
+            problems: [],
+            debugHistory: [],
+            debugInput: '',
+            terminalInput: '',
+            cursorPos: "Ln 1, Col 1",
             fontSize: 15,
-            executionHistory: [],
             
-            initEditor() {
-                const savedCode = localStorage.getItem('goverse_sandbox_code') || DEFAULT_CODE;
+            folderState: {},
+            
+            get fileTree() {
+                // 1. Build a deeply nested object
+                const tree = { name: 'root', type: 'folder', path: '', children: {}, depth: -1 };
                 
+                Object.keys(this.files).sort().forEach(filepath => {
+                    const parts = filepath.split('/');
+                    let current = tree;
+                    let currentPath = '';
+                    
+                    for (let i = 0; i < parts.length; i++) {
+                        const part = parts[i];
+                        const isFile = i === parts.length - 1;
+                        currentPath = currentPath === '' ? part : currentPath + '/' + part;
+                        
+                        if (!current.children[part]) {
+                            current.children[part] = {
+                                name: part,
+                                type: isFile ? 'file' : 'folder',
+                                path: currentPath,
+                                children: {},
+                                depth: i
+                            };
+                            
+                            // Default folders to open
+                            if (!isFile && this.folderState[currentPath] === undefined) {
+                                this.folderState[currentPath] = true;
+                            }
+                        }
+                        current = current.children[part];
+                    }
+                });
+
+                // 2. Flatten the tree into a list, respecting folderState (isOpen)
+                const flattened = [];
+                const traverse = (node) => {
+                    const sortedChildren = Object.values(node.children).sort((a, b) => {
+                        if (a.type !== b.type) return a.type === 'folder' ? -1 : 1;
+                        return a.name.localeCompare(b.name);
+                    });
+                    
+                    for (const child of sortedChildren) {
+                        flattened.push(child);
+                        if (child.type === 'folder' && this.folderState[child.path]) {
+                            traverse(child);
+                        }
+                    }
+                };
+                
+                traverse(tree);
+                return flattened;
+            },
+            
+            toggleFolder(path) {
+                this.folderState[path] = !this.folderState[path];
+            },
+
+            get forwardedPorts() {
+                const ports = [];
+                const code = this.files['main.go'] || '';
+                const match = code.match(/ListenAndServe\s*\(\s*["'][^:]*:(\d+)["']/);
+                if (match) {
+                    ports.push({ port: match[1], proto: 'http', status: 'Forwarded (Simulated)' });
+                }
+                return ports;
+            },
+
+            initEditor() {
+                const saved = localStorage.getItem('goverse_studio_files_v2');
+                if (saved) {
+                    try {
+                        this.files = JSON.parse(saved);
+                    } catch(e) {
+                        this.files = {...DEFAULT_FILES};
+                    }
+                } else {
+                    this.files = {...DEFAULT_FILES};
+                }
+
+                if (!this.files[this.activeFile]) {
+                    this.activeFile = Object.keys(this.files)[0] || 'main.go';
+                    if (!this.files[this.activeFile]) {
+                        this.files['main.go'] = '';
+                    }
+                }
+
                 require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
                 require(['vs/editor/editor.main'], () => {
                     globalMonacoEditor = monaco.editor.create(document.getElementById('editor-container'), {
-                        value: savedCode,
-                        language: 'go',
-                        theme: 'vs-dark',
-                        automaticLayout: false, 
+                        value: this.files[this.activeFile],
+                        language: this.getFileLanguage(this.activeFile),
+                        theme: 'vs-dark', // Theme colors intact, background overridden via CSS
+                        automaticLayout: true,
                         minimap: { enabled: false },
                         fontSize: this.fontSize,
                         fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
@@ -156,7 +482,8 @@ func main() {
                         smoothScrolling: true,
                         cursorBlinking: "smooth",
                         cursorSmoothCaretAnimation: "on",
-                        padding: { top: 20, bottom: 20 }
+                        overviewRulerBorder: false,
+                        hideCursorInOverviewRuler: true
                     });
 
                     // Add Ctrl+Enter binding
@@ -166,107 +493,292 @@ func main() {
 
                     // Auto-save logic
                     globalMonacoEditor.onDidChangeModelContent(() => {
-                        localStorage.setItem('goverse_sandbox_code', globalMonacoEditor.getValue());
+                        this.files[this.activeFile] = globalMonacoEditor.getValue();
+                        localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
                         this.autoSaved = true;
                         setTimeout(() => this.autoSaved = false, 1500);
                     });
 
-                    window.addEventListener('resize', () => {
-                        if (globalMonacoEditor) globalMonacoEditor.layout();
-                    });
-                    
-                    this.$watch('isSplitHorizontal', () => {
-                        setTimeout(() => globalMonacoEditor.layout(), 50);
+                    globalMonacoEditor.onDidChangeCursorPosition((e) => {
+                        this.cursorPos = 'Ln ' + e.position.lineNumber + ', Col ' + e.position.column;
                     });
                 });
             },
 
-            increaseFontSize() {
-                if (this.fontSize < 30) {
-                    this.fontSize += 1;
-                    if(globalMonacoEditor) globalMonacoEditor.updateOptions({ fontSize: this.fontSize });
-                }
-            },
-            
-            decreaseFontSize() {
-                if (this.fontSize > 10) {
-                    this.fontSize -= 1;
-                    if(globalMonacoEditor) globalMonacoEditor.updateOptions({ fontSize: this.fontSize });
-                }
+            getFileLanguage(filename) {
+                if (filename.endsWith('.go') || filename.endsWith('.mod')) return 'go';
+                if (filename.endsWith('.json')) return 'json';
+                if (filename.endsWith('.md')) return 'markdown';
+                return 'plaintext';
             },
 
-            copyCode() {
+            switchFile(filename) {
+                if (this.activeFile === filename || this.isRenaming === filename) return;
+                
                 if (globalMonacoEditor) {
-                    navigator.clipboard.writeText(globalMonacoEditor.getValue());
-                    alert("Code copied to clipboard!");
+                    this.files[this.activeFile] = globalMonacoEditor.getValue();
+                }
+
+                this.activeFile = filename;
+                
+                if (globalMonacoEditor) {
+                    const oldModel = globalMonacoEditor.getModel();
+                    if (oldModel) oldModel.dispose();
+                    
+                    const newModel = monaco.editor.createModel(this.files[filename], this.getFileLanguage(filename));
+                    globalMonacoEditor.setModel(newModel);
                 }
             },
 
-            downloadCode() {
-                if (!globalMonacoEditor) return;
-                const blob = new Blob([globalMonacoEditor.getValue()], { type: 'text/plain' });
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'main.go';
-                a.click();
-                window.URL.revokeObjectURL(url);
-            },
-
-            resetCode() {
-                if (globalMonacoEditor && confirm("Reset to default code? This cannot be undone.")) {
-                    globalMonacoEditor.setValue(DEFAULT_CODE);
-                    this.clearTerminal();
+            createNewFile() {
+                let baseName = 'new_file.go';
+                let counter = 1;
+                while (this.files[baseName]) {
+                    baseName = `new_file_${counter}.go`;
+                    counter++;
                 }
+                
+                this.files[baseName] = 'package main\n\n';
+                this.switchFile(baseName);
+                
+                this.startRename(baseName);
             },
             
+            createFileInFolder(folderPath) {
+                this.folderState[folderPath] = true; // Ensure folder is open
+                let baseName = folderPath + '/new_file.go';
+                let counter = 1;
+                while (this.files[baseName]) {
+                    baseName = folderPath + `/new_file_${counter}.go`;
+                    counter++;
+                }
+                
+                const pkgName = folderPath.split('/').pop().replace(/[^a-zA-Z0-9]/g, '');
+                this.files[baseName] = `package ${pkgName}\n\n`;
+                this.switchFile(baseName);
+                
+                this.startRename(baseName);
+            },
+
+            startRename(filename) {
+                if (filename === 'main.go' || filename === 'go.mod') return;
+                this.isRenaming = filename;
+                setTimeout(() => {
+                    const el = document.getElementById('input_file_' + filename.replace(/[^a-zA-Z0-9]/g, '_'));
+                    if (el) {
+                        el.focus();
+                        el.select();
+                    }
+                }, 100);
+            },
+
+            finishRename(oldName, newName) {
+                newName = newName.trim();
+                this.isRenaming = null;
+                
+                if (newName === '' || newName === oldName) return;
+                
+                if (this.files[newName] !== undefined) {
+                    alert('A file with this name already exists.');
+                    return;
+                }
+                
+                this.files[newName] = this.files[oldName];
+                delete this.files[oldName];
+                
+                if (this.activeFile === oldName) {
+                    this.activeFile = newName;
+                    if (globalMonacoEditor) {
+                        monaco.editor.setModelLanguage(globalMonacoEditor.getModel(), this.getFileLanguage(newName));
+                    }
+                }
+                
+                localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+            },
+
+            deleteFile(filename) {
+                if (filename === 'main.go' || filename === 'go.mod') return;
+                
+                if (confirm('Are you sure you want to delete ' + filename + '?')) {
+                    delete this.files[filename];
+                    if (this.activeFile === filename) {
+                        this.switchFile('main.go');
+                    }
+                    localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                }
+            },
+
+            resetAllFiles() {
+                if (confirm("Reset to the default GoVerse Studio workspace?")) {
+                    this.files = {...DEFAULT_FILES};
+                    this.activeFile = 'main.go';
+                    localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                    if (globalMonacoEditor) {
+                        const newModel = monaco.editor.createModel(this.files['main.go'], 'go');
+                        globalMonacoEditor.setModel(newModel);
+                    }
+                    this.showSettings = false;
+                    this.clearPanel();
+                }
+            },
+
+            increaseFontSize() {
+                this.fontSize = Math.min(this.fontSize + 1, 30);
+                if (globalMonacoEditor) globalMonacoEditor.updateOptions({ fontSize: this.fontSize });
+            },
+
+            decreaseFontSize() {
+                this.fontSize = Math.max(this.fontSize - 1, 10);
+                if (globalMonacoEditor) globalMonacoEditor.updateOptions({ fontSize: this.fontSize });
+            },
+
             formatCode() {
-                // A true format requires backend gofmt, but for now we just layout
                 if (globalMonacoEditor) globalMonacoEditor.getAction('editor.action.formatDocument').run();
             },
             
-            clearTerminal() {
-                this.executionHistory = [];
+            clearPanel() {
+                if (this.activePanel === 'TERMINAL') this.terminalHistory = [];
+                if (this.activePanel === 'OUTPUT') this.outputHistory = [];
+                if (this.activePanel === 'DEBUG_CONSOLE') this.debugHistory = [];
+            },
+            
+            scrollToBottom(id) {
+                setTimeout(() => {
+                    const el = document.getElementById(id);
+                    if(el) el.scrollTop = el.scrollHeight;
+                }, 50);
+            },
+            
+            parseProblems(errMsg) {
+                this.problems = [];
+                if (!errMsg) return;
+                const lines = errMsg.split('\n');
+                lines.forEach(line => {
+                    const match = line.match(/^([^:]+):(\d+):(\d+):\s(.*)$/);
+                    if (match) {
+                        this.problems.push({ file: match[1], line: match[2], col: match[3], msg: match[4] });
+                    } else if (line.trim().length > 0 && !line.startsWith('exit status') && !line.startsWith('# ')) {
+                        this.problems.push({ file: 'compiler', line: '-', col: '-', msg: line });
+                    }
+                });
+                if (this.problems.length > 0 && this.activePanel !== 'PROBLEMS') {
+                    this.activePanel = 'PROBLEMS';
+                }
+            },
+
+            async submitDebug() {
+                const expr = this.debugInput.trim();
+                if (!expr || this.isRunning || !globalMonacoEditor) return;
+                
+                this.debugInput = '';
+                this.isRunning = true;
+                
+                // Wrap expression in a basic Go program to evaluate it
+                const debugCode = `package main\nimport (\n\t"fmt"\n\t"strings"\n\t"math"\n)\nfunc main() {\n\tfmt.Println(${expr})\n}`;
+                
+                try {
+                    const response = await fetch('/api/v1/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ files: { 'main.go': debugCode, 'go.mod': 'module run\ngo 1.21\n' } })
+                    });
+                    
+                    const data = await response.json();
+                    let out = (!response.ok) ? (data.error || 'Evaluation failed') : (data.error || data.output);
+                    
+                    this.debugHistory.push({ expr: expr, result: out.trim() });
+                } catch (err) {
+                    this.debugHistory.push({ expr: expr, result: 'Network error.' });
+                } finally {
+                    this.isRunning = false;
+                    this.scrollToBottom('debug-scroll');
+                }
+            },
+
+            async submitTerminal() {
+                const cmd = this.terminalInput.trim();
+                if (!cmd || this.isRunning || !globalMonacoEditor) return;
+                
+                this.terminalInput = '';
+                this.files[this.activeFile] = globalMonacoEditor.getValue();
+                this.isRunning = true;
+                
+                try {
+                    const response = await fetch('/api/v1/terminal', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ command: cmd, files: this.files })
+                    });
+                    
+                    let errMsg = '';
+                    
+                    if (!response.ok) {
+                        try {
+                            const data = await response.json();
+                            errMsg = data.error || 'Execution failed';
+                        } catch(e) {
+                            errMsg = await response.text();
+                        }
+                        this.terminalHistory.push({ command: cmd, output: '', error: errMsg, time: 0 });
+                    } else {
+                        const data = await response.json();
+                        this.terminalHistory.push({ command: cmd, output: data.output, error: data.error, time: data.time_ms });
+                    }
+                } catch (err) {
+                    this.terminalHistory.push({ command: cmd, output: '', error: 'Network error or server unreachable.', time: 0 });
+                } finally {
+                    this.isRunning = false;
+                    this.scrollToBottom('console-scroll');
+                }
             },
 
             async runCode() {
                 if (!globalMonacoEditor || this.isRunning) return;
                 
-                const code = globalMonacoEditor.getValue();
+                this.files[this.activeFile] = globalMonacoEditor.getValue();
+                this.activePanel = 'TERMINAL';
                 this.isRunning = true;
 
                 try {
                     const response = await fetch('/api/v1/execute', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ code })
+                        body: JSON.stringify({ files: this.files })
                     });
                     
-                    const data = await response.json();
                     if (!response.ok) {
-                        this.executionHistory.unshift({
+                        let errMsg = 'Execution failed';
+                        try {
+                            const data = await response.json();
+                            errMsg = data.error || errMsg;
+                        } catch(e) {
+                            errMsg = await response.text();
+                        }
+                        this.outputHistory.unshift({
                             output: '',
-                            error: data.error || 'Execution failed',
-                            time: data.time_ms || 0
+                            error: errMsg,
+                            time: 0
                         });
+                        this.parseProblems(errMsg);
                     } else {
-                        this.executionHistory.unshift({
+                        const data = await response.json();
+                        this.outputHistory.unshift({
                             output: data.output,
                             error: data.error,
                             time: data.time_ms
                         });
+                        this.parseProblems(data.error);
                     }
                 } catch (err) {
-                    this.executionHistory.unshift({
+                    this.outputHistory.unshift({
                         output: '',
                         error: 'Network error or server unreachable. Ensure backend is running.',
                         time: 0
                     });
                 } finally {
                     this.isRunning = false;
-                    // Keep history capped at 10 items to prevent huge DOM
-                    if (this.executionHistory.length > 10) {
-                        this.executionHistory = this.executionHistory.slice(0, 10);
+                    if (this.activePanel === 'TERMINAL') {
+                        this.activePanel = 'OUTPUT';
                     }
                 }
             }

@@ -43,3 +43,26 @@ To execute Go files quickly from your terminal using the GoVerse engine:
 ```bash
 go run ./cmd/cli/main.go -file your_file.go
 ```
+
+## 🗺️ Roadmap
+
+```mermaid
+timeline
+    title GoVerse Platform Roadmap
+    Phase 1: Core Infrastructure
+        : Go Native Code Sandbox
+        : Markdown Parsing Engine
+        : Developer CLI Tool
+    Phase 2: Web Platform & UI
+        : HTMX + Alpine.js Frontend
+        : PostgreSQL Database
+        : Monaco Editor Integration
+    Phase 3: Learning Curriculum
+        : 41-Chapter Concurrency Course
+        : System Design Modules
+        : Real-world Projects
+    Phase 4: Enterprise Productionization
+        : Containerized Isolated Execution
+        : Authentication & Leaderboards
+        : Kubernetes Deployment
+```

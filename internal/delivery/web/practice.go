@@ -12,6 +12,7 @@ import (
 func RegisterPracticeRoutes(r chi.Router) {
 	r.Get("/practice", HandlePracticePage)
 	r.Post("/api/v1/execute", HandleExecuteCode)
+	r.Post("/api/v1/terminal", HandleTerminalCommand)
 	r.Post("/api/v1/evaluate", HandleEvaluateCode)
 }
 
@@ -27,7 +28,7 @@ func HandlePracticePage(w http.ResponseWriter, r *http.Request) {
 }
 
 type ExecuteRequest struct {
-	Code string `json:"code"`
+	Files map[string]string `json:"files"`
 }
 
 func HandleExecuteCode(w http.ResponseWriter, r *http.Request) {
@@ -37,15 +38,42 @@ func HandleExecuteCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Code == "" {
-		http.Error(w, "Code cannot be empty", http.StatusBadRequest)
+	if len(req.Files) == 0 {
+		http.Error(w, "Files cannot be empty", http.StatusBadRequest)
 		return
 	}
 
-	result, err := runner.ExecuteCode(r.Context(), req.Code)
+	result, err := runner.ExecuteCode(r.Context(), req.Files)
 	if err != nil {
 		// Log the error internally, return generic error to client
 		http.Error(w, "Failed to execute code", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+type TerminalRequest struct {
+	Command string            `json:"command"`
+	Files   map[string]string `json:"files"`
+}
+
+func HandleTerminalCommand(w http.ResponseWriter, r *http.Request) {
+	var req TerminalRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.Command == "" {
+		http.Error(w, "Command cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	result, err := runner.RunCommand(r.Context(), req.Command, req.Files)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

@@ -3,6 +3,7 @@ package web
 import (
 	"html/template"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
@@ -24,16 +25,28 @@ func RegisterRoutes(r chi.Router, userRepo domain.UserRepository, courseRepo dom
 
 	r.Get("/", h.HandleLandingPage)
 	r.Get("/dashboard", h.HandleDashboard)
+	r.Get("/roadmap", h.HandleRoadmap)
 	h.RegisterLearnRoutes(r)
 	RegisterPracticeRoutes(r)
 }
 
+func getProjectRoot() string {
+	if _, err := os.Stat("ui/templates"); err == nil {
+		return "."
+	}
+	if _, err := os.Stat("../../ui/templates"); err == nil {
+		return "../.."
+	}
+	return "."
+}
+
 func parseTemplates() *template.Template {
 	// Parse base layout and all pages/partials
+	root := getProjectRoot()
 	tmpl := template.New("")
-	tmpl, _ = tmpl.ParseGlob(filepath.Join("ui", "templates", "layouts", "*.html"))
-	tmpl, _ = tmpl.ParseGlob(filepath.Join("ui", "templates", "pages", "*.html"))
-	tmpl, _ = tmpl.ParseGlob(filepath.Join("ui", "templates", "partials", "*.html"))
+	tmpl = template.Must(tmpl.ParseGlob(filepath.Join(root, "ui", "templates", "layouts", "*.html")))
+	tmpl = template.Must(tmpl.ParseGlob(filepath.Join(root, "ui", "templates", "pages", "*.html")))
+	tmpl = template.Must(tmpl.ParseGlob(filepath.Join(root, "ui", "templates", "partials", "*.html")))
 	return tmpl
 }
 
@@ -42,6 +55,17 @@ func (h *WebHandler) HandleLandingPage(w http.ResponseWriter, r *http.Request) {
 	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
 		"Title": "GoVerse - The Ultimate Golang Learning Platform",
 		"Page":  "index",
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (h *WebHandler) HandleRoadmap(w http.ResponseWriter, r *http.Request) {
+	tmpl := parseTemplates()
+	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
+		"Title": "Roadmap - GoVerse",
+		"Page":  "roadmap",
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

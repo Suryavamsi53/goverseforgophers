@@ -45,7 +45,7 @@ func main() {
 	// Connect to Database
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://goverse_admin:goverse_password@localhost:5432/goverse_db"
+		dbURL = "postgres://goverse_admin:goverse_password@localhost:5433/goverse_db?sslmode=disable"
 	}
 	dbPool, err := pgxpool.New(context.Background(), dbURL)
 	if err != nil {

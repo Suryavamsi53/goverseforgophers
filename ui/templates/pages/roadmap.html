@@ -1,0 +1,58 @@
+{{define "roadmap"}}
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-extrabold text-white tracking-tight sm:text-5xl mb-4">Platform <span class="text-transparent bg-clip-text bg-gradient-to-r from-go-cyan to-go-blue">Roadmap</span></h1>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">Track the evolution of GoVerse from core infrastructure to a production-grade enterprise platform.</p>
+    </div>
+
+        <pre class="mermaid bg-transparent w-full">
+timeline
+    title GoVerse Platform Roadmap
+    Phase 1: Core Infrastructure
+        : Go Native Code Sandbox
+        : Markdown Parsing Engine
+        : Developer CLI Tool
+    Phase 2: Web Platform & UI
+        : HTMX + Alpine.js Frontend
+        : PostgreSQL Database
+        : Monaco Editor Integration
+    Phase 3: Learning Curriculum
+        : 41-Chapter Concurrency Course
+        : System Design Modules
+        : Real-world Projects
+    Phase 4: Enterprise Productionization
+        : Containerized Isolated Execution
+        : Authentication & Leaderboards
+        : Kubernetes Deployment
+        </pre>
+    </div>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    
+    mermaid.initialize({ 
+        startOnLoad: false, 
+        theme: 'dark',
+        fontFamily: 'Inter, sans-serif'
+    });
+
+    const renderMermaid = async () => {
+        try {
+            await mermaid.run({
+                querySelector: '.mermaid',
+            });
+        } catch(e) {
+            console.error("Mermaid rendering failed:", e);
+        }
+    };
+
+    // Run on fresh load
+    renderMermaid();
+
+    // Run on HTMX navigation
+    document.body.addEventListener('htmx:load', function() {
+        renderMermaid();
+    });
+</script>
+{{end}}
