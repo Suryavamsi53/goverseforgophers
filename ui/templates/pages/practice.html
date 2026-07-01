@@ -48,22 +48,7 @@
         </div>
         
         <div class="flex items-center gap-4">
-            <button @click="showSettings = !showSettings" class="text-gray-400 hover:text-white transition-colors relative" title="Studio Settings">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                
-                <div x-show="showSettings" class="absolute top-8 right-0 w-48 glass-panel py-2 z-50 text-gray-300" style="display: none;" @click.outside="showSettings = false">
-                    <div class="px-4 py-2 hover:bg-white/10 hover:text-emerald-400 cursor-pointer flex justify-between transition-colors" @click.stop="increaseFontSize">
-                        <span>Font Size +</span>
-                    </div>
-                    <div class="px-4 py-2 hover:bg-white/10 hover:text-emerald-400 cursor-pointer flex justify-between transition-colors" @click.stop="decreaseFontSize">
-                        <span>Font Size -</span>
-                    </div>
-                    <div class="h-px bg-white/10 my-1"></div>
-                    <div class="px-4 py-2 hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors" @click.stop="resetAllFiles">
-                        Reset Workspace
-                    </div>
-                </div>
-            </button>
+
             <button @click="formatCode" class="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xs font-bold tracking-widest">FORMAT</button>
             <button @click="runCode" :disabled="isRunning" class="px-6 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold tracking-widest transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:shadow-[0_0_25px_rgba(52,211,153,0.5)]">
                 <svg x-show="!isRunning" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
@@ -86,6 +71,51 @@
             <button @click="sidebarMode = 'extensions'" :class="sidebarMode === 'extensions' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-4 transition-colors" title="Extensions">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             </button>
+            
+            <div class="mt-auto relative w-full flex flex-col items-center">
+                <button @click="showSettings = !showSettings" class="p-3 rounded-xl text-gray-500 hover:text-gray-300 transition-colors" title="Settings">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+                
+                <div x-show="showSettings" class="absolute bottom-0 left-16 w-64 glass-panel py-2 z-50 text-gray-300 shadow-2xl" style="display: none;" @click.outside="showSettings = false">
+                    <div class="px-4 py-2 text-xs font-bold text-gray-500 tracking-wider">EDITOR SETTINGS</div>
+                    
+                    <div class="px-4 py-2 hover:bg-white/10 cursor-pointer flex justify-between items-center transition-colors" @click.stop="toggleMinimap">
+                        <span>Minimap</span>
+                        <div class="w-8 h-4 rounded-full transition-colors relative" :class="editorSettings.minimap ? 'bg-emerald-500' : 'bg-gray-600'">
+                            <div class="w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all" :class="editorSettings.minimap ? 'right-0.5' : 'left-0.5'"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="px-4 py-2 hover:bg-white/10 cursor-pointer flex justify-between items-center transition-colors" @click.stop="toggleWordWrap">
+                        <span>Word Wrap</span>
+                        <div class="w-8 h-4 rounded-full transition-colors relative" :class="editorSettings.wordWrap === 'on' ? 'bg-emerald-500' : 'bg-gray-600'">
+                            <div class="w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all" :class="editorSettings.wordWrap === 'on' ? 'right-0.5' : 'left-0.5'"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="px-4 py-2 hover:bg-white/10 cursor-pointer flex justify-between items-center transition-colors" @click.stop="toggleTabSize">
+                        <span>Tab Size</span>
+                        <span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded" x-text="editorSettings.tabSize"></span>
+                    </div>
+
+                    <div class="px-4 py-2 flex justify-between items-center">
+                        <span>Font Size</span>
+                        <div class="flex gap-2 bg-black/40 rounded px-2 py-1 items-center">
+                            <button @click.stop="decreaseFontSize" class="hover:text-emerald-400 px-1 font-bold">-</button>
+                            <span class="text-xs font-mono text-emerald-400 font-bold" x-text="editorSettings.fontSize"></span>
+                            <button @click.stop="increaseFontSize" class="hover:text-emerald-400 px-1 font-bold">+</button>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-white/10 my-2"></div>
+                    
+                    <div class="px-4 py-2 text-xs font-bold text-gray-500 tracking-wider">WORKSPACE</div>
+                    <div class="px-4 py-2 hover:bg-white/10 hover:text-red-400 cursor-pointer transition-colors" @click.stop="resetAllFiles">
+                        Reset All Files
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Sidebar Panel Container -->
@@ -273,6 +303,16 @@
                                 @click="activePanel = 'PORTS'">
                             PORTS
                         </button>
+                        <button x-show="extensions['rest-client']" class="pb-1 border-b-[1px] transition-colors whitespace-nowrap"
+                                :class="activePanel === 'REST_CLIENT' ? 'border-emerald-400 text-gray-200' : 'border-transparent text-gray-500 hover:text-gray-300'"
+                                @click="activePanel = 'REST_CLIENT'">
+                            REST CLIENT
+                        </button>
+                        <button x-show="extensions['html-preview']" class="pb-1 border-b-[1px] transition-colors whitespace-nowrap"
+                                :class="activePanel === 'PREVIEW' ? 'border-emerald-400 text-gray-200' : 'border-transparent text-gray-500 hover:text-gray-300'"
+                                @click="activePanel = 'PREVIEW'">
+                            LIVE PREVIEW
+                        </button>
                     </div>
                     <div class="ml-auto flex items-center gap-3 pb-1 text-gray-500">
                         <button @click="clearPanel" title="Clear Panel" class="hover:text-gray-200 transition-colors">
@@ -384,6 +424,27 @@
                         </div>
                     </div>
 
+                    <!-- REST Client Content -->
+                    <div class="absolute inset-0 p-5 overflow-y-auto flex flex-col" x-show="activePanel === 'REST_CLIENT'" style="display: none;">
+                        <div class="flex gap-2 mb-4">
+                            <select x-model="restMethod" class="bg-black/60 border border-white/10 rounded px-3 py-1.5 text-xs text-gray-200 outline-none w-24">
+                                <option>GET</option>
+                                <option>POST</option>
+                                <option>PUT</option>
+                                <option>DELETE</option>
+                            </select>
+                            <input type="text" x-model="restUrl" @keydown.enter="sendRestRequest" class="flex-1 bg-black/60 border border-white/10 rounded px-3 py-1.5 text-xs text-gray-200 outline-none" placeholder="Enter Request URL">
+                            <button @click="sendRestRequest" :disabled="restLoading" class="bg-blue-600 hover:bg-blue-500 text-white px-4 rounded text-xs font-bold transition-colors" x-text="restLoading ? 'Sending...' : 'Send'"></button>
+                        </div>
+                        <div class="flex-1 bg-black/40 border border-white/5 rounded p-4 font-mono text-[12px] text-gray-300 overflow-y-auto whitespace-pre-wrap" x-text="restResponse">
+                        </div>
+                    </div>
+
+                    <!-- HTML Preview Content -->
+                    <div class="absolute inset-0 bg-white" x-show="activePanel === 'PREVIEW'" style="display: none;">
+                        <iframe id="html-preview-frame" class="w-full h-full border-0" sandbox="allow-scripts"></iframe>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -407,6 +468,12 @@
             activePanel: 'TERMINAL',
             isRunning: false,
             showSettings: false,
+            editorSettings: {
+                fontSize: 14,
+                minimap: false,
+                wordWrap: 'off',
+                tabSize: 4,
+            },
             autoSaved: false,
             isRenaming: null,
             terminalHistory: [],
@@ -418,8 +485,16 @@
             cursorPos: "Ln 1, Col 1",
             sidebarMode: 'files',
             extensions: {
+                'gemini': false,
                 'dracula': false,
-                'vim': false
+                'vim': false,
+                'go-snippets': false,
+                'go-linter': false,
+                'html-preview': false,
+                'html-snippets': false,
+                'rest-client': false,
+                'docker': false,
+                'sql-tools': false
             },
             isResizing: false,
             terminalHeight: 32,
@@ -427,10 +502,25 @@
             fitAddon: null,
             ws: null,
             extensionSearch: '',
+            
+            // REST Client State
+            restMethod: 'GET',
+            restUrl: 'https://api.restful-api.dev/objects',
+            restLoading: false,
+            restResponse: 'Waiting for request...',
+
             availableExtensions: [
+                { id: 'gemini', name: 'Gemini Code Assist', desc: 'Google Gemini powered AI completions, explanations, and code refactoring.', icon: '✧', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.2)' },
                 { id: 'dracula', name: 'Dracula Theme', desc: 'A dark theme for Monaco Editor with vibrant pinks and purples.', icon: 'D', color: '#ff79c6', bg: '#282a36' },
                 { id: 'vim', name: 'Vim Keybindings', desc: 'Enables true Vim modal editing bindings directly within the editor.', icon: 'V', color: '#10b981', bg: 'rgba(16, 185, 129, 0.2)' },
-                { id: 'fmt', name: 'Go Format', desc: 'Automatically runs standard Go formatting and linting.', icon: 'fmt', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)', disabled: true }
+                { id: 'go-snippets', name: 'Go Snippets', desc: 'Useful Go code snippets (HTTP servers, JSON parsing, routines).', icon: 'Go', color: '#00add8', bg: 'rgba(0, 173, 216, 0.2)' },
+                { id: 'go-linter', name: 'Go Linter & Vet', desc: 'Real-time static analysis and bug detection for Go source files.', icon: '✓', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+                { id: 'html-preview', name: 'HTML Live Preview', desc: 'Preview HTML rendering in a side panel as you type.', icon: 'H5', color: '#f97316', bg: 'rgba(249, 115, 22, 0.2)' },
+                { id: 'html-snippets', name: 'HTML5 Snippets', desc: 'Boilerplates and common HTML tags autocomplete.', icon: '<>', color: '#fb923c', bg: 'rgba(251, 146, 60, 0.1)' },
+                { id: 'rest-client', name: 'REST Client', desc: 'Send HTTP requests and view API responses in the editor.', icon: 'API', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)' },
+                { id: 'docker', name: 'Docker Explorer', desc: 'Manage containers, images, and streamline Dockerfile editing.', icon: '🐳', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.2)' },
+                { id: 'sql-tools', name: 'Database Tools', desc: 'SQL formatter and schema explorer for PostgreSQL/MySQL.', icon: 'DB', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.2)' },
+                { id: 'fmt', name: 'Go Format on Save', desc: 'Automatically runs standard Go formatting and linting.', icon: 'fmt', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)', disabled: true }
             ],
 
             startResize(e) {
@@ -694,11 +784,14 @@
                                     });
                                 }
                                 
-                                suggestions.push(
-                                    { label: 'main', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'func main() {\n\t$0\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Main function snippet', range: range },
-                                    { label: 'forr', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'for ${1:i}, ${2:v} := range ${3:iterable} {\n\t$0\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'For range loop snippet', range: range },
-                                    { label: 'iferr', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'if err != nil {\n\treturn err\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Error check snippet', range: range }
-                                );
+                                if (this.extensions['go-snippets']) {
+                                    suggestions.push(
+                                        { label: 'main', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'func main() {\n\t$0\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Main function snippet', range: range },
+                                        { label: 'forr', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'for ${1:i}, ${2:v} := range ${3:iterable} {\n\t$0\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'For range loop snippet', range: range },
+                                        { label: 'iferr', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'if err != nil {\n\treturn err\n}', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Error check snippet', range: range },
+                                        { label: 'httpserver', kind: monaco.languages.CompletionItemKind.Snippet, insertText: 'http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {\n\tfmt.Fprintf(w, "Hello")\n})\nhttp.ListenAndServe(":${1:8080}", nil)', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'HTTP Server Template', range: range }
+                                    );
+                                }
                                 
                                 const stdlib = ['fmt', 'os', 'strings', 'math', 'time', 'net/http', 'encoding/json', 'io', 'log', 'context'];
                                 for (const pkg of stdlib) {
@@ -720,8 +813,10 @@
                         language: this.getFileLanguage(this.activeFile),
                         theme: 'vs-dark', // Theme colors intact, background overridden via CSS
                         automaticLayout: true,
-                        minimap: { enabled: false },
-                        fontSize: this.fontSize,
+                        minimap: { enabled: this.editorSettings.minimap },
+                        wordWrap: this.editorSettings.wordWrap,
+                        tabSize: this.editorSettings.tabSize,
+                        fontSize: this.editorSettings.fontSize,
                         fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace",
                         fontLigatures: true,
                         scrollBeyondLastLine: false,
@@ -737,12 +832,63 @@
                         this.runCode();
                     });
 
+                    // Add Ctrl+S binding for format
+                    globalMonacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+                        if (this.extensions['fmt']) {
+                            this.formatCode();
+                        }
+                    });
+
+                    // HTML Snippets registration
+                    monaco.languages.registerCompletionItemProvider('html', {
+                        provideCompletionItems: (model, position) => {
+                            if (!this.extensions['html-snippets']) return { suggestions: [] };
+                            const word = model.getWordUntilPosition(position);
+                            const range = { startLineNumber: position.lineNumber, endLineNumber: position.lineNumber, startColumn: word.startColumn, endColumn: word.endColumn };
+                            return {
+                                suggestions: [
+                                    { label: 'html5', kind: monaco.languages.CompletionItemKind.Snippet, insertText: '<!DOCTYPE html>\n<html lang="en">\n<head>\n\t<meta charset="UTF-8">\n\t<meta name="viewport" content="width=device-width, initial-scale=1.0">\n\t<title>${1:Document}</title>\n</head>\n<body>\n\t$0\n</body>\n</html>', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'HTML5 Boilerplate', range: range },
+                                    { label: 'divc', kind: monaco.languages.CompletionItemKind.Snippet, insertText: '<div class="${1:class}">\n\t$0\n</div>', insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, documentation: 'Div with class', range: range }
+                                ]
+                            };
+                        }
+                    });
+
+                    // Gemini AI Inline Completion Mock
+                    monaco.languages.registerInlineCompletionsProvider('go', {
+                        provideInlineCompletions: (model, position) => {
+                            if (!this.extensions['gemini']) return { items: [] };
+                            const textUntilPosition = model.getValueInRange({startLineNumber: position.lineNumber, startColumn: 1, endLineNumber: position.lineNumber, endColumn: position.column});
+                            if (textUntilPosition.trim() === '// gemini: http server') {
+                                return {
+                                    items: [{ insertText: '\nhttp.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {\n\tfmt.Fprintf(w, "Hello World")\n})\nhttp.ListenAndServe(":8080", nil)' }]
+                                };
+                            }
+                            if (textUntilPosition.trim() === '// gemini: read file') {
+                                return {
+                                    items: [{ insertText: '\ndata, err := os.ReadFile("data.txt")\nif err != nil {\n\tlog.Fatal(err)\n}\nfmt.Println(string(data))' }]
+                                };
+                            }
+                            return { items: [] };
+                        },
+                        freeInlineCompletions() {}
+                    });
+
                     // Auto-save logic
                     globalMonacoEditor.onDidChangeModelContent(() => {
-                        this.files[this.activeFile] = globalMonacoEditor.getValue();
+                        const content = globalMonacoEditor.getValue();
+                        this.files[this.activeFile] = content;
                         localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
                         this.autoSaved = true;
                         setTimeout(() => this.autoSaved = false, 1500);
+                        
+                        // Live HTML Preview Logic
+                        if (this.extensions['html-preview'] && (this.activeFile.endsWith('.html') || this.activeFile.endsWith('.htm'))) {
+                            const iframe = document.getElementById('html-preview-frame');
+                            if (iframe) {
+                                iframe.srcdoc = content;
+                            }
+                        }
                     });
 
                     globalMonacoEditor.onDidChangeCursorPosition((e) => {
@@ -755,6 +901,7 @@
                 if (filename.endsWith('.go') || filename.endsWith('.mod')) return 'go';
                 if (filename.endsWith('.json')) return 'json';
                 if (filename.endsWith('.md')) return 'markdown';
+                if (filename.endsWith('.html') || filename.endsWith('.htm')) return 'html';
                 return 'plaintext';
             },
 
@@ -772,6 +919,15 @@
                     if (oldModel) oldModel.dispose();
                     
                     const newModel = monaco.editor.createModel(this.files[filename], this.getFileLanguage(filename));
+                    
+                    // Update iframe if switching to HTML file and preview is enabled
+                    if (this.extensions['html-preview'] && (filename.endsWith('.html') || filename.endsWith('.htm'))) {
+                        const iframe = document.getElementById('html-preview-frame');
+                        if (iframe) iframe.srcdoc = this.files[filename];
+                    } else {
+                        const iframe = document.getElementById('html-preview-frame');
+                        if (iframe) iframe.srcdoc = '';
+                    }
                     globalMonacoEditor.setModel(newModel);
                 }
             },
@@ -868,14 +1024,40 @@
                 }
             },
 
+            toggleMinimap() {
+                this.editorSettings.minimap = !this.editorSettings.minimap;
+                this.applySettings();
+            },
+
+            toggleWordWrap() {
+                this.editorSettings.wordWrap = this.editorSettings.wordWrap === 'off' ? 'on' : 'off';
+                this.applySettings();
+            },
+
+            toggleTabSize() {
+                this.editorSettings.tabSize = this.editorSettings.tabSize === 4 ? 2 : 4;
+                this.applySettings();
+            },
+
             increaseFontSize() {
-                this.fontSize = Math.min(this.fontSize + 1, 30);
-                if (globalMonacoEditor) globalMonacoEditor.updateOptions({ fontSize: this.fontSize });
+                this.editorSettings.fontSize = Math.min(this.editorSettings.fontSize + 1, 30);
+                this.applySettings();
             },
 
             decreaseFontSize() {
-                this.fontSize = Math.max(this.fontSize - 1, 10);
-                if (globalMonacoEditor) globalMonacoEditor.updateOptions({ fontSize: this.fontSize });
+                this.editorSettings.fontSize = Math.max(this.editorSettings.fontSize - 1, 10);
+                this.applySettings();
+            },
+
+            applySettings() {
+                if (globalMonacoEditor) {
+                    globalMonacoEditor.updateOptions({
+                        fontSize: this.editorSettings.fontSize,
+                        minimap: { enabled: this.editorSettings.minimap },
+                        wordWrap: this.editorSettings.wordWrap,
+                        tabSize: this.editorSettings.tabSize
+                    });
+                }
             },
 
             formatCode() {
@@ -909,6 +1091,35 @@
                 });
                 if (this.problems.length > 0 && this.activePanel !== 'PROBLEMS') {
                     this.activePanel = 'PROBLEMS';
+                }
+            },
+
+            async sendRestRequest() {
+                if (!this.restUrl) return;
+                this.restLoading = true;
+                this.restResponse = 'Sending request to ' + this.restUrl + '...';
+                
+                try {
+                    const t0 = performance.now();
+                    const res = await fetch(this.restUrl, { method: this.restMethod });
+                    const t1 = performance.now();
+                    const timeMs = (t1 - t0).toFixed(0);
+                    
+                    let data = '';
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        const jsonData = await res.json();
+                        data = JSON.stringify(jsonData, null, 2);
+                    } else {
+                        data = await res.text();
+                    }
+                    
+                    const statusLine = `HTTP ${res.status} ${res.statusText} (${timeMs}ms)\n\n`;
+                    this.restResponse = statusLine + data;
+                } catch (e) {
+                    this.restResponse = `Error: ${e.message}\n\nNote: If this is an external API, it might be blocking CORS requests from the browser.`;
+                } finally {
+                    this.restLoading = false;
                 }
             },
 
