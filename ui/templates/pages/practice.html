@@ -36,6 +36,7 @@
     <div class="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
     <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-lime-500/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
     
+    {{if not .IsEmbedded}}
     <!-- Custom IDE Header -->
     <div class="h-16 flex items-center justify-between px-6 shrink-0 z-10 border-b border-white/5 relative">
         <div class="flex items-center gap-3">
@@ -57,6 +58,7 @@
             </button>
         </div>
     </div>
+    {{end}}
 
     <!-- Main Content Area -->
     <div class="flex-1 flex overflow-hidden z-10">
@@ -240,15 +242,28 @@
             <!-- Editor Panel -->
             <div class="glass-panel flex flex-col overflow-hidden relative group" :style="`height: ${100 - terminalHeight}%;`">
                 <!-- Floating Tabs (Custom UI) -->
-                <div class="absolute top-4 left-4 right-4 z-20 flex gap-2 overflow-x-auto no-scrollbar pb-2">
-                    <template x-for="filename in Object.keys(files)" :key="filename">
-                        <div class="px-5 py-2 rounded-full text-[12px] font-bold cursor-pointer transition-all border flex items-center gap-2 shadow-lg tracking-wide"
-                             :class="activeFile === filename ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400 backdrop-blur-xl' : 'bg-black/60 border-white/10 text-gray-400 hover:bg-black/80 hover:text-gray-200 backdrop-blur-md'"
-                             @click="switchFile(filename)">
-                            <span x-text="filename"></span>
-                            <div x-show="activeFile === filename" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_#34d399]"></div>
-                        </div>
-                    </template>
+                <div class="absolute top-4 left-4 right-4 z-20 flex justify-between items-start pointer-events-none">
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2 pointer-events-auto">
+                        <template x-for="filename in Object.keys(files)" :key="filename">
+                            <div class="px-5 py-2 rounded-full text-[12px] font-bold cursor-pointer transition-all border flex items-center gap-2 shadow-lg tracking-wide"
+                                 :class="activeFile === filename ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400 backdrop-blur-xl' : 'bg-black/60 border-white/10 text-gray-400 hover:bg-black/80 hover:text-gray-200 backdrop-blur-md'"
+                                 @click="switchFile(filename)">
+                                <span x-text="filename"></span>
+                                <div x-show="activeFile === filename" class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_#34d399]"></div>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    {{if .IsEmbedded}}
+                    <div class="flex items-center gap-3 pointer-events-auto">
+                        <button @click="formatCode" class="px-4 py-1.5 rounded-full bg-black/60 border border-white/10 text-gray-300 hover:text-white hover:bg-black/80 backdrop-blur-md transition-colors text-xs font-bold tracking-widest shadow-lg">FORMAT</button>
+                        <button @click="runCode" :disabled="isRunning" class="px-5 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold tracking-widest transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)]">
+                            <svg x-show="!isRunning" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                            <svg x-show="isRunning" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" style="display: none;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            <span x-text="isRunning ? 'RUNNING' : 'EXECUTE'"></span>
+                        </button>
+                    </div>
+                    {{end}}
                 </div>
                 
                 <!-- Editor Container (Padding top to avoid tabs) -->
@@ -260,8 +275,8 @@
                 <div class="absolute bottom-4 right-6 z-20 pointer-events-none">
                     <div class="bg-black/60 backdrop-blur-xl border border-white/10 rounded-full px-4 py-2 flex items-center gap-3 text-[11px] text-gray-400 font-mono shadow-2xl">
                         <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 rounded-full" :class="autoSaved ? 'bg-emerald-500 shadow-[0_0_8px_#34d399]' : 'bg-gray-600'"></div>
-                            <span x-text="autoSaved ? 'Saving...' : 'Saved'" class="font-medium tracking-wide"></span>
+                            <div class="w-2 h-2 rounded-full" :class="isSaving ? 'bg-yellow-500 shadow-[0_0_8px_#eab308] animate-pulse' : (autoSaved ? 'bg-emerald-500 shadow-[0_0_8px_#34d399]' : 'bg-gray-600')"></div>
+                            <span x-text="isSaving ? 'Syncing...' : (autoSaved ? 'Cloud Saved' : 'Saved')" class="font-medium tracking-wide"></span>
                         </div>
                         <div class="w-px h-3 bg-white/20"></div>
                         <span x-text="cursorPos" class="font-medium tracking-wider">Ln 1, Col 1</span>
@@ -454,10 +469,7 @@
 <!-- Load Monaco Editor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
 <script>
-    const DEFAULT_FILES = {
-        'main.go': 'package main\n\nimport (\n\t"fmt"\n)\n\nfunc main() {\n\tfmt.Println("Welcome to the GoVerse Custom Studio!")\n}\n',
-        'go.mod': 'module example\n\ngo 1.21\n'
-    };
+    const DEFAULT_FILES = {};
 
     let globalMonacoEditor = null;
 
@@ -704,16 +716,65 @@
                 return ports;
             },
 
-            initEditor() {
-                const saved = localStorage.getItem('goverse_studio_files_v2');
-                if (saved) {
+            saveTimeout: null,
+            isSaving: false,
+
+            async saveWorkspace(immediate = false) {
+                // Update local storage for immediate resilience
+                localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                
+                if (this.saveTimeout) clearTimeout(this.saveTimeout);
+                
+                const performSave = async () => {
+                    this.isSaving = true;
                     try {
-                        this.files = JSON.parse(saved);
+                        await fetch('/api/v1/workspace', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: '{{.WsType}}',
+                                ref_id: '{{.RefID}}',
+                                files: this.files
+                            })
+                        });
                     } catch(e) {
+                        console.error('Failed to sync workspace to cloud');
+                    }
+                    this.isSaving = false;
+                };
+
+                if (immediate) {
+                    await performSave();
+                } else {
+                    this.saveTimeout = setTimeout(performSave, 1500); // debounce 1.5s
+                }
+            },
+
+            async initEditor() {
+                try {
+                    const res = await fetch(`/api/v1/workspace?type={{.WsType}}&ref_id={{.RefID}}`);
+                    if (res.ok) {
+                        const ws = await res.json();
+                        if (ws && ws.files && Object.keys(ws.files).length > 0) {
+                            this.files = ws.files;
+                        } else {
+                            this.files = {...DEFAULT_FILES};
+                        }
+                    } else {
+                        throw new Error("Workspace not found");
+                    }
+                } catch(e) {
+                    // Fallback to local storage
+                    const saved = localStorage.getItem('goverse_studio_files_v2');
+                    if (saved) {
+                        try {
+                            this.files = JSON.parse(saved);
+                        } catch(err) {
+                            this.files = {...DEFAULT_FILES};
+                        }
+                    } else {
                         this.files = {...DEFAULT_FILES};
                     }
-                } else {
-                    this.files = {...DEFAULT_FILES};
                 }
 
                 if (!this.files[this.activeFile]) {
@@ -878,7 +939,7 @@
                     globalMonacoEditor.onDidChangeModelContent(() => {
                         const content = globalMonacoEditor.getValue();
                         this.files[this.activeFile] = content;
-                        localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                        this.saveWorkspace();
                         this.autoSaved = true;
                         setTimeout(() => this.autoSaved = false, 1500);
                         
@@ -995,7 +1056,7 @@
                     }
                 }
                 
-                localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                this.saveWorkspace();
             },
 
             deleteFile(filename) {
@@ -1006,7 +1067,7 @@
                     if (this.activeFile === filename) {
                         this.switchFile('main.go');
                     }
-                    localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                    this.saveWorkspace();
                 }
             },
 
@@ -1014,7 +1075,7 @@
                 if (confirm("Reset to the default GoVerse Studio workspace?")) {
                     this.files = {...DEFAULT_FILES};
                     this.activeFile = 'main.go';
-                    localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                    this.saveWorkspace();
                     if (globalMonacoEditor) {
                         const newModel = monaco.editor.createModel(this.files['main.go'], 'go');
                         globalMonacoEditor.setModel(newModel);
@@ -1060,8 +1121,31 @@
                 }
             },
 
-            formatCode() {
-                if (globalMonacoEditor) globalMonacoEditor.getAction('editor.action.formatDocument').run();
+            async formatCode() {
+                if (!globalMonacoEditor) return;
+                
+                const currentCode = globalMonacoEditor.getValue();
+                try {
+                    const response = await fetch('/api/v1/format', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: currentCode })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.error) {
+                        this.parseProblems(data.error);
+                    } else if (data.formatted_code) {
+                        // Preserve cursor position if possible, but for simplicity just setValue
+                        const position = globalMonacoEditor.getPosition();
+                        globalMonacoEditor.setValue(data.formatted_code);
+                        globalMonacoEditor.setPosition(position);
+                        this.files[this.activeFile] = data.formatted_code;
+                        this.parseProblems(""); // clear problems
+                    }
+                } catch (e) {
+                    console.error("Format failed", e);
+                }
             },
             
             clearPanel() {
@@ -1226,7 +1310,22 @@
                 };
                 
                 this.ws.onmessage = (event) => {
-                    this.term.write(event.data);
+                    try {
+                        let msg = JSON.parse(event.data);
+                        if (msg.type === "output") {
+                            this.term.write(msg.data);
+                        } else if (msg.type === "files") {
+                            for (let name in msg.files) {
+                                // Ignore go.mod since backend hides it, but don't delete if we already have it
+                                if (name === "go.mod") continue;
+                                if (this.files[name] !== msg.files[name]) {
+                                    this.files[name] = msg.files[name];
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        this.term.write(event.data);
+                    }
                 };
                 
                 this.ws.onclose = () => {

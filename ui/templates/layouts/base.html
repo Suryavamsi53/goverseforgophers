@@ -38,7 +38,9 @@
 </head>
 <body class="bg-dark-900 text-gray-100 font-sans min-h-screen flex flex-col">
     
+    {{if not .IsEmbedded}}
     {{template "navbar" .}}
+    {{end}}
 
     <main class="flex-grow flex flex-col" id="main-content">
         {{if eq .Page "index"}}
@@ -53,10 +55,24 @@
             {{template "practice" .}}
         {{else if eq .Page "roadmap"}}
             {{template "roadmap" .}}
+        {{else if eq .Page "login"}}
+            {{template "login" .}}
+        {{else if eq .Page "register"}}
+            {{template "register" .}}
+        {{else if eq .Page "leaderboard"}}
+            {{template "leaderboard" .}}
+        {{else if eq .Page "settings"}}
+            {{template "settings" .}}
+        {{else if eq .Page "projects"}}
+            {{template "projects" .}}
+        {{else if eq .Page "project_detail"}}
+            {{template "project_detail" .}}
         {{end}}
     </main>
 
+    {{if not .IsEmbedded}}
     {{template "footer" .}}
+    {{end}}
 
 </body>
 </html>

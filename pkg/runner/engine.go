@@ -3,6 +3,7 @@ package runner
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -12,9 +13,10 @@ import (
 )
 
 type ExecutionResult struct {
-	Output string `json:"output"`
-	Error  string `json:"error"`
-	TimeMs int64  `json:"time_ms"`
+	Output string            `json:"output"`
+	Error  string            `json:"error"`
+	TimeMs int64             `json:"time_ms"`
+	Files  map[string]string `json:"files,omitempty"` // New/modified files
 }
 
 // ExecuteCode writes the source code to a temporary file, runs it with `go run`,
@@ -69,11 +71,16 @@ func ExecuteCode(ctx context.Context, files map[string]string) (*ExecutionResult
 
 	// Prepare the command to run the code
 	// Adding a hard timeout for execution to prevent infinite loops
-	runCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	runCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(runCtx, "go", "run", ".")
-	cmd.Dir = tempDir
+	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
+		"--memory", "256m",
+		"--cpus", "0.5",
+		"-v", tempDir+":/app:z",
+		"-w", "/app",
+		"golang:1.21-alpine",
+		"go", "run", ".")
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -147,8 +154,13 @@ func RunCommand(ctx context.Context, command string, files map[string]string) (*
 	runCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	cmd := exec.CommandContext(runCtx, "sh", "-c", command)
-	cmd.Dir = tempDir
+	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
+		"--memory", "256m",
+		"--cpus", "0.5",
+		"-v", tempDir+":/app:z",
+		"-w", "/app",
+		"golang:1.21-alpine",
+		"sh", "-c", command)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -161,7 +173,26 @@ func RunCommand(ctx context.Context, command string, files map[string]string) (*
 	result := &ExecutionResult{
 		Output: stdout.String(),
 		TimeMs: duration,
+		Files:  make(map[string]string),
 	}
+
+	// Read back any files created/modified by the command
+	filepath.Walk(tempDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+		// Skip go.mod if we auto-generated it and it wasn't there before
+		rel, _ := filepath.Rel(tempDir, path)
+		if rel == "go.mod" && !hasGoMod {
+			return nil
+		}
+		
+		contentBytes, err := os.ReadFile(path)
+		if err == nil {
+			result.Files[rel] = string(contentBytes)
+		}
+		return nil
+	})
 
 	if err != nil {
 		if runCtx.Err() == context.DeadlineExceeded {
@@ -177,4 +208,25 @@ func RunCommand(ctx context.Context, command string, files map[string]string) (*
 	}
 
 	return result, nil
+}
+
+// FormatCode runs gofmt on the provided code string
+func FormatCode(ctx context.Context, code string) (string, error) {
+	cmd := exec.CommandContext(ctx, "gofmt")
+	cmd.Stdin = strings.NewReader(code)
+	
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+	
+	err := cmd.Run()
+	if err != nil {
+		if stderr.Len() > 0 {
+			// e.g. main.go:3:1: expected 'package', found 'EOF'
+			return "", fmt.Errorf("%s", stderr.String())
+		}
+		return "", err
+	}
+	
+	return stdout.String(), nil
 }

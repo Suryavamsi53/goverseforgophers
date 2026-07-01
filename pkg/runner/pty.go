@@ -59,12 +59,15 @@ func HandleWSTerminalSession(ws *websocket.Conn) {
 		os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte("module example\n\ngo 1.21\n"), 0644)
 	}
 
-	// Start bash with PTY
-	cmd := exec.Command("bash")
-	cmd.Dir = tmpDir
-	
-	// Add environment variables
-	cmd.Env = append(os.Environ(), "TERM=xterm-256color")
+	// Start shell with PTY inside Docker
+	cmd := exec.Command("docker", "run", "-it", "--rm",
+		"--memory", "256m",
+		"-cpus", "0.5",
+		"-v", tmpDir+":/app:z",
+		"-w", "/app",
+		"-e", "TERM=xterm-256color",
+		"golang:1.21-alpine",
+		"/bin/sh")
 
 	ptmx, err := pty.Start(cmd)
 	if err != nil {
@@ -91,12 +94,53 @@ func HandleWSTerminalSession(ws *websocket.Conn) {
 				}
 				break
 			}
-			err = ws.WriteMessage(websocket.TextMessage, buf[:n])
-			if err != nil {
+			
+			// Send output as JSON
+			msg := map[string]interface{}{
+				"type": "output",
+				"data": string(buf[:n]),
+			}
+			if err := ws.WriteJSON(msg); err != nil {
 				break
 			}
 		}
 		close(done)
+	}()
+
+	// Goroutine to periodically sync files back to frontend
+	go func() {
+		ticker := time.NewTicker(2 * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				files := make(map[string]string)
+				filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
+					if err != nil || info.IsDir() {
+						return nil
+					}
+					rel, _ := filepath.Rel(tmpDir, path)
+					if rel == "go.mod" {
+						return nil // ignore go.mod
+					}
+					content, err := os.ReadFile(path)
+					if err == nil {
+						files[rel] = string(content)
+					}
+					return nil
+				})
+				
+				if len(files) > 0 {
+					msg := map[string]interface{}{
+						"type": "files",
+						"files": files,
+					}
+					ws.WriteJSON(msg)
+				}
+			}
+		}
 	}()
 
 	// Goroutine to read from WS and write to PTY

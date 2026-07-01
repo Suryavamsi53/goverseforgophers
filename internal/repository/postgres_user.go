@@ -95,3 +95,29 @@ func (r *postgresUserRepository) UpdateProfile(ctx context.Context, profile *dom
 	_, err := r.db.Exec(ctx, query, profile.AvatarURL, profile.Bio, profile.GithubHandle, profile.LinkedinHandle, profile.DailyStreak, profile.TotalScore, profile.UserID)
 	return err
 }
+
+func (r *postgresUserRepository) GetLeaderboard(ctx context.Context, limit int) ([]*domain.LeaderboardEntry, error) {
+	query := `
+		SELECT u.id, u.username, p.avatar_url, p.daily_streak, p.total_score 
+		FROM users u
+		JOIN user_profiles p ON u.id = p.user_id
+		ORDER BY p.total_score DESC, p.daily_streak DESC
+		LIMIT $1
+	`
+	rows, err := r.db.Query(ctx, query, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var entries []*domain.LeaderboardEntry
+	for rows.Next() {
+		e := &domain.LeaderboardEntry{}
+		err := rows.Scan(&e.UserID, &e.Username, &e.AvatarURL, &e.DailyStreak, &e.TotalScore)
+		if err != nil {
+			return nil, err
+		}
+		entries = append(entries, e)
+	}
+	return entries, nil
+}

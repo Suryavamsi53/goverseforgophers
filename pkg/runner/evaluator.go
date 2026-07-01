@@ -76,11 +76,16 @@ func EvaluateProblem(ctx context.Context, code string, problem *domain.PracticeP
 		return nil, err
 	}
 
-	runCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	runCtx, cancel := context.WithTimeout(ctx, 15*time.Second) // Increase timeout for docker overhead
 	defer cancel()
 
-	cmd := exec.CommandContext(runCtx, "go", "run", "main.go", "solution.go")
-	cmd.Dir = tempDir
+	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
+		"--memory", "256m",
+		"--cpus", "0.5",
+		"-v", tempDir+":/app",
+		"-w", "/app",
+		"golang:1.21-alpine",
+		"go", "run", "main.go", "solution.go")
 
 	start := time.Now()
 	out, err := cmd.CombinedOutput()
@@ -161,4 +166,67 @@ func main() {
 	fmt.Println(string(out)) 
 }
 `
+}
+
+// EvaluateProject runs the project's TestFile against the user's code.
+func EvaluateProject(ctx context.Context, code string, project *domain.Project) (*EvaluationResult, error) {
+	slog.Info("Starting project evaluation", "project_slug", project.Slug)
+
+	tempDir, err := os.MkdirTemp("", "goverse_proj_*")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tempDir)
+
+	if !strings.Contains(code, "package main") {
+		code = "package main\n\n" + code
+	}
+
+	if err := os.WriteFile(filepath.Join(tempDir, "main.go"), []byte(code), 0644); err != nil {
+		return nil, err
+	}
+
+	if err := os.WriteFile(filepath.Join(tempDir, "main_test.go"), []byte(project.TestFile), 0644); err != nil {
+		return nil, err
+	}
+
+	modCmd := exec.CommandContext(ctx, "go", "mod", "init", "project")
+	modCmd.Dir = tempDir
+	if err := modCmd.Run(); err != nil {
+		return nil, err
+	}
+
+	runCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
+
+	// Run go test in json mode to parse output if we want, or just check exit status.
+	// For MVP, if it exits 0, it passes.
+	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
+		"--memory", "256m",
+		"--cpus", "0.5",
+		"-v", tempDir+":/app",
+		"-w", "/app",
+		"golang:1.21-alpine",
+		"go", "test", "-v", ".")
+
+	start := time.Now()
+	out, err := cmd.CombinedOutput()
+	duration := time.Since(start).Milliseconds()
+
+	evalResult := &EvaluationResult{
+		TimeMs: duration,
+	}
+
+	if err != nil {
+		evalResult.Success = false
+		evalResult.SystemError = string(out)
+		if evalResult.SystemError == "" {
+			evalResult.SystemError = err.Error()
+		}
+	} else {
+		evalResult.Success = true
+		evalResult.SystemError = string(out) // we can optionally return test output here
+	}
+
+	return evalResult, nil
 }

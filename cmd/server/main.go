@@ -15,6 +15,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/suryavamsivaggu/goverse/internal/delivery/web"
 	"github.com/suryavamsivaggu/goverse/internal/repository"
+	"github.com/suryavamsivaggu/goverse/internal/usecase"
+	"github.com/suryavamsivaggu/goverse/pkg/auth"
 )
 
 func main() {
@@ -56,9 +58,18 @@ func main() {
 	userRepo := repository.NewPostgresUserRepository(dbPool)
 	courseRepo := repository.NewPostgresCourseRepository(dbPool)
 	progressRepo := repository.NewPostgresProgressRepository(dbPool)
+	projectRepo := repository.NewMockProjectRepository()
+	workspaceRepo := repository.NewPostgresWorkspaceRepository(dbPool)
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "super-secret-key-change-in-prod"
+	}
+	jwtManager := auth.NewJWTManager(jwtSecret, 24*time.Hour)
+	authUseCase := usecase.NewAuthUseCase(userRepo, jwtManager)
 
 	// Register web routes
-	web.RegisterRoutes(r, userRepo, courseRepo, progressRepo)
+	web.RegisterRoutes(r, userRepo, courseRepo, progressRepo, projectRepo, workspaceRepo, authUseCase, jwtManager)
 
 	// Server setup
 	srv := &http.Server{

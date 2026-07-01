@@ -25,6 +25,14 @@ type UserProfile struct {
 	TotalScore     int    `json:"total_score"`
 }
 
+type LeaderboardEntry struct {
+	UserID      string `json:"user_id"`
+	Username    string `json:"username"`
+	AvatarURL   string `json:"avatar_url"`
+	DailyStreak int    `json:"daily_streak"`
+	TotalScore  int    `json:"total_score"`
+}
+
 type UserRepository interface {
 	Create(ctx context.Context, user *User) error
 	GetByID(ctx context.Context, id string) (*User, error)
@@ -34,6 +42,8 @@ type UserRepository interface {
 	CreateProfile(ctx context.Context, profile *UserProfile) error
 	GetProfile(ctx context.Context, userID string) (*UserProfile, error)
 	UpdateProfile(ctx context.Context, profile *UserProfile) error
+	
+	GetLeaderboard(ctx context.Context, limit int) ([]*LeaderboardEntry, error)
 }
 
 type AuthUseCase interface {
