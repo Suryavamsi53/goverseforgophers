@@ -294,7 +294,7 @@ Walkthrough of the Go source code for %s.
 ---
 
 ## 19️⃣ Architecture
-For production projects integrating %s:
+For production projects integrating this concept:
 * **Folder Structure**
 * **Clean Architecture & DDD**
 * **Repository & Service Layers**

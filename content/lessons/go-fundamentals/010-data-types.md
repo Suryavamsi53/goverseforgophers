@@ -168,7 +168,7 @@ Walkthrough of the Go source code for Data Types.
 ---
 
 ## 19️⃣ Architecture
-For production projects integrating %!s(MISSING):
+For production projects integrating this concept:
 * **Folder Structure**
 * **Clean Architecture & DDD**
 * **Repository & Service Layers**
