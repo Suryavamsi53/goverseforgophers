@@ -25,6 +25,12 @@ type UserProfile struct {
 	TotalScore     int    `json:"total_score"`
 }
 
+type UserSettings struct {
+	UserID         string                 `json:"user_id"`
+	EditorSettings map[string]interface{} `json:"editor_settings"`
+	Extensions     map[string]bool        `json:"extensions"`
+}
+
 type LeaderboardEntry struct {
 	UserID      string `json:"user_id"`
 	Username    string `json:"username"`
@@ -42,6 +48,9 @@ type UserRepository interface {
 	CreateProfile(ctx context.Context, profile *UserProfile) error
 	GetProfile(ctx context.Context, userID string) (*UserProfile, error)
 	UpdateProfile(ctx context.Context, profile *UserProfile) error
+	
+	GetSettings(ctx context.Context, userID string) (*UserSettings, error)
+	UpdateSettings(ctx context.Context, settings *UserSettings) error
 	
 	GetLeaderboard(ctx context.Context, limit int) ([]*LeaderboardEntry, error)
 }

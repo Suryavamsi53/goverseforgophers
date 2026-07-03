@@ -62,7 +62,8 @@ func HandleWSTerminalSession(ws *websocket.Conn) {
 	// Start shell with PTY inside Docker
 	cmd := exec.Command("docker", "run", "-it", "--rm",
 		"--memory", "256m",
-		"-cpus", "0.5",
+		"--cpus", "0.5",
+		"--network", "host",
 		"-v", tmpDir+":/app:z",
 		"-w", "/app",
 		"-e", "TERM=xterm-256color",

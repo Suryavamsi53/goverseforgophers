@@ -61,10 +61,8 @@ func ExecuteCode(ctx context.Context, files map[string]string) (*ExecutionResult
 
 	// Initialize Go module in the temp directory so it can run independently (if not provided)
 	if !hasGoMod {
-		modCmd := exec.CommandContext(ctx, "go", "mod", "init", "example")
-		modCmd.Dir = tempDir
-		if err := modCmd.Run(); err != nil {
-			slog.Error("Failed to run go mod init", "error", err)
+		if err := os.WriteFile(filepath.Join(tempDir, "go.mod"), []byte("module example\n\ngo 1.21\n"), 0644); err != nil {
+			slog.Error("Failed to write go.mod", "error", err)
 			return nil, err
 		}
 	}
@@ -77,6 +75,7 @@ func ExecuteCode(ctx context.Context, files map[string]string) (*ExecutionResult
 	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
 		"--memory", "256m",
 		"--cpus", "0.5",
+		"--network", "host",
 		"-v", tempDir+":/app:z",
 		"-w", "/app",
 		"golang:1.21-alpine",
@@ -100,7 +99,7 @@ func ExecuteCode(ctx context.Context, files map[string]string) (*ExecutionResult
 	// If there's an error, it could be a compile error or runtime panic
 	if err != nil {
 		if runCtx.Err() == context.DeadlineExceeded {
-			result.Error = "Execution timed out (5s limit)"
+			result.Error = "Execution timed out (10s limit). Note: For web servers, please use the Terminal!"
 		} else {
 			result.Error = stderr.String()
 			if result.Error == "" {
@@ -146,9 +145,7 @@ func RunCommand(ctx context.Context, command string, files map[string]string) (*
 	}
 
 	if !hasGoMod {
-		modCmd := exec.CommandContext(ctx, "go", "mod", "init", "example")
-		modCmd.Dir = tempDir
-		modCmd.Run()
+		os.WriteFile(filepath.Join(tempDir, "go.mod"), []byte("module example\n\ngo 1.21\n"), 0644)
 	}
 
 	runCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
@@ -157,6 +154,7 @@ func RunCommand(ctx context.Context, command string, files map[string]string) (*
 	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
 		"--memory", "256m",
 		"--cpus", "0.5",
+		"--network", "host",
 		"-v", tempDir+":/app:z",
 		"-w", "/app",
 		"golang:1.21-alpine",
@@ -196,7 +194,7 @@ func RunCommand(ctx context.Context, command string, files map[string]string) (*
 
 	if err != nil {
 		if runCtx.Err() == context.DeadlineExceeded {
-			result.Error = "Command timed out (10s limit)"
+			result.Error = "Command timed out (10s limit). Note: For long-running processes, please use the Terminal!"
 		} else {
 			result.Error = stderr.String()
 			if result.Error == "" {

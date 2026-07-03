@@ -468,19 +468,26 @@
 
 <!-- Load Monaco Editor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
+<script id="user-settings-data" type="application/json">{{.SettingsJSON}}</script>
 <script>
     const DEFAULT_FILES = {};
 
     let globalMonacoEditor = null;
 
     function playground() {
+        let savedSettings = { editor_settings: null, extensions: null };
+        try {
+            const raw = document.getElementById('user-settings-data').textContent;
+            if (raw) savedSettings = JSON.parse(raw);
+        } catch(e) {}
+        
         return {
             files: {},
             activeFile: 'main.go',
             activePanel: 'TERMINAL',
             isRunning: false,
             showSettings: false,
-            editorSettings: {
+            editorSettings: savedSettings.editor_settings || {
                 fontSize: 14,
                 minimap: false,
                 wordWrap: 'off',
@@ -496,7 +503,7 @@
             terminalInput: '',
             cursorPos: "Ln 1, Col 1",
             sidebarMode: 'files',
-            extensions: {
+            extensions: savedSettings.extensions || {
                 'gemini': false,
                 'dracula': false,
                 'vim': false,
@@ -647,6 +654,23 @@
                             if (status) status.remove();
                         }
                     }
+                }
+                
+                this.persistSettings();
+            },
+            
+            async persistSettings() {
+                try {
+                    await fetch('/api/v1/user/ide-settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            editor_settings: this.editorSettings,
+                            extensions: this.extensions
+                        })
+                    });
+                } catch(e) {
+                    console.error('Failed to persist settings', e);
                 }
             },
             
@@ -955,7 +979,20 @@
                     globalMonacoEditor.onDidChangeCursorPosition((e) => {
                         this.cursorPos = 'Ln ' + e.position.lineNumber + ', Col ' + e.position.column;
                     });
+                    
+                    this.applyInitialExtensions();
                 });
+            },
+
+            applyInitialExtensions() {
+                if (this.extensions['dracula']) {
+                    this.extensions['dracula'] = false;
+                    this.toggleExtension('dracula');
+                }
+                if (this.extensions['vim']) {
+                    this.extensions['vim'] = false;
+                    this.toggleExtension('vim');
+                }
             },
 
             getFileLanguage(filename) {
@@ -1119,6 +1156,7 @@
                         tabSize: this.editorSettings.tabSize
                     });
                 }
+                this.persistSettings();
             },
 
             async formatCode() {

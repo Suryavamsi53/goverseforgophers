@@ -334,13 +334,14 @@ func main() {
 		
 		comma := ","
 		if i == len(lines)-1 {
-			comma = ";"
+			comma = ""
 		}
 
 		safeTitle := strings.ReplaceAll(title, "'", "''")
 		sqlFile.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', 'See markdown file', %d)%s\n", 
 			id, courseID, slug, safeTitle, i+1, comma))
 	}
+	sqlFile.WriteString("ON CONFLICT (id) DO NOTHING;\n")
 
 	fmt.Printf("Successfully regenerated %d markdown lessons with Ultimate Template in %s\n", len(lines), courseDir)
 }

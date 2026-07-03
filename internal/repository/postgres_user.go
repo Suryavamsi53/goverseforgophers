@@ -96,6 +96,27 @@ func (r *postgresUserRepository) UpdateProfile(ctx context.Context, profile *dom
 	return err
 }
 
+func (r *postgresUserRepository) GetSettings(ctx context.Context, userID string) (*domain.UserSettings, error) {
+	query := `SELECT user_id, editor_settings, extensions FROM user_settings WHERE user_id = $1`
+	settings := &domain.UserSettings{}
+	err := r.db.QueryRow(ctx, query, userID).Scan(&settings.UserID, &settings.EditorSettings, &settings.Extensions)
+	if err != nil {
+		return nil, err
+	}
+	return settings, nil
+}
+
+func (r *postgresUserRepository) UpdateSettings(ctx context.Context, settings *domain.UserSettings) error {
+	query := `
+		INSERT INTO user_settings (user_id, editor_settings, extensions) 
+		VALUES ($1, $2, $3)
+		ON CONFLICT (user_id) 
+		DO UPDATE SET editor_settings = EXCLUDED.editor_settings, extensions = EXCLUDED.extensions, updated_at = CURRENT_TIMESTAMP
+	`
+	_, err := r.db.Exec(ctx, query, settings.UserID, settings.EditorSettings, settings.Extensions)
+	return err
+}
+
 func (r *postgresUserRepository) GetLeaderboard(ctx context.Context, limit int) ([]*domain.LeaderboardEntry, error) {
 	query := `
 		SELECT u.id, u.username, p.avatar_url, p.daily_streak, p.total_score 

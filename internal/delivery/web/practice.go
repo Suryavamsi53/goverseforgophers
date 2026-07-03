@@ -20,6 +20,7 @@ func (h *WebHandler) RegisterPracticeRoutes(r chi.Router) {
 	r.Post("/api/v1/format", h.HandleFormatCode)
 	r.Get("/api/v1/workspace", h.HandleGetWorkspace)
 	r.Post("/api/v1/workspace", h.HandleSaveWorkspace)
+	r.Post("/api/v1/user/ide-settings", h.HandleUpdateIDESettings)
 }
 
 func (h *WebHandler) HandlePracticePage(w http.ResponseWriter, r *http.Request) {
@@ -28,13 +29,27 @@ func (h *WebHandler) HandlePracticePage(w http.ResponseWriter, r *http.Request) 
 	refID := r.URL.Query().Get("ref_id")
 	if refID == "" { refID = "default" }
 
+	var settings *domain.UserSettings
+	claims, ok := r.Context().Value(userContextKey).(*auth.Claims)
+	if ok {
+		settings, _ = h.UserRepo.GetSettings(r.Context(), claims.UserID)
+	}
+	if settings == nil {
+		settings = &domain.UserSettings{
+			EditorSettings: map[string]interface{}{"fontSize": 14, "minimap": false, "wordWrap": "off", "tabSize": 4, "theme": "goverseDark"},
+			Extensions: map[string]bool{"gemini": false, "dracula": false, "vim": false, "go-snippets": false, "go-linter": false, "html-preview": false, "html-snippets": false, "rest-client": false, "docker": false, "sql-tools": false},
+		}
+	}
+	settingsJSON, _ := json.Marshal(settings)
+
 	tmpl := parseTemplates()
 	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":      "Go Sandbox Playground",
-		"Page":       "practice",
-		"IsEmbedded": r.URL.Query().Get("embed") == "true",
-		"WsType":     wsType,
-		"RefID":      refID,
+		"Title":        "Go Sandbox Playground",
+		"Page":         "practice",
+		"IsEmbedded":   r.URL.Query().Get("embed") == "true",
+		"WsType":       wsType,
+		"RefID":        refID,
+		"SettingsJSON": string(settingsJSON),
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -230,4 +245,27 @@ func (h *WebHandler) HandleSaveWorkspace(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"status": "success"})
+}
+
+func (h *WebHandler) HandleUpdateIDESettings(w http.ResponseWriter, r *http.Request) {
+	claims, ok := r.Context().Value(userContextKey).(*auth.Claims)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req domain.UserSettings
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	req.UserID = claims.UserID
+
+	if err := h.UserRepo.UpdateSettings(r.Context(), &req); err != nil {
+		http.Error(w, "Failed to save settings", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]bool{"success": true})
 }

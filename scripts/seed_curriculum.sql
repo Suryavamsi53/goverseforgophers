@@ -109,4 +109,5 @@ INSERT INTO lessons (id, course_id, slug, title, content, order_index) VALUES
 ('10000000-0000-0000-0000-000000000107', '22222222-2222-2222-2222-222222222222', '107-cicd', 'CI/CD', 'See markdown file', 107),
 ('10000000-0000-0000-0000-000000000108', '22222222-2222-2222-2222-222222222222', '108-observability', 'Observability', 'See markdown file', 108),
 ('10000000-0000-0000-0000-000000000109', '22222222-2222-2222-2222-222222222222', '109-performance-optimization', 'Performance Optimization', 'See markdown file', 109),
-('10000000-0000-0000-0000-000000000110', '22222222-2222-2222-2222-222222222222', '110-deployment', 'Deployment', 'See markdown file', 110);
+('10000000-0000-0000-0000-000000000110', '22222222-2222-2222-2222-222222222222', '110-deployment', 'Deployment', 'See markdown file', 110)
+ON CONFLICT (id) DO NOTHING;

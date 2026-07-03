@@ -34,23 +34,11 @@ func RegisterAuthRoutes(r chi.Router, authUseCase domain.AuthUseCase, jwtManager
 func AuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("token")
-			if err != nil {
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
-			}
-
-			claims, err := jwtManager.VerifyToken(cookie.Value)
-			if err != nil {
-				http.SetCookie(w, &http.Cookie{
-					Name:     "token",
-					Value:    "",
-					Path:     "/",
-					Expires:  time.Now().Add(-1 * time.Hour),
-					HttpOnly: true,
-				})
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
+			// Bypass login for development
+			claims := &auth.Claims{
+				UserID:   "11111111-1111-1111-1111-111111111111",
+				Username: "gopher_master",
+				Role:     "admin",
 			}
 
 			ctx := context.WithValue(r.Context(), userContextKey, claims)

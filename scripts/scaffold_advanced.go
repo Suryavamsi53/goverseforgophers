@@ -64,7 +64,7 @@ var advancedCourses = []Course{
 		},
 	},
 	{
-		ID:          "77777777-7777-7777-7777-777777777777",
+		ID:          "cccccccc-cccc-cccc-cccc-cccccccccccc",
 		Slug:        "microservices",
 		Title:       "Microservices",
 		Description: "Design, build, and scale distributed service architectures.",
@@ -82,7 +82,7 @@ var advancedCourses = []Course{
 		},
 	},
 	{
-		ID:          "88888888-8888-8888-8888-888888888888",
+		ID:          "dddddddd-dddd-dddd-dddd-dddddddddddd",
 		Slug:        "cloud-devops",
 		Title:       "Cloud & DevOps",
 		Description: "Deploy and manage Go applications in the cloud.",
@@ -337,13 +337,13 @@ func main() {
 	for i, c := range advancedCourses {
 		comma := ","
 		if i == len(advancedCourses)-1 {
-			comma = ";"
+			comma = ""
 		}
 		safeTitle := strings.ReplaceAll(c.Title, "'", "''")
 		safeDesc := strings.ReplaceAll(c.Description, "'", "''")
 		sqlFile.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', '%s')%s\n", c.ID, c.Slug, safeTitle, safeDesc, c.Difficulty, comma))
 	}
-	sqlFile.WriteString("ON CONFLICT DO NOTHING;\n\n")
+	sqlFile.WriteString("ON CONFLICT (id) DO UPDATE SET slug = EXCLUDED.slug, title = EXCLUDED.title, description = EXCLUDED.description, difficulty = EXCLUDED.difficulty;\n\n")
 
 	sqlFile.WriteString("-- Seed Advanced Lessons\n")
 	sqlFile.WriteString("INSERT INTO lessons (id, course_id, slug, title, content, order_index) VALUES\n")
@@ -378,7 +378,7 @@ func main() {
 			
 			comma := ","
 			if lessonCounter == totalLessons-1 {
-				comma = ";"
+				comma = ""
 			}
 
 			safeTitle := strings.ReplaceAll(title, "'", "''")
@@ -388,7 +388,7 @@ func main() {
 			lessonCounter++
 		}
 	}
-	sqlFile.WriteString("ON CONFLICT DO NOTHING;\n")
+	sqlFile.WriteString("ON CONFLICT (id) DO UPDATE SET course_id = EXCLUDED.course_id, slug = EXCLUDED.slug, title = EXCLUDED.title, content = EXCLUDED.content, order_index = EXCLUDED.order_index;\n")
 
 	fmt.Printf("Successfully generated %d advanced markdown lessons\n", totalLessons)
 	fmt.Println("Successfully generated scripts/seed_advanced.sql")
