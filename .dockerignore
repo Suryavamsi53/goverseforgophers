@@ -1,0 +1,7 @@
+.git/
+.env
+ui/assets/tailwindcss
+server
+main
+goverse-cli
+deployments/pgdata

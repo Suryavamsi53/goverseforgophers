@@ -13,5 +13,19 @@ services:
       - pgdata:/var/lib/postgresql/data
     restart: unless-stopped
 
+  server:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgres://goverse_admin:goverse_password@postgres:5432/goverse_db?sslmode=disable
+      - PORT=8080
+      - JWT_SECRET=super-secret-key-change-in-prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
 volumes:
   pgdata:
