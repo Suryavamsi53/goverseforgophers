@@ -1,181 +1,88 @@
 # Docker Compose
 
-## 1️⃣ Learning Objectives
-* **What you'll learn**: Master the core mechanics of Docker Compose.
-* **Why it matters**: Crucial for building scalable, concurrent, and robust backend systems.
-* **Where it's used**: Heavily utilized in API Gateways, Microservices, and High-throughput pipelines.
+While a `Dockerfile` builds a single image, most modern Go applications require a database (PostgreSQL), a cache (Redis), and maybe a message broker (Kafka). 
 
----
+Running all of these manually on your laptop is a nightmare. **Docker Compose** orchestrates your entire local development environment with a single command: `docker-compose up`.
 
-## 2️⃣ Real-world Story
-Instead of a dry technical definition, imagine you're managing seats in a cinema... *(To be expanded: A real-world analogy explaining Docker Compose)*.
+## 1. The Anatomy of a Go Stack
 
----
+Here is a standard `docker-compose.yml` for a Go Web Server that relies on Postgres and Redis.
 
-## 3️⃣ Visual Learning (Execution Flow & Architecture)
-```mermaid
-graph TD
-    A[Heap Allocation] -->|Garbage Collector| B(Trace Pointers)
-    B --> C{Escape Analysis}
-    C -->|Stack| D[Fast Allocation]
-    C -->|Heap| E[Slower Allocation]
+```yaml
+version: '3.8'
+
+services:
+  # 1. The Go Application
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev # Use a dev-specific dockerfile for hot-reloading!
+    ports:
+      - "8080:8080"
+    environment:
+      - DATABASE_URL=postgres://user:pass@db:5432/myapp?sslmode=disable
+      - REDIS_URL=redis:6379
+    depends_on:
+      db:
+        condition: service_healthy # Wait until Postgres is fully booted!
+      redis:
+        condition: service_started
+    volumes:
+      - .:/app # Mount local code into the container for live-reloading
+
+  # 2. PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: myapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Persist data across restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d myapp"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+# Define the persistent volume for the database
+volumes:
+  pgdata:
 ```
 
----
+## 2. The Internal Docker Network
 
-## 4️⃣ Internal Working (Under the Hood)
-Deep dive into the Go runtime source code.
-* **Struct definition**: Exploring `runtime` internals.
-* **Field by field breakdown**: What does the runtime actually store?
+Notice the `DATABASE_URL` for the Go API: `postgres://user:pass@db:5432`.
+It does not say `localhost`. 
 
----
+When you run Docker Compose, it automatically creates a secure internal DNS network. Your Go container can talk to the Postgres container simply by using its service name (`db`) as the hostname!
 
-## 5️⃣ Compiler Behavior
-* **Escape Analysis**: Does this variable escape to the heap?
-* **Inlining**: How the compiler optimizes the function call overhead.
-* **SSA (Static Single Assignment)**: Optimization passes.
+## 3. Hot-Reloading with `air`
 
----
+If you compile your Go binary directly into the Docker image, you have to rebuild the image every time you change a line of code. This slows down development.
 
-## 6️⃣ Memory Management
-* **Heap vs Stack**: Memory locality.
-* **Garbage Collection**: Impact on GC latency.
-* **Pointer Analysis**: Safepoints and write barriers.
+Instead, we use a tool called **Air** (`github.com/cosmtrek/air`) for live-reloading.
 
----
+Create a `Dockerfile.dev`:
+```dockerfile
+FROM golang:1.22-alpine
 
-## 7️⃣ Code Examples
+WORKDIR /app
 
-### 🔹 Example 1: Simple
-```go
-// Basic implementation
-package main
+# Install Air for hot-reloading
+RUN go install github.com/cosmtrek/air@latest
 
-func main() {
-	// TODO
-}
+# We don't copy the code here! 
+# We use the 'volumes' mount in docker-compose to mount our laptop's code into the container!
+
+CMD ["air"]
 ```
-
-### 🔹 Example 2: Intermediate
-```go
-// Adding edge cases and error handling
-```
-
-### 🔹 Example 3: Advanced
-```go
-// Optimized for zero-allocation
-```
-
-### 🔹 Example 4: Production
-```go
-// Production-grade implementation with metrics and context
-```
-
-### 🔹 Example 5: Interview
-```go
-// Tricky edge-case testing understanding of pointers/state
-```
-
----
-
-## 8️⃣ Production Examples
-How is Docker Compose used in real systems?
-1. **Worker Pools**: Distributing tasks.
-2. **API Gateways**: Managing request lifecycle.
-3. **Kafka Streams**: Batching and dispatching events.
-
----
-
-## 9️⃣ Performance & Benchmarking
-* **CPU vs Memory Trade-offs**
-* **Latency impacts**
-* **Cache Locality & Branch Prediction**
-```bash
-go test -bench=.
-```
-
----
-
-## 🔟 Best Practices
-* ✅ **Do**: Follow Idiomatic Go patterns.
-* ❌ **Don't**: Ignore context cancellation or leak goroutines.
-* 🏢 **Google / Uber / Netflix Style**: Explicit error handling, minimal package surface area.
-
----
-
-## 11️⃣ Common Mistakes
-1. **Memory Leaks**: Forgetting to clean up pointers in slices.
-2. **Deadlocks**: Improper channel synchronization.
-3. **Race Conditions**: Shared state without Mutex.
-4. **Shadow Variables**: Accidental re-declaration using `:=`.
-
----
-
-## 12️⃣ Debugging
-How to troubleshoot Docker Compose in production:
-* **pprof**: Analyzing heap and CPU profiles.
-* **Trace**: Visualizing goroutine execution.
-* **Race Detector**: `go run -race`
-* **Delve**: Stepping through memory.
-
----
-
-## 13️⃣ Exercises
-1. **Easy**: Write a basic Docker Compose.
-2. **Medium**: Refactor to handle concurrent access.
-3. **Hard**: Eliminate all heap allocations in the hot path.
-4. **Expert**: Implement a custom scheduler utilizing Docker Compose.
-
----
-
-## 14️⃣ Quiz
-1. **MCQ**: What happens when you read from a closed Docker Compose?
-2. **Output Prediction**: What does this program print?
-3. **Debugging**: Find the hidden memory leak in this snippet.
-4. **Code Review**: Critique this pull request.
-
----
-
-## 15️⃣ FAANG Interview Questions
-* **Beginner**: Explain Docker Compose to a junior dev.
-* **Intermediate**: How would you optimize Docker Compose?
-* **Senior (Google/Meta)**: Design a distributed lock manager using Docker Compose.
-* **System Design Follow-up**: How does this impact your database connection pool?
-
----
-
-## 16️⃣ Mini Project
-**Real-Time Docker Compose Implementation**
-Build a production-ready feature utilizing Docker Compose.
-* **Examples**: A concurrent web crawler, an email queue worker, or a reverse proxy.
-
----
-
-## 17️⃣ Enterprise Features & Observability
-* **Logging**: Structured JSON logging.
-* **Metrics**: Prometheus instrumentation.
-* **Tracing**: OpenTelemetry spans.
-* **Security**: Input sanitization.
-* **CI/CD & Kubernetes**: Graceful shutdown and liveness probes.
-
----
-
-## 18️⃣ Source Code Reading
-Walkthrough of the Go source code for Docker Compose.
-* **Why it was implemented this way**.
-* **Trade-offs made by the Go core team**.
-
----
-
-## 19️⃣ Architecture
-For production projects integrating this concept:
-* **Folder Structure**
-* **Clean Architecture & DDD**
-* **Repository & Service Layers**
-* **Testing & Deployment via GitHub Actions**
-
----
-
-## 20️⃣ Summary & Cheat Sheet
-* Key takeaways.
-* 1-page quick reference code snippets.
+Now, when you run `docker-compose up`, Air watches your mounted code. Whenever you hit `Ctrl+S` to save a `.go` file on your laptop, Air instantly recompiles and restarts the server inside the Docker container!

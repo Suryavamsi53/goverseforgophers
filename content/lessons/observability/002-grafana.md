@@ -1,181 +1,55 @@
-# Grafana
+# Grafana Visualization
 
-## 1️⃣ Learning Objectives
-* **What you'll learn**: Master the core mechanics of Grafana.
-* **Why it matters**: Crucial for building scalable, concurrent, and robust backend systems.
-* **Where it's used**: Heavily utilized in API Gateways, Microservices, and High-throughput pipelines.
+Prometheus is incredible at storing and querying time-series data, but its built-in user interface is extremely basic. It is designed for querying, not for monitoring.
 
----
+To actually visualize your system's health, you connect Prometheus to **Grafana**.
 
-## 2️⃣ Real-world Story
-Instead of a dry technical definition, imagine you're managing seats in a cinema... *(To be expanded: A real-world analogy explaining Grafana)*.
+## 1. The Visualization Layer
 
----
+Grafana is an open-source visualization and analytics software. It acts as the "glass pane" for your observability stack.
 
-## 3️⃣ Visual Learning (Execution Flow & Architecture)
 ```mermaid
 graph TD
-    A[Heap Allocation] -->|Garbage Collector| B(Trace Pointers)
-    B --> C{Escape Analysis}
-    C -->|Stack| D[Fast Allocation]
-    C -->|Heap| E[Slower Allocation]
+    subgraph Data Sources
+        P[Prometheus]
+        L[Loki Logs]
+        J[Jaeger Traces]
+    end
+    
+    G[Grafana] --> P
+    G --> L
+    G --> J
+    
+    U((Engineer)) -->|Views Dashboard| G
 ```
+Grafana does not store any data itself. It simply reaches out to data sources (like Prometheus or Postgres), executes queries, and renders the results into beautiful graphs, gauges, and heatmaps.
 
----
+## 2. Building Dashboards
 
-## 4️⃣ Internal Working (Under the Hood)
-Deep dive into the Go runtime source code.
-* **Struct definition**: Exploring `runtime` internals.
-* **Field by field breakdown**: What does the runtime actually store?
+A Grafana Dashboard is composed of **Panels**. Each panel is powered by a specific query.
 
----
+When building a dashboard for a Go web server, the three most important panels you must create are based on the **RED Method**:
+1. **Rate**: The number of requests per second (Line Chart).
+   * `sum(rate(http_requests_total[1m]))`
+2. **Errors**: The rate of 5xx HTTP status codes (Bar Chart).
+   * `sum(rate(http_requests_total{status=~"5.."}[1m]))`
+3. **Duration**: The 99th percentile response time (Heatmap or Line Chart).
+   * `histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[1m])) by (le))`
 
-## 5️⃣ Compiler Behavior
-* **Escape Analysis**: Does this variable escape to the heap?
-* **Inlining**: How the compiler optimizes the function call overhead.
-* **SSA (Static Single Assignment)**: Optimization passes.
+## 3. Alerts and Routing
 
----
+Grafana isn't just for looking at screens; it is a powerful alerting engine. 
 
-## 6️⃣ Memory Management
-* **Heap vs Stack**: Memory locality.
-* **Garbage Collection**: Impact on GC latency.
-* **Pointer Analysis**: Safepoints and write barriers.
+You can configure Grafana to constantly evaluate your PromQL queries in the background.
 
----
+* **Alert Rule**: "If the Error Rate is > 5% for 3 consecutive minutes, trigger an alert."
 
-## 7️⃣ Code Examples
+Once triggered, Grafana's **Notification Policies** route the alert to the correct team:
+* If it's a critical production outage, route it to **PagerDuty** to wake up the on-call engineer via a phone call.
+* If it's a minor warning (like Disk Space at 70%), route it to a **Slack** channel for the team to investigate during normal business hours.
 
-### 🔹 Example 1: Simple
-```go
-// Basic implementation
-package main
+## 4. Provisioning via Code (Dashboard as Code)
 
-func main() {
-	// TODO
-}
-```
+In enterprise environments, you never manually click around the Grafana UI to build dashboards. If the Grafana server crashes, your dashboards are gone!
 
-### 🔹 Example 2: Intermediate
-```go
-// Adding edge cases and error handling
-```
-
-### 🔹 Example 3: Advanced
-```go
-// Optimized for zero-allocation
-```
-
-### 🔹 Example 4: Production
-```go
-// Production-grade implementation with metrics and context
-```
-
-### 🔹 Example 5: Interview
-```go
-// Tricky edge-case testing understanding of pointers/state
-```
-
----
-
-## 8️⃣ Production Examples
-How is Grafana used in real systems?
-1. **Worker Pools**: Distributing tasks.
-2. **API Gateways**: Managing request lifecycle.
-3. **Kafka Streams**: Batching and dispatching events.
-
----
-
-## 9️⃣ Performance & Benchmarking
-* **CPU vs Memory Trade-offs**
-* **Latency impacts**
-* **Cache Locality & Branch Prediction**
-```bash
-go test -bench=.
-```
-
----
-
-## 🔟 Best Practices
-* ✅ **Do**: Follow Idiomatic Go patterns.
-* ❌ **Don't**: Ignore context cancellation or leak goroutines.
-* 🏢 **Google / Uber / Netflix Style**: Explicit error handling, minimal package surface area.
-
----
-
-## 11️⃣ Common Mistakes
-1. **Memory Leaks**: Forgetting to clean up pointers in slices.
-2. **Deadlocks**: Improper channel synchronization.
-3. **Race Conditions**: Shared state without Mutex.
-4. **Shadow Variables**: Accidental re-declaration using `:=`.
-
----
-
-## 12️⃣ Debugging
-How to troubleshoot Grafana in production:
-* **pprof**: Analyzing heap and CPU profiles.
-* **Trace**: Visualizing goroutine execution.
-* **Race Detector**: `go run -race`
-* **Delve**: Stepping through memory.
-
----
-
-## 13️⃣ Exercises
-1. **Easy**: Write a basic Grafana.
-2. **Medium**: Refactor to handle concurrent access.
-3. **Hard**: Eliminate all heap allocations in the hot path.
-4. **Expert**: Implement a custom scheduler utilizing Grafana.
-
----
-
-## 14️⃣ Quiz
-1. **MCQ**: What happens when you read from a closed Grafana?
-2. **Output Prediction**: What does this program print?
-3. **Debugging**: Find the hidden memory leak in this snippet.
-4. **Code Review**: Critique this pull request.
-
----
-
-## 15️⃣ FAANG Interview Questions
-* **Beginner**: Explain Grafana to a junior dev.
-* **Intermediate**: How would you optimize Grafana?
-* **Senior (Google/Meta)**: Design a distributed lock manager using Grafana.
-* **System Design Follow-up**: How does this impact your database connection pool?
-
----
-
-## 16️⃣ Mini Project
-**Real-Time Grafana Implementation**
-Build a production-ready feature utilizing Grafana.
-* **Examples**: A concurrent web crawler, an email queue worker, or a reverse proxy.
-
----
-
-## 17️⃣ Enterprise Features & Observability
-* **Logging**: Structured JSON logging.
-* **Metrics**: Prometheus instrumentation.
-* **Tracing**: OpenTelemetry spans.
-* **Security**: Input sanitization.
-* **CI/CD & Kubernetes**: Graceful shutdown and liveness probes.
-
----
-
-## 18️⃣ Source Code Reading
-Walkthrough of the Go source code for Grafana.
-* **Why it was implemented this way**.
-* **Trade-offs made by the Go core team**.
-
----
-
-## 19️⃣ Architecture
-For production projects integrating this concept:
-* **Folder Structure**
-* **Clean Architecture & DDD**
-* **Repository & Service Layers**
-* **Testing & Deployment via GitHub Actions**
-
----
-
-## 20️⃣ Summary & Cheat Sheet
-* Key takeaways.
-* 1-page quick reference code snippets.
+Instead, you export Grafana dashboards as JSON files and store them in your Git repository. Grafana natively supports **Provisioning**, meaning it will automatically read those JSON files on startup and load the dashboards. This allows you to review dashboard changes via Pull Requests!

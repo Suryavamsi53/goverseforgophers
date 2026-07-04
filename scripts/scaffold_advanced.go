@@ -111,6 +111,7 @@ var advancedCourses = []Course{
 			"Structured Logging",
 			"Distributed Tracing",
 			"Metrics",
+			"Log Analysis Pipeline",
 		},
 	},
 	{

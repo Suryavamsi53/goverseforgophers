@@ -1,0 +1,9 @@
+2026/07/04 10:32:28 No .env file found, using environment variables
+2026/07/04 10:32:28 Starting GoVerse server on port 8080...
+2026/07/04 10:41:31 [fedora/Hl8HBjSjWt-000001] "GET http://localhost:8080/ HTTP/1.1" from [::1]:35196 - 200 15624B in 3.84544ms
+2026/07/04 10:41:43 [fedora/Hl8HBjSjWt-000002] "GET http://localhost:8080/favicon.ico HTTP/1.1" from [::1]:35572 - 404 19B in 14.457µs
+2026/07/04 10:42:00 [fedora/Hl8HBjSjWt-000003] "POST http://localhost:8080/api/users HTTP/1.1" from 192.168.1.10:4321 - 201 500B in 25.43ms
+2026/07/04 10:42:15 [fedora/Hl8HBjSjWt-000004] "GET http://localhost:8080/api/users HTTP/1.1" from 192.168.1.10:4321 - 200 200B in 5.2ms
+2026/07/04 10:43:00 [fedora/Hl8HBjSjWt-000005] "GET http://localhost:8080/ HTTP/1.1" from [::1]:35197 - 200 15624B in 4.12ms
+2026/07/04 10:45:17 Shutting down server...
+2026/07/04 10:45:17 Server exiting gracefully

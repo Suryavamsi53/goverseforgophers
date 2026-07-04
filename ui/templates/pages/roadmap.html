@@ -27,32 +27,4 @@ timeline
         </pre>
     </div>
 </div>
-
-<script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-    
-    mermaid.initialize({ 
-        startOnLoad: false, 
-        theme: 'dark',
-        fontFamily: 'Inter, sans-serif'
-    });
-
-    const renderMermaid = async () => {
-        try {
-            await mermaid.run({
-                querySelector: '.mermaid',
-            });
-        } catch(e) {
-            console.error("Mermaid rendering failed:", e);
-        }
-    };
-
-    // Run on fresh load
-    renderMermaid();
-
-    // Run on HTMX navigation
-    document.body.addEventListener('htmx:load', function() {
-        renderMermaid();
-    });
-</script>
 {{end}}

@@ -16,6 +16,7 @@ Go Workspace & Modules
 Your First Go Program
 Program Structure
 Packages & Imports
+Comments & Documentation
 Variables
 Constants
 Data Types
@@ -23,22 +24,13 @@ Operators
 Type Conversion
 User Input
 Output Formatting
-Comments & Documentation
 if Statement
 switch Statement
 for Loop
 break
 continue
-goto (when not to use)
 Labels
-Functions
-Parameters
-Multiple Return Values
-Named Return Values
-Variadic Functions
-Anonymous Functions
-Closures
-Recursion
+goto (when not to use)
 Arrays
 Slices
 Slice Internals
@@ -47,17 +39,25 @@ copy()
 Maps
 Map Internals
 Strings & Runes
+Functions
+Parameters
+Multiple Return Values
+Named Return Values
+Variadic Functions
+Anonymous Functions
+Closures
+Recursion
+Pointers
+Memory Layout
+Escape Analysis Basics
 Structs
 Anonymous Structs
 Nested Structs
 Methods
+Pointer Receivers
 Value vs Pointer Receivers
 Composition
 Embedding
-Pointers
-Pointer Receivers
-Memory Layout
-Escape Analysis Basics
 Interfaces
 Implicit Implementation
 Empty Interface
@@ -65,8 +65,6 @@ Type Assertions
 Type Switch
 Interface Composition
 Practical Interfaces
-Dependency Injection
-Best Practices
 Errors
 Custom Errors
 Wrapping Errors
@@ -83,10 +81,10 @@ Channel Directions
 Closing Channels
 Range over Channels
 Select Statement
-Context
 Mutex
 RWMutex
 Atomic Operations
+Context
 Worker Pool Pattern
 Pipeline Pattern
 fmt
@@ -108,17 +106,17 @@ Middleware
 Unit Testing
 Benchmarking
 Profiling
-Production Best Practices
 Project Structure
-Logging
-Configuration
 Dependency Injection
+Configuration
+Logging
 Graceful Shutdown
-Docker
-CI/CD
 Observability
 Performance Optimization
+Docker
+CI/CD
 Deployment
+Production Best Practices
 `
 
 var templateMD = `# %s
@@ -325,9 +323,11 @@ func main() {
 		slug := fmt.Sprintf("%03d-%s", i+1, slugRaw) 
 		filePath := filepath.Join(courseDir, fileName)
 
-		// Create markdown file
-		mdContent := fmt.Sprintf(templateMD, title, title, title, title, title, title, title, title, title, title, title, title, title, title)
-		os.WriteFile(filePath, []byte(mdContent), 0644)
+		// Create markdown file if it doesn't exist
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			mdContent := fmt.Sprintf(templateMD, title, title, title, title, title, title, title, title, title, title, title, title, title, title)
+			os.WriteFile(filePath, []byte(mdContent), 0644)
+		}
 
 		// Generate SQL
 		id := fmt.Sprintf("10000000-0000-0000-0000-%012d", i+1)
