@@ -43,9 +43,76 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex-grow min-w-0 flex flex-col">
+    <div class="flex-grow min-w-0 flex flex-col"
+         x-data="{ 
+            isSpeaking: false,
+            isPaused: false,
+            speech: null,
+            init() {
+                this.speech = new SpeechSynthesisUtterance();
+                this.speech.onend = () => { this.isSpeaking = false; this.isPaused = false; };
+            },
+            toggleSpeech() {
+                if (!this.isSpeaking) {
+                    const text = $refs.content.innerText;
+                    this.speech.text = text;
+                    // Get first available English voice
+                    const voices = window.speechSynthesis.getVoices();
+                    const enVoice = voices.find(v => v.lang.startsWith('en-'));
+                    if (enVoice) this.speech.voice = enVoice;
+                    
+                    window.speechSynthesis.speak(this.speech);
+                    this.isSpeaking = true;
+                    this.isPaused = false;
+                } else if (this.isPaused) {
+                    window.speechSynthesis.resume();
+                    this.isPaused = false;
+                } else {
+                    window.speechSynthesis.pause();
+                    this.isPaused = true;
+                }
+            },
+            stopSpeech() {
+                window.speechSynthesis.cancel();
+                this.isSpeaking = false;
+                this.isPaused = false;
+            }
+         }">
+         
+        <!-- AI Audio Controls -->
+        <div class="max-w-3xl mb-8 p-4 bg-elevated/50 backdrop-blur-md border border-white/10 rounded-xl flex items-center justify-between shadow-lg">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-glowMuted flex items-center justify-center text-glow transition-all duration-300"
+                     :class="isSpeaking && !isPaused ? 'animate-pulse-glow shadow-glow' : ''">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white tracking-tight">AI Audio Guide</h3>
+                    <p class="text-sm text-secondary">Listen to this lesson</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button @click="toggleSpeech" 
+                        class="btn-glass flex items-center gap-2">
+                    <template x-if="!isSpeaking || isPaused">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                    </template>
+                    <template x-if="isSpeaking && !isPaused">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                    </template>
+                    <span x-text="(!isSpeaking) ? 'Play' : (isPaused ? 'Resume' : 'Pause')"></span>
+                </button>
+                
+                <button x-show="isSpeaking" @click="stopSpeech" x-transition
+                        class="px-4 py-2 bg-error/10 hover:bg-error/20 text-error border border-error/30 rounded-lg text-sm font-medium transition-colors flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
+        </div>
+
         <!-- Markdown Content -->
-        <article class="flex-grow max-w-3xl prose prose-invert prose-pre:bg-dark-800 prose-pre:border prose-pre:border-dark-border prose-a:text-go-cyan hover:prose-a:text-go-blue prose-headings:text-white prose-p:text-gray-300">
+        <article x-ref="content" class="flex-grow max-w-3xl prose prose-invert prose-pre:bg-dark-800 prose-pre:border prose-pre:border-dark-border prose-a:text-go-cyan hover:prose-a:text-go-blue prose-headings:text-white prose-p:text-gray-300">
             {{.Content}}
         </article>
 

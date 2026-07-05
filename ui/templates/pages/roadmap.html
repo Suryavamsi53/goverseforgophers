@@ -1,39 +1,65 @@
 {{define "roadmap"}}
 <div class="h-full flex flex-col w-full bg-app overflow-hidden relative">
-    
+
     <!-- Ambient Background Effects -->
     <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-glow/5 blur-[120px] mix-blend-screen"></div>
-        <div class="absolute top-[40%] -right-[10%] w-[30%] h-[50%] rounded-full bg-blue-500/5 blur-[120px] mix-blend-screen"></div>
+        <div
+            class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-glow/5 blur-[120px] mix-blend-screen">
+        </div>
+        <div
+            class="absolute top-[40%] -right-[10%] w-[30%] h-[50%] rounded-full bg-blue-500/5 blur-[120px] mix-blend-screen">
+        </div>
     </div>
 
     <!-- Header -->
     <div class="pt-10 pb-6 px-8 text-center relative z-10 shrink-0 border-b border-white/5 bg-app/80 backdrop-blur-xl">
-        <h1 class="text-3xl font-extrabold text-white tracking-tight sm:text-4xl mb-3 flex items-center justify-center gap-3">
-            <svg class="w-8 h-8 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
-            Golang <span class="text-transparent bg-clip-text bg-gradient-to-r from-glow to-blue-400">Developer Roadmap</span>
+        <h1
+            class="text-3xl font-extrabold text-white tracking-tight sm:text-4xl mb-3 flex items-center justify-center gap-3">
+            <svg class="w-8 h-8 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
+                </path>
+            </svg>
+            Golang <span class="text-transparent bg-clip-text bg-gradient-to-r from-glow to-blue-400">Developer
+                Roadmap</span>
         </h1>
-        <p class="text-sm text-gray-400 max-w-2xl mx-auto">Your step-by-step guide to mastering Go engineering, from fundamental syntax to distributed systems architecture.</p>
+        <p class="text-sm text-gray-400 max-w-2xl mx-auto">Your step-by-step guide to mastering Go engineering, from
+            fundamental syntax to distributed systems architecture.</p>
     </div>
 
     <!-- Interactive Roadmap Container (Pan/Zoom) -->
-    <div class="flex-1 w-full h-full relative z-10 p-4 flex items-center justify-center overflow-hidden" id="roadmap-container">
-        <div class="w-full h-full bg-panel/30 border border-white/5 rounded-2xl backdrop-blur-sm shadow-2xl relative overflow-hidden flex items-center justify-center">
-            
+    <div class="flex-1 w-full h-full relative z-10 p-4 flex items-center justify-center overflow-hidden"
+        id="roadmap-container">
+        <div
+            class="w-full h-full bg-panel/30 border border-white/5 rounded-2xl backdrop-blur-sm shadow-2xl relative overflow-hidden flex items-center justify-center">
+
             <!-- Zoom Controls -->
             <div class="absolute bottom-6 right-6 z-50 flex gap-2">
-                <button onclick="roadmapZoomIn()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <button onclick="roadmapZoomIn()"
+                    class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
                 </button>
-                <button onclick="roadmapZoomOut()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                <button onclick="roadmapZoomOut()"
+                    class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                    </svg>
                 </button>
-                <button onclick="roadmapZoomReset()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-glow flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md ml-2" title="Reset Zoom">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <button onclick="roadmapZoomReset()"
+                    class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-glow flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md ml-2"
+                    title="Reset Zoom">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                        </path>
+                    </svg>
                 </button>
             </div>
 
-            <pre class="mermaid bg-transparent w-full h-full flex justify-center items-center text-base" id="mermaid-target">
+            <pre class="mermaid bg-transparent w-full h-full flex justify-center items-center text-base"
+                id="mermaid-target">
 flowchart TD
     %% Custom Styling - Increased font sizes for readability
     classDef default fill:#111111,stroke:#333333,stroke-width:1px,color:#A1A1AA,rx:8px,ry:8px,font-family:Inter,font-size:16px;
@@ -42,7 +68,7 @@ flowchart TD
     classDef node fill:#0A0A0A,stroke:#333333,stroke-width:1px,color:#A1A1AA,rx:6px,ry:6px,font-size:16px;
     classDef topic fill:#050505,stroke:#222222,stroke-width:1px,color:#888888,rx:4px,ry:4px,stroke-dasharray: 5 5,font-size:14px;
 
-    %% Nodes
+    %% Nodesd
     Go[Go Language]:::root
     
     %% Prerequisites
@@ -136,7 +162,7 @@ flowchart TD
             svgElement.style.maxWidth = 'none';
             svgElement.style.height = '100%';
             svgElement.style.width = '100%';
-            
+
             if (panZoomInstance) {
                 panZoomInstance.destroy();
             }
@@ -169,10 +195,10 @@ flowchart TD
     });
 
     // Button controls
-    window.roadmapZoomIn = () => { if(panZoomInstance) panZoomInstance.zoomIn() };
-    window.roadmapZoomOut = () => { if(panZoomInstance) panZoomInstance.zoomOut() };
-    window.roadmapZoomReset = () => { 
-        if(panZoomInstance) {
+    window.roadmapZoomIn = () => { if (panZoomInstance) panZoomInstance.zoomIn() };
+    window.roadmapZoomOut = () => { if (panZoomInstance) panZoomInstance.zoomOut() };
+    window.roadmapZoomReset = () => {
+        if (panZoomInstance) {
             panZoomInstance.resetZoom();
             panZoomInstance.center();
         }
@@ -185,20 +211,25 @@ flowchart TD
         cursor: grab;
         user-select: none;
     }
+
     #mermaid-target:active {
         cursor: grabbing;
     }
-    
+
+    d
+
     /* Make flowchart edges lighter */
     .mermaid .edgePath .path {
         stroke: #3F3F46 !important;
         stroke-width: 2px !important;
     }
+
     .mermaid .edgeLabel {
         color: #A1A1AA !important;
         background-color: transparent !important;
         font-size: 14px !important;
     }
+
     .mermaid .marker {
         fill: #3F3F46 !important;
         stroke: #3F3F46 !important;

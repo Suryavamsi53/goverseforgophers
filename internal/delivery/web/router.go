@@ -35,7 +35,7 @@ func RegisterRoutes(r chi.Router, userRepo domain.UserRepository, courseRepo dom
 	r.Get("/roadmap", h.HandleRoadmap)
 
 	// Auth routes
-	RegisterAuthRoutes(r, authUseCase, jwtManager)
+	RegisterAuthRoutes(r, authUseCase, jwtManager, userRepo)
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
@@ -110,7 +110,14 @@ func (h *WebHandler) HandleDashboard(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.UserRepo.GetByID(r.Context(), userID)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		http.SetCookie(w, &http.Cookie{
+			Name:     "token",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+		})
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -296,7 +303,14 @@ func (h *WebHandler) HandleSettingsPage(w http.ResponseWriter, r *http.Request) 
 
 	user, err := h.UserRepo.GetByID(r.Context(), claims.UserID)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		http.SetCookie(w, &http.Cookie{
+			Name:     "token",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+		})
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -327,7 +341,14 @@ func (h *WebHandler) HandleUpdateSettings(w http.ResponseWriter, r *http.Request
 	
 	user, err := h.UserRepo.GetByID(r.Context(), claims.UserID)
 	if err != nil {
-		http.Error(w, "User not found", http.StatusNotFound)
+		http.SetCookie(w, &http.Cookie{
+			Name:     "token",
+			Value:    "",
+			Path:     "/",
+			MaxAge:   -1,
+			HttpOnly: true,
+		})
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 	
