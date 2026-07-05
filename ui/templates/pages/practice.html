@@ -50,7 +50,7 @@
         
         <div class="flex items-center gap-4">
 
-            <button @click="formatCode" class="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 transition-colors text-xs font-bold tracking-widest">FORMAT</button>
+            <button @click="resetAllFiles" class="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-300 hover:text-red-400 hover:bg-white/10 transition-colors text-xs font-bold tracking-widest">RESET</button>
             <button @click="runCode" :disabled="isRunning" class="px-6 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold tracking-widest transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:shadow-[0_0_25px_rgba(52,211,153,0.5)]">
                 <svg x-show="!isRunning" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                 <svg x-show="isRunning" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" style="display: none;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -256,7 +256,7 @@
                     
                     {{if .IsEmbedded}}
                     <div class="flex items-center gap-3 pointer-events-auto">
-                        <button @click="formatCode" class="px-4 py-1.5 rounded-full bg-black/60 border border-white/10 text-gray-300 hover:text-white hover:bg-black/80 backdrop-blur-md transition-colors text-xs font-bold tracking-widest shadow-lg">FORMAT</button>
+                        <button @click="resetAllFiles" class="px-4 py-1.5 rounded-full bg-black/60 border border-white/10 text-gray-300 hover:text-red-400 hover:bg-black/80 backdrop-blur-md transition-colors text-xs font-bold tracking-widest shadow-lg">RESET</button>
                         <button @click="runCode" :disabled="isRunning" class="px-5 py-1.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold tracking-widest transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(52,211,153,0.3)] hover:shadow-[0_0_20px_rgba(52,211,153,0.5)]">
                             <svg x-show="!isRunning" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
                             <svg x-show="isRunning" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" style="display: none;"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -469,8 +469,18 @@
 <!-- Load Monaco Editor -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.js"></script>
 <script id="user-settings-data" type="application/json">{{.SettingsJSON}}</script>
+<script id="default-files-json" type="application/json">{{.DefaultFilesJSON}}</script>
 <script>
-    const DEFAULT_FILES = {};
+    let DEFAULT_FILES = {};
+    try {
+        let content = document.getElementById('default-files-json').textContent;
+        if (content.startsWith('"') && content.endsWith('"')) {
+            content = JSON.parse(content);
+        }
+        DEFAULT_FILES = JSON.parse(content);
+    } catch(e) {
+        console.error("Failed to parse default files", e);
+    }
 
     let globalMonacoEditor = null;
 
@@ -539,7 +549,7 @@
                 { id: 'rest-client', name: 'REST Client', desc: 'Send HTTP requests and view API responses in the editor.', icon: 'API', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)' },
                 { id: 'docker', name: 'Docker Explorer', desc: 'Manage containers, images, and streamline Dockerfile editing.', icon: '🐳', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.2)' },
                 { id: 'sql-tools', name: 'Database Tools', desc: 'SQL formatter and schema explorer for PostgreSQL/MySQL.', icon: 'DB', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.2)' },
-                { id: 'fmt', name: 'Go Format on Save', desc: 'Automatically runs standard Go formatting and linting.', icon: 'fmt', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)', disabled: true }
+                { id: 'fmt', name: 'Go Format on Save', desc: 'Automatically runs standard Go formatting and linting.', icon: 'fmt', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)' }
             ],
 
             startResize(e) {
@@ -744,8 +754,17 @@
             isSaving: false,
 
             async saveWorkspace(immediate = false) {
+                if (this.activeFile && this.files[this.activeFile] !== undefined && globalMonacoEditor) {
+                    this.files[this.activeFile] = globalMonacoEditor.getValue();
+                }
+
                 // Update local storage for immediate resilience
                 localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                
+                // Format on save if extension is enabled
+                if (this.extensions && this.extensions['fmt'] && !immediate) {
+                    this.formatCode();
+                }
                 
                 if (this.saveTimeout) clearTimeout(this.saveTimeout);
                 
@@ -919,9 +938,7 @@
 
                     // Add Ctrl+S binding for format
                     globalMonacoEditor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-                        if (this.extensions['fmt']) {
-                            this.formatCode();
-                        }
+                        this.formatCode();
                     });
 
                     // HTML Snippets registration
@@ -1111,12 +1128,16 @@
             resetAllFiles() {
                 if (confirm("Reset to the default GoVerse Studio workspace?")) {
                     this.files = {...DEFAULT_FILES};
-                    this.activeFile = 'main.go';
-                    this.saveWorkspace();
+                    this.activeFile = Object.keys(this.files)[0] || 'main.go';
+                    if (!this.files[this.activeFile]) {
+                        this.files['main.go'] = '';
+                        this.activeFile = 'main.go';
+                    }
                     if (globalMonacoEditor) {
-                        const newModel = monaco.editor.createModel(this.files['main.go'], 'go');
+                        const newModel = monaco.editor.createModel(this.files[this.activeFile], 'go');
                         globalMonacoEditor.setModel(newModel);
                     }
+                    this.saveWorkspace(true);
                     this.showSettings = false;
                     this.clearPanel();
                 }

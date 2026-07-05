@@ -15,11 +15,13 @@ type Project struct {
 	Slug         string            `json:"slug"`
 	Title        string            `json:"title"`
 	Description  string            `json:"description"`
+	Scenario     string            `json:"scenario"`
 	Difficulty   ProjectDifficulty `json:"difficulty"`
 	Tags         []string          `json:"tags"`
 	Icon         string            `json:"icon"`
 	Color        string            `json:"color"` // Used for the UI glow (e.g., "blue", "purple", "emerald")
 	Requirements []string          `json:"requirements"`
+	Tips         []string          `json:"tips"`
 	StarterCode  string            `json:"starter_code"`
 	TestFile     string            `json:"test_file"`
 }

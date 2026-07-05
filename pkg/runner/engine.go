@@ -47,11 +47,12 @@ func ExecuteCode(ctx context.Context, files map[string]string) (*ExecutionResult
 		}
 		path := filepath.Join(tempDir, name)
 		
-		// Create parent directories if they don't exist
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 			slog.Error("Failed to create parent directories", "error", err)
 			return nil, err
 		}
+		
+		slog.Info("Writing file for execution", "filename", name, "content_length", len(content))
 		
 		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 			slog.Error("Failed to write file", "path", path, "error", err)

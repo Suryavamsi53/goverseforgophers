@@ -150,45 +150,45 @@ var advancedCourses = []Course{
 
 var templateMD = `# %s
 
-## 1️⃣ Learning Objectives
+## 1. Learning Objectives
 * **What you'll learn**: Master the core mechanics of %s.
 * **Why it matters**: Crucial for building scalable, concurrent, and robust backend systems.
 * **Where it's used**: Heavily utilized in API Gateways, Microservices, and High-throughput pipelines.
 
 ---
 
-## 2️⃣ Real-world Story
+## 2. Real-world Story
 Instead of a dry technical definition, imagine you're managing seats in a cinema... *(To be expanded: A real-world analogy explaining %s)*.
 
 ---
 
-## 3️⃣ Visual Learning (Execution Flow & Architecture)
+## 3. Visual Learning (Execution Flow & Architecture)
 ` + "```mermaid\ngraph TD\n    A[Heap Allocation] -->|Garbage Collector| B(Trace Pointers)\n    B --> C{Escape Analysis}\n    C -->|Stack| D[Fast Allocation]\n    C -->|Heap| E[Slower Allocation]\n```" + `
 
 ---
 
-## 4️⃣ Internal Working (Under the Hood)
+## 4. Internal Working (Under the Hood)
 Deep dive into the Go runtime source code.
 * **Struct definition**: Exploring ` + "`runtime`" + ` internals.
 * **Field by field breakdown**: What does the runtime actually store?
 
 ---
 
-## 5️⃣ Compiler Behavior
+## 5. Compiler Behavior
 * **Escape Analysis**: Does this variable escape to the heap?
 * **Inlining**: How the compiler optimizes the function call overhead.
 * **SSA (Static Single Assignment)**: Optimization passes.
 
 ---
 
-## 6️⃣ Memory Management
+## 6. Memory Management
 * **Heap vs Stack**: Memory locality.
 * **Garbage Collection**: Impact on GC latency.
 * **Pointer Analysis**: Safepoints and write barriers.
 
 ---
 
-## 7️⃣ Code Examples
+## 7. Code Examples
 
 ### 🔹 Example 1: Simple
 ` + "```go\n// Basic implementation\npackage main\n\nfunc main() {\n\t// TODO\n}\n```" + `
@@ -207,7 +207,7 @@ Deep dive into the Go runtime source code.
 
 ---
 
-## 8️⃣ Production Examples
+## 8. Production Examples
 How is %s used in real systems?
 1. **Worker Pools**: Distributing tasks.
 2. **API Gateways**: Managing request lifecycle.
@@ -215,7 +215,7 @@ How is %s used in real systems?
 
 ---
 
-## 9️⃣ Performance & Benchmarking
+## 9. Performance & Benchmarking
 * **CPU vs Memory Trade-offs**
 * **Latency impacts**
 * **Cache Locality & Branch Prediction**
@@ -223,14 +223,14 @@ How is %s used in real systems?
 
 ---
 
-## 🔟 Best Practices
+## 10. Best Practices
 * ✅ **Do**: Follow Idiomatic Go patterns.
 * ❌ **Don't**: Ignore context cancellation or leak goroutines.
 * 🏢 **Google / Uber / Netflix Style**: Explicit error handling, minimal package surface area.
 
 ---
 
-## 11️⃣ Common Mistakes
+## 11. Common Mistakes
 1. **Memory Leaks**: Forgetting to clean up pointers in slices.
 2. **Deadlocks**: Improper channel synchronization.
 3. **Race Conditions**: Shared state without Mutex.
@@ -238,7 +238,7 @@ How is %s used in real systems?
 
 ---
 
-## 12️⃣ Debugging
+## 12. Debugging
 How to troubleshoot %s in production:
 * **pprof**: Analyzing heap and CPU profiles.
 * **Trace**: Visualizing goroutine execution.
@@ -247,7 +247,7 @@ How to troubleshoot %s in production:
 
 ---
 
-## 13️⃣ Exercises
+## 13. Exercises
 1. **Easy**: Write a basic %s.
 2. **Medium**: Refactor to handle concurrent access.
 3. **Hard**: Eliminate all heap allocations in the hot path.
@@ -255,7 +255,7 @@ How to troubleshoot %s in production:
 
 ---
 
-## 14️⃣ Quiz
+## 14. Quiz
 1. **MCQ**: What happens when you read from a closed %s?
 2. **Output Prediction**: What does this program print?
 3. **Debugging**: Find the hidden memory leak in this snippet.
@@ -263,7 +263,7 @@ How to troubleshoot %s in production:
 
 ---
 
-## 15️⃣ FAANG Interview Questions
+## 15. FAANG Interview Questions
 * **Beginner**: Explain %s to a junior dev.
 * **Intermediate**: How would you optimize %s?
 * **Senior (Google/Meta)**: Design a distributed lock manager using %s.
@@ -271,14 +271,14 @@ How to troubleshoot %s in production:
 
 ---
 
-## 16️⃣ Mini Project
+## 16. Mini Project
 **Real-Time %s Implementation**
 Build a production-ready feature utilizing %s.
 * **Examples**: A concurrent web crawler, an email queue worker, or a reverse proxy.
 
 ---
 
-## 17️⃣ Enterprise Features & Observability
+## 17. Enterprise Features & Observability
 * **Logging**: Structured JSON logging.
 * **Metrics**: Prometheus instrumentation.
 * **Tracing**: OpenTelemetry spans.
@@ -287,14 +287,14 @@ Build a production-ready feature utilizing %s.
 
 ---
 
-## 18️⃣ Source Code Reading
+## 18. Source Code Reading
 Walkthrough of the Go source code for %s.
 * **Why it was implemented this way**.
 * **Trade-offs made by the Go core team**.
 
 ---
 
-## 19️⃣ Architecture
+## 19. Architecture
 For production projects integrating this concept:
 * **Folder Structure**
 * **Clean Architecture & DDD**
@@ -303,7 +303,7 @@ For production projects integrating this concept:
 
 ---
 
-## 20️⃣ Summary & Cheat Sheet
+## 20. Summary & Cheat Sheet
 * Key takeaways.
 * 1-page quick reference code snippets.
 `

@@ -24,20 +24,26 @@ type LogEntry struct {
 
 // LogStats aggregates metrics
 type LogStats struct {
-	mu           sync.Mutex
-	TotalReqs    int
-	StatusCounts map[string]int
-	IPCounts     map[string]int
-	PathCounts   map[string]int
-	TotalLatency time.Duration
-	MaxLatency   time.Duration
+	mu             sync.Mutex
+	TotalReqs      int
+	StatusCounts   map[string]int
+	IPCounts       map[string]int
+	PathCounts     map[string]int
+	TotalLatency   time.Duration
+	MaxLatency     time.Duration
+	Durations      []time.Duration
+	SuspiciousIPs  map[string]int
+	EndpointErrors map[string]int
 }
 
 func NewLogStats() *LogStats {
 	return &LogStats{
-		StatusCounts: make(map[string]int),
-		IPCounts:     make(map[string]int),
-		PathCounts:   make(map[string]int),
+		StatusCounts:   make(map[string]int),
+		IPCounts:       make(map[string]int),
+		PathCounts:     make(map[string]int),
+		Durations:      make([]time.Duration, 0, 10000),
+		SuspiciousIPs:  make(map[string]int),
+		EndpointErrors: make(map[string]int),
 	}
 }
 
@@ -67,10 +73,23 @@ func (s *LogStats) Add(entry LogEntry) {
 	}
 	s.PathCounts[path]++
 
+	// Track errors per endpoint (5xx or 4xx)
+	if strings.HasPrefix(entry.Status, "4") || strings.HasPrefix(entry.Status, "5") {
+		s.EndpointErrors[path]++
+	}
+
+	// Track suspicious IPs (401 Unauthorized or 429 Rate Limited)
+	if entry.Status == "401" || entry.Status == "429" {
+		s.SuspiciousIPs[cleanIP]++
+	}
+
 	// Latency metrics
 	s.TotalLatency += entry.Duration
 	if entry.Duration > s.MaxLatency {
 		s.MaxLatency = entry.Duration
+	}
+	if entry.Duration > 0 {
+		s.Durations = append(s.Durations, entry.Duration)
 	}
 }
 
@@ -160,6 +179,17 @@ func main() {
 		avgLatency := stats.TotalLatency / time.Duration(stats.TotalReqs)
 		fmt.Printf("Avg Latency    : %v\n", avgLatency)
 		fmt.Printf("Max Latency    : %v\n", stats.MaxLatency)
+		
+		// Calculate Percentiles
+		if len(stats.Durations) > 0 {
+			sort.Slice(stats.Durations, func(i, j int) bool {
+				return stats.Durations[i] < stats.Durations[j]
+			})
+			p95Index := int(float64(len(stats.Durations)) * 0.95)
+			p99Index := int(float64(len(stats.Durations)) * 0.99)
+			fmt.Printf("P95 Latency    : %v\n", stats.Durations[p95Index])
+			fmt.Printf("P99 Latency    : %v\n", stats.Durations[p99Index])
+		}
 	}
 	fmt.Printf("Time Taken     : %v\n", elapsed)
 	fmt.Println("-------------------------------------")
@@ -169,9 +199,19 @@ func main() {
 	
 	fmt.Println("\nTop 5 IP Addresses:")
 	printTop(stats.IPCounts, 5)
+
+	if len(stats.SuspiciousIPs) > 0 {
+		fmt.Println("\nTop 5 Suspicious IPs (401/429):")
+		printTop(stats.SuspiciousIPs, 5)
+	}
 	
 	fmt.Println("\nTop 5 Endpoints:")
 	printTop(stats.PathCounts, 5)
+
+	if len(stats.EndpointErrors) > 0 {
+		fmt.Println("\nTop 5 Endpoints by Errors (4xx/5xx):")
+		printTop(stats.EndpointErrors, 5)
+	}
 	fmt.Println("=====================================")
 }
 
@@ -191,9 +231,10 @@ func printTop(counts map[string]int, limit int) {
 		if i >= limit {
 			break
 		}
-		padding := strings.Repeat(" ", 20-len(kv.Key))
-		if len(kv.Key) > 20 {
-			padding = " "
+		padLen := 20 - len(kv.Key)
+		padding := " "
+		if padLen > 0 {
+			padding = strings.Repeat(" ", padLen)
 		}
 		fmt.Printf("  %s%s : %d\n", kv.Key, padding, kv.Value)
 	}

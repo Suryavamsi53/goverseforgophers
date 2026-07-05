@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"html/template"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -42,14 +43,27 @@ func (h *WebHandler) HandlePracticePage(w http.ResponseWriter, r *http.Request) 
 	}
 	settingsJSON, _ := json.Marshal(settings)
 
+	var defaultFilesJSON string = "{}"
+	if wsType == "project" && refID != "" && h.ProjectRepo != nil {
+		proj, err := h.ProjectRepo.GetBySlug(r.Context(), refID)
+		if err == nil && proj != nil {
+			defaultFiles := map[string]string{
+				"main.go": proj.StarterCode,
+			}
+			b, _ := json.Marshal(defaultFiles)
+			defaultFilesJSON = string(b)
+		}
+	}
+
 	tmpl := parseTemplates()
 	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":        "Go Sandbox Playground",
-		"Page":         "practice",
-		"IsEmbedded":   r.URL.Query().Get("embed") == "true",
-		"WsType":       wsType,
-		"RefID":        refID,
-		"SettingsJSON": string(settingsJSON),
+		"Title":            "Go Sandbox Playground",
+		"Page":             "practice",
+		"IsEmbedded":       r.URL.Query().Get("embed") == "true",
+		"WsType":           wsType,
+		"RefID":            refID,
+		"SettingsJSON":     template.HTML(settingsJSON),
+		"DefaultFilesJSON": template.HTML(defaultFilesJSON),
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -207,6 +221,22 @@ func (h *WebHandler) HandleGetWorkspace(w http.ResponseWriter, r *http.Request) 
 
 	ws, err := h.WorkspaceRepo.Get(r.Context(), claims.UserID, wsType, refID)
 	if err != nil {
+		if wsType == "project" && h.ProjectRepo != nil {
+			proj, pErr := h.ProjectRepo.GetBySlug(r.Context(), refID)
+			if pErr == nil && proj != nil {
+				ws = &domain.Workspace{
+					UserID: claims.UserID,
+					Type:   wsType,
+					RefID:  refID,
+					Files: map[string]string{
+						"main.go": proj.StarterCode,
+					},
+				}
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(ws)
+				return
+			}
+		}
 		// Return 404 so frontend knows to use default files
 		http.Error(w, "Workspace not found", http.StatusNotFound)
 		return

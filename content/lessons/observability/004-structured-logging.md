@@ -1,68 +1,205 @@
-# Structured Logging Pipeline
+# Structured Logging (slog)
 
-We covered `log/slog` in the Go Fundamentals track, but how does structured logging fit into the broader observability pipeline?
+## 1. Learning Objectives
+* **What you'll learn**: How to implement high-performance structured logging in Go using the standard library `log/slog` (introduced in Go 1.21), allowing machines to query logs like a database.
+* **Why it matters**: `fmt.Println("User 123 logged in")` is useless at scale. You cannot query raw text effectively. Structured logging outputs pure JSON, allowing you to instantly query: "Show me all logs where `user_id = 123` and `level = ERROR`."
+* **Where it's used**: Splunk, Elasticsearch, Datadog, and Loki log aggregators.
 
-## 1. The Problem with Text Logs
+---
 
-If your Go server logs plain text:
-`2023/10/01 10:00:00 Failed to process order 9923 for user alice@gmail.com`
+## 2. Real-world Story
+Imagine trying to find a specific book in a library where all the books are dumped in a massive pile on the floor (Unstructured Logs). You have to manually scan every cover (Regex searching).
+Structured Logging is the Dewey Decimal System. Every log is neatly organized into specific categories (`Author`, `Genre`, `Year`). When you need to find something, you query the index and find it in milliseconds.
 
-When this log arrives in Elasticsearch or Splunk, it is treated as a single, massive string. If you want to build a graph showing "Failed orders per user", the log aggregation system has to run complex Regex operations on millions of logs to extract the email address. This is incredibly slow and burns massive CPU.
+---
 
-## 2. JSON Ingestion
+## 3. Visual Learning (Execution Flow & Architecture)
+```mermaid
+graph TD
+    A[Go App Code] -->|slog.Info| B(slog.Logger)
+    
+    B -->|Formats to JSON| C[Stdout: '{"level":"info","msg":"Auth","user":42}']
+    
+    C -->|Captured by| D[Log Shipper: Promtail / FluentBit]
+    
+    D -->|Network Push| E[(Centralized Log DB: Loki / Elastic)]
+    
+    E -->|Query: {user=42}| F[Grafana Dashboard]
+    
+    style B fill:#3b82f6,color:#fff
+    style E fill:#f59e0b,color:#fff
+```
 
-By using Go's `slog.NewJSONHandler`, your output looks like this:
-```json
-{
-  "time": "2023-10-01T10:00:00Z",
-  "level": "ERROR",
-  "msg": "Failed to process order",
-  "orderID": 9923,
-  "userEmail": "alice@gmail.com"
+---
+
+## 4. Internal Working (Under the Hood)
+A structured log is simply an Event represented as a Key-Value data structure (JSON).
+When you use `log/slog`, Go doesn't construct a massive string via concatenation (which is slow and allocates RAM). Instead, it serializes the Key-Value pairs directly into a byte buffer (`[]byte`), vastly reducing Garbage Collection overhead compared to traditional `fmt.Sprintf`.
+
+---
+
+## 5. Compiler Behavior
+* **Zero-Allocation Logging**: The `slog` package is heavily optimized. It uses `sync.Pool` to reuse byte buffers. If you write your logs correctly using `slog.String` and `slog.Int` (strongly typed attributes), you can achieve near-zero memory allocations per log line, allowing you to log 100,000 times a second without slowing down the Go API!
+
+---
+
+## 6. Memory Management
+* **Log Levels matter**: If you use `slog.Debug("Heavy calculation: ", HeavyFunc())`, Go must evaluate `HeavyFunc()` *even if* the Logger is set to INFO mode, wasting CPU! You should always use conditionals or lazy evaluation for expensive debug logs.
+
+---
+
+## 7. Code Examples
+
+### 🔹 Example 1: Simple (JSON Handler)
+```go
+import "log/slog"
+import "os"
+
+func main() {
+    // 1. Create a JSON handler writing to Stdout
+    handler := slog.NewJSONHandler(os.Stdout, nil)
+    
+    // 2. Initialize the Logger
+    logger := slog.New(handler)
+    
+    // 3. Set it as the global default (optional)
+    slog.SetDefault(logger)
+
+    // Output: {"time":"2023-10-01T...","level":"INFO","msg":"Server started","port":8080}
+    slog.Info("Server started", "port", 8080)
 }
 ```
 
-When Elasticsearch receives this JSON payload, it doesn't just save a string. It dynamically parses the JSON and creates indexed, searchable database columns for `orderID` and `userEmail`. 
-
-Querying `userEmail == "alice@gmail.com"` is now an indexed database lookup, returning results in milliseconds instead of minutes.
-
-## 3. Standardizing Keys (The Taxonomy)
-
-If Team A logs `"user_id": 123` and Team B logs `"userID": 123`, your log aggregator will create two different columns, making cross-team queries impossible.
-
-Enterprise architectures require a strict **Logging Taxonomy**. You define constants in a shared Go package:
-
+### 🔹 Example 2: Intermediate (Strongly Typed Attributes)
 ```go
-// pkg/logkeys/keys.go
-const (
-    KeyUserID  = "user_id"
-    KeyOrderID = "order_id"
-    KeyLatency = "latency_ms"
+// Using variadic key-value strings ("port", 8080) is easy but slightly slow.
+// For MAXIMUM performance, use explicitly typed attributes!
+slog.Error("Database connection failed",
+    slog.String("db_host", "localhost"),
+    slog.Int("retry_count", 3),
+    slog.Duration("latency", time.Second),
 )
+// Output: {"level":"ERROR","msg":"Database connection failed","db_host":"localhost","retry_count":3,"latency":1000000000}
 ```
-Teams are forced to use these keys when writing logs:
+
+### 🔹 Example 3: Advanced (Context and Grouping)
 ```go
-slog.Info("order saved", slog.Int(logkeys.KeyOrderID, 99))
+// Grouping prevents key collisions (e.g., if you have multiple "id" fields)
+slog.Info("Processed request",
+    slog.Group("user",
+        slog.String("id", "u-123"),
+        slog.String("role", "admin"),
+    ),
+    slog.Group("request",
+        slog.String("ip", "192.168.1.1"),
+    ),
+)
+// Output: {"msg":"Processed request", "user":{"id":"u-123","role":"admin"}, "request":{"ip":"..."}}
 ```
 
-## 4. Contextual Log Injection
-
-In an HTTP server, every log line generated during a request should contain the `TraceID` and the `UserID`. Instead of manually adding these to every single `slog.Info()` call, you inject a pre-configured logger into the `context.Context` using Middleware.
-
+### 🔹 Example 4: Production (Custom Handlers)
 ```go
-func LoggingMiddleware(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        
-        traceID := generateTraceID()
-        
-        // Create a logger bound with the traceID
-        logger := slog.Default().With(slog.String("trace_id", traceID))
-        
-        // Inject the logger into the request context
-        ctx := context.WithValue(r.Context(), "logger", logger)
-        
-        next.ServeHTTP(w, r.WithContext(ctx))
-    })
-}
+// Passing a Logger down the call stack with pre-attached Context!
+// Every log generated by 'reqLogger' will automatically include the trace_id!
+reqLogger := logger.With(
+    slog.String("trace_id", "abc-123"),
+    slog.String("env", "production"),
+)
+
+reqLogger.Info("Payment accepted")
+// {"msg":"Payment accepted", "trace_id":"abc-123", "env":"production"}
 ```
-Now, downstream repository functions can extract the logger from the context and use it, guaranteeing that every database error log perfectly correlates with the original HTTP request!
+
+### 🔹 Example 5: Interview
+```go
+// Q: Why should Go applications almost always log to Stdout (Console) instead of a File?
+// A: The 12-Factor App methodology states apps should not manage log files or rotation. 
+// The app streams unbuffered JSON to Stdout. The hosting environment (Docker/Kubernetes) 
+// captures Stdout and forwards it to the Log Aggregator. This keeps the Go app completely stateless!
+```
+
+---
+
+## 8. Production Examples
+1. **Loki / ELK Stack**: You pipe your JSON logs into Elasticsearch. A manager asks, "How many times did User 42 encounter a payment error today?" In Kibana, you type `user_id:42 AND level:ERROR`. Because the logs are JSON, Elasticsearch returns the answer in 0.5 seconds across 10 billion logs.
+2. **Alerting**: You configure Datadog: If `level=FATAL` appears more than 5 times in 1 minute, automatically trigger PagerDuty to wake up the engineering team.
+
+---
+
+## 9. Performance & Benchmarking
+* **`slog` vs `zap`**: Before Go 1.21, Uber's `go.uber.org/zap` was the industry standard for high-performance JSON logging. `slog` was heavily inspired by `zap` and integrated directly into the standard library. While `zap` is still *technically* slightly faster in extreme micro-benchmarks, `slog` is fast enough for 99.9% of companies and requires zero external dependencies.
+
+---
+
+## 10. Best Practices
+* ✅ **Do**: Use snake_case for all JSON keys (`user_id`, `http_status`) to maintain consistency across the entire company.
+* ❌ **Don't**: Log sensitive PII (Credit Cards, Social Security Numbers) into the logs. Log aggregators are heavily searched; storing PII in logs is a massive compliance violation.
+* 🏢 **Google / Uber / Netflix Style**: Use **Dynamic Log Levels**. Expose a secret HTTP endpoint `PUT /admin/log-level`. If a production bug occurs, you can dynamically flip the log level from `INFO` to `DEBUG` in real-time without restarting the Go application!
+
+---
+
+## 11. Common Mistakes
+1. **Dangling Keys**: Doing `slog.Info("msg", "user_id")` without providing the value! `slog` will output a weird `!BADKEY` error in the JSON because it expects Key-Value pairs. Always use `slog.String("user_id", "123")` to prevent this compile-blindness!
+2. **Huge JSON Payloads**: Logging an entire `user` struct containing a 10MB Base64 Profile Picture into a log line. Log aggregators charge you by the Gigabyte. You will rack up a $10,000 AWS bill instantly.
+
+---
+
+## 12. Debugging
+How to troubleshoot logging in production:
+* **Human Readability**: JSON is hard for humans to read in a local terminal. `slog` provides a `NewTextHandler`! You can conditionally use `JSONHandler` when `ENV=prod`, and `TextHandler` (colored output) when `ENV=local_dev`.
+
+---
+
+## 13. Exercises
+1. **Easy**: Import `log/slog` and write a basic `slog.Info` message.
+2. **Medium**: Configure the logger to output pure JSON. Add 3 contextual fields (User, Action, Result).
+3. **Hard**: Create a sub-logger using `.With()` that permanently attaches a `request_id` to all future logs made by that specific logger instance.
+4. **Expert**: Write a custom `slog.Handler` that intercepts all logs, checks if they contain a `password` field, redacts it to `***`, and then passes the log to the standard JSON handler.
+
+---
+
+## 14. Quiz
+1. **MCQ**: What is the primary benefit of structured logging over unstructured `fmt.Printf`?
+   * (A) It is faster to type (B) It enables machines and databases to parse, index, and query the log attributes instantly (C) It uses less disk space. *(Answer: B)*
+2. **Code Review**: `slog.Info(fmt.Sprintf("User %d logged in", id))`. Why is this an anti-pattern? *(It completely defeats the purpose of structured logging! You are burying the variable inside the string. It should be `slog.Info("User logged in", slog.Int("id", id))`).*
+
+---
+
+## 15. FAANG Interview Questions
+* **Beginner**: Explain the difference between `INFO`, `WARN`, `ERROR`, and `FATAL` log levels.
+* **Intermediate**: How do you correlate a specific HTTP request across 5 different microservices using logs? (Hint: Injecting a TraceID).
+* **Senior (Google/Meta)**: Architect a logging pipeline that ingests 10 Terabytes of logs per day. How do you ensure the logging sidecar agent doesn't consume all the CPU on the Kubernetes node and impact the main Go application?
+
+---
+
+## 16. Mini Project
+**The Audit Logger**
+* Build a Go HTTP server.
+* Write a Middleware that captures the Start Time, Path, Method, and generates a UUID `trace_id`.
+* Pass the `trace_id` down to the Handler via `context`.
+* Log `{"msg":"Processing payment", "trace_id":"xyz"}`.
+* Back in the Middleware, calculate the latency and log `{"msg":"Request finished", "latency_ms": 45, "trace_id":"xyz"}`.
+
+---
+
+## 17. Enterprise Features & Observability
+* **Log Sampling**: In hyper-scale systems, you don't log every 200 OK request (it's too expensive). You implement Log Sampling: Log 100% of ERRORs, but only log a random 5% of INFO logs, mathematically preserving the statistical trends while saving 95% on storage costs.
+
+---
+
+## 18. Source Code Reading
+Walkthrough of `log/slog`.
+* **The Record Struct**: Study `slog.Record`. When you call `Info()`, it captures the Program Counter (`PC`). This allows the logger to extremely efficiently determine exactly which File and Line Number (`main.go:42`) triggered the log, without relying on slow runtime reflection!
+
+---
+
+## 19. Architecture
+* **Log Shippers**: Your Go code doesn't send logs to Elasticsearch. It writes to `Stdout`. A lightweight agent (like FluentBit, Filebeat, or Promtail) runs as a DaemonSet on the Kubernetes node, reads the Docker Stdout files, buffers them, and pushes them securely over the network.
+
+---
+
+## 20. Summary & Cheat Sheet
+* **Standard Lib**: `log/slog` (Go 1.21+).
+* **Format**: JSON (`slog.NewJSONHandler`).
+* **Rule 1**: Never bury variables in the string message.
+* **Rule 2**: Use strong types (`slog.String`, `slog.Int`) for performance.
