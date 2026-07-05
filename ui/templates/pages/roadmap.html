@@ -1,30 +1,207 @@
 {{define "roadmap"}}
-<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="text-center mb-12">
-        <h1 class="text-4xl font-extrabold text-white tracking-tight sm:text-5xl mb-4">Platform <span class="text-transparent bg-clip-text bg-gradient-to-r from-go-cyan to-go-blue">Roadmap</span></h1>
-        <p class="text-xl text-gray-400 max-w-2xl mx-auto">Track the evolution of GoVerse from core infrastructure to a production-grade enterprise platform.</p>
+<div class="h-full flex flex-col w-full bg-app overflow-hidden relative">
+    
+    <!-- Ambient Background Effects -->
+    <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-glow/5 blur-[120px] mix-blend-screen"></div>
+        <div class="absolute top-[40%] -right-[10%] w-[30%] h-[50%] rounded-full bg-blue-500/5 blur-[120px] mix-blend-screen"></div>
     </div>
 
-        <pre class="mermaid bg-transparent w-full">
-timeline
-    title GoVerse Platform Roadmap
-    Phase 1: Core Infrastructure
-        : Go Native Code Sandbox
-        : Markdown Parsing Engine
-        : Developer CLI Tool
-    Phase 2: Web Platform & UI
-        : HTMX + Alpine.js Frontend
-        : PostgreSQL Database
-        : Monaco Editor Integration
-    Phase 3: Learning Curriculum
-        : 41-Chapter Concurrency Course
-        : System Design Modules
-        : Real-world Projects
-    Phase 4: Enterprise Productionization
-        : Containerized Isolated Execution
-        : Authentication & Leaderboards
-        : Kubernetes Deployment
-        </pre>
+    <!-- Header -->
+    <div class="pt-10 pb-6 px-8 text-center relative z-10 shrink-0 border-b border-white/5 bg-app/80 backdrop-blur-xl">
+        <h1 class="text-3xl font-extrabold text-white tracking-tight sm:text-4xl mb-3 flex items-center justify-center gap-3">
+            <svg class="w-8 h-8 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+            Golang <span class="text-transparent bg-clip-text bg-gradient-to-r from-glow to-blue-400">Developer Roadmap</span>
+        </h1>
+        <p class="text-sm text-gray-400 max-w-2xl mx-auto">Your step-by-step guide to mastering Go engineering, from fundamental syntax to distributed systems architecture.</p>
+    </div>
+
+    <!-- Interactive Roadmap Container (Pan/Zoom) -->
+    <div class="flex-1 w-full h-full relative z-10 p-4 flex items-center justify-center overflow-hidden" id="roadmap-container">
+        <div class="w-full h-full bg-panel/30 border border-white/5 rounded-2xl backdrop-blur-sm shadow-2xl relative overflow-hidden flex items-center justify-center">
+            
+            <!-- Zoom Controls -->
+            <div class="absolute bottom-6 right-6 z-50 flex gap-2">
+                <button onclick="roadmapZoomIn()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                </button>
+                <button onclick="roadmapZoomOut()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path></svg>
+                </button>
+                <button onclick="roadmapZoomReset()" class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-glow flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md ml-2" title="Reset Zoom">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+            </div>
+
+            <pre class="mermaid bg-transparent w-full h-full flex justify-center items-center text-base" id="mermaid-target">
+flowchart TD
+    %% Custom Styling - Increased font sizes for readability
+    classDef default fill:#111111,stroke:#333333,stroke-width:1px,color:#A1A1AA,rx:8px,ry:8px,font-family:Inter,font-size:16px;
+    classDef root fill:#00D08415,stroke:#00D084,stroke-width:2px,color:#00D084,font-weight:bold,rx:12px,ry:12px,font-size:20px;
+    classDef section fill:#1A1A1A,stroke:#52525B,stroke-width:1px,color:#EDEDED,font-weight:bold,rx:8px,ry:8px,font-size:18px;
+    classDef node fill:#0A0A0A,stroke:#333333,stroke-width:1px,color:#A1A1AA,rx:6px,ry:6px,font-size:16px;
+    classDef topic fill:#050505,stroke:#222222,stroke-width:1px,color:#888888,rx:4px,ry:4px,stroke-dasharray: 5 5,font-size:14px;
+
+    %% Nodes
+    Go[Go Language]:::root
+    
+    %% Prerequisites
+    Prereq[1. Prerequisites]:::section
+    Go --> Prereq
+    Prereq --> CLI[Command Line]:::node
+    Prereq --> Net[Networking Basics]:::node
+    Prereq --> Git[Git & Version Control]:::node
+    
+    %% Fundamentals
+    Fund[2. Fundamentals]:::section
+    Prereq --> Fund
+    Fund --> Syntax[Basic Syntax]:::node
+    Fund --> Vars[Variables & Data Types]:::node
+    Fund --> Control[Control Structures]:::node
+    Control --> If[if / else]:::topic
+    Control --> Switch[switch / select]:::topic
+    Control --> For[for loop]:::topic
+    
+    %% Data Structures
+    Data[3. Data Structures]:::section
+    Fund --> Data
+    Data --> Arrays[Arrays & Slices]:::node
+    Data --> Maps[Maps]:::node
+    Data --> Structs[Structs]:::node
+    
+    %% Functions & Pointers
+    Funcs[4. Functions & Pointers]:::section
+    Data --> Funcs
+    Funcs --> Functions[Functions]:::node
+    Functions --> Variadic[Variadic]:::topic
+    Functions --> Closures[Closures]:::topic
+    Funcs --> Pointers[Pointers]:::node
+    Funcs --> Methods[Methods]:::node
+    
+    %% Interfaces & Error Handling
+    Intf[5. Interfaces & Errors]:::section
+    Funcs --> Intf
+    Intf --> Interfaces[Interfaces]:::node
+    Interfaces --> TypeAssert[Type Assertions]:::topic
+    Intf --> Errors[Error Handling]:::node
+    Errors --> Panic[Panic & Recover]:::topic
+    
+    %% Concurrency
+    Conc[6. Concurrency]:::root
+    Intf --> Conc
+    Conc --> Goroutines[Goroutines]:::section
+    Conc --> Channels[Channels]:::section
+    Channels --> Buffered[Buffered / Unbuffered]:::topic
+    Channels --> SelectSt[Select Statement]:::topic
+    Conc --> Sync[Sync Package]:::section
+    Sync --> Mutex[Mutex / RWMutex]:::topic
+    Sync --> WaitGroup[WaitGroup]:::topic
+    Sync --> Atomic[Atomic Operations]:::topic
+    
+    %% Advanced
+    Adv[7. Advanced Topics]:::section
+    Conc --> Adv
+    Adv --> Context[Context Package]:::node
+    Adv --> Generics[Generics]:::node
+    Adv --> Modules[Go Modules]:::node
+    Adv --> Testing[Testing & Benchmarking]:::node
+    Testing --> Fuzzing[Fuzzing]:::topic
+    
+    %% Backend Dev
+    Backend[8. Backend & Systems]:::root
+    Adv --> Backend
+    Backend --> StdLib[Standard Library]:::section
+    StdLib --> nethttp[net/http]:::topic
+    StdLib --> io[io / os]:::topic
+    StdLib --> json[encoding/json]:::topic
+    Backend --> DB[Databases]:::section
+    DB --> SQL[database/sql]:::topic
+    DB --> ORM[GORM / sqlc]:::topic
+    Backend --> API[API Design]:::section
+    API --> REST[RESTful APIs]:::topic
+    API --> gRPC[gRPC & Protobuf]:::topic
+            </pre>
+        </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+<script>
+    let panZoomInstance = null;
+
+    function initPanZoom() {
+        const svgElement = document.querySelector('#mermaid-target svg');
+        if (svgElement) {
+            // Remove constraints to allow proper zooming
+            svgElement.style.maxWidth = 'none';
+            svgElement.style.height = '100%';
+            svgElement.style.width = '100%';
+            
+            if (panZoomInstance) {
+                panZoomInstance.destroy();
+            }
+
+            panZoomInstance = svgPanZoom(svgElement, {
+                zoomEnabled: true,
+                controlIconsEnabled: false,
+                fit: true,
+                center: true,
+                minZoom: 0.5,
+                maxZoom: 5,
+                zoomScaleSensitivity: 0.2
+            });
+        }
+    }
+
+    // Polling observer since mermaid renders asynchronously in base.html
+    const observer = new MutationObserver((mutations, obs) => {
+        const svgElement = document.querySelector('#mermaid-target svg');
+        if (svgElement) {
+            // Give Mermaid a tiny bit of time to calculate final dimensions before initializing pan/zoom
+            setTimeout(initPanZoom, 100);
+            obs.disconnect(); // Stop observing once we found and initialized it
+        }
+    });
+
+    observer.observe(document.getElementById('mermaid-target'), {
+        childList: true,
+        subtree: true
+    });
+
+    // Button controls
+    window.roadmapZoomIn = () => { if(panZoomInstance) panZoomInstance.zoomIn() };
+    window.roadmapZoomOut = () => { if(panZoomInstance) panZoomInstance.zoomOut() };
+    window.roadmapZoomReset = () => { 
+        if(panZoomInstance) {
+            panZoomInstance.resetZoom();
+            panZoomInstance.center();
+        }
+    };
+</script>
+
+<style>
+    /* Prevent text selection when dragging */
+    #mermaid-target {
+        cursor: grab;
+        user-select: none;
+    }
+    #mermaid-target:active {
+        cursor: grabbing;
+    }
+    
+    /* Make flowchart edges lighter */
+    .mermaid .edgePath .path {
+        stroke: #3F3F46 !important;
+        stroke-width: 2px !important;
+    }
+    .mermaid .edgeLabel {
+        color: #A1A1AA !important;
+        background-color: transparent !important;
+        font-size: 14px !important;
+    }
+    .mermaid .marker {
+        fill: #3F3F46 !important;
+        stroke: #3F3F46 !important;
+    }
+</style>
 {{end}}

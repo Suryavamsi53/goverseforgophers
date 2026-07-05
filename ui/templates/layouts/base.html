@@ -1,10 +1,10 @@
 {{define "base"}}
 <!DOCTYPE html>
-<html lang="en" class="dark scroll-smooth">
+<html lang="en" class="dark scroll-smooth h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}}</title>
+    <title>{{.Title}} | GoVerse</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +17,36 @@
             theme: {
                 extend: {
                     colors: {
-                        go: { emerald: '#34d399', dark: '#059669' },
-                        dark: { 900: '#050505', 800: '#111111', 700: '#1a1a1a', border: '#222222' }
+                        app: '#0A0A0A',
+                        panel: '#111111',
+                        elevated: '#1A1A1A',
+                        glow: '#00D084',
+                        glowHover: '#00E691',
+                        glowMuted: 'rgba(0, 208, 132, 0.15)',
+                        primary: '#EDEDED',
+                        secondary: '#A1A1AA',
+                        tertiary: '#52525B',
+                        success: '#238636',
+                        error: '#F85149',
+                        warning: '#D29922',
+                        info: '#2F81F7',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    boxShadow: {
+                        glow: '0 0 15px rgba(0, 208, 132, 0.2)',
+                        modal: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                    },
+                    animation: {
+                        'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        'pulse-glow': {
+                            '0%, 100%': { opacity: 1, boxShadow: '0 0 15px rgba(0, 208, 132, 0.2)' },
+                            '50%': { opacity: .7, boxShadow: '0 0 5px rgba(0, 208, 132, 0.1)' },
+                        }
                     }
                 }
             }
@@ -26,53 +54,118 @@
     </script>
     <style type="text/tailwindcss">
         @layer components {
-            .btn-primary { @apply px-4 py-2 bg-go-emerald text-black rounded-lg font-medium hover:bg-go-dark hover:text-white transition-colors duration-200; }
-            .btn-secondary { @apply px-4 py-2 bg-dark-800 text-gray-300 rounded-lg font-medium border border-dark-border hover:bg-dark-700 hover:text-white transition-colors duration-200; }
-            .glass-card { @apply bg-dark-800/50 backdrop-blur-md border border-dark-border rounded-xl; }
+            .btn-neon { @apply px-4 py-2 bg-glow text-black rounded-lg font-medium hover:bg-glowHover hover:shadow-glow hover:scale-105 transition-all duration-300; }
+            .btn-glass { @apply px-4 py-2 bg-white/5 text-primary rounded-lg font-medium border border-white/10 hover:bg-white/10 transition-colors duration-200; }
+            .glass-panel { @apply bg-panel/80 backdrop-blur-md border border-white/10 rounded-2xl; }
+            .glass-header { @apply bg-app/80 backdrop-blur-md border-b border-white/5; }
         }
+        /* Custom Scrollbar for OS Feel */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
     </style>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
 </head>
-<body class="bg-dark-900 text-gray-100 font-sans min-h-screen flex flex-col">
+<body class="bg-app text-primary font-sans h-full flex overflow-hidden antialiased" x-data="{ focusMode: false, cmdOpen: false }">
     
-    {{if not .IsEmbedded}}
-    {{template "navbar" .}}
+    <!-- Command Palette (Alpine.js Modal) -->
+    <div x-show="cmdOpen" style="display: none;" class="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]"
+         x-transition:enter="ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="cmdOpen = false"></div>
+        <div class="relative w-full max-w-2xl bg-elevated border border-white/10 rounded-2xl shadow-modal overflow-hidden">
+            <input type="text" placeholder="Search lessons, projects, docs... (Esc to close)" class="w-full bg-transparent text-lg text-primary placeholder-secondary px-6 py-4 outline-none border-b border-white/5" @keydown.escape.window="cmdOpen = false" autofocus>
+            <!-- HTMX Search Results Target -->
+            <div id="search-results" class="p-2 max-h-[60vh] overflow-y-auto">
+                <div class="text-secondary text-sm p-4 text-center">Type to search...</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Global Keyboard Shortcuts -->
+    <script>
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                Alpine.store('cmdOpen', true); // Wait, we are using x-data on body.
+                // Trigger Alpine state:
+                document.body._x_dataStack[0].cmdOpen = true;
+            }
+        });
+    </script>
+
+    {{if and (not .IsEmbedded) (ne .Page "index")}}
+    <!-- Global Sidebar (Hidden in Focus Mode) -->
+    <div x-show="!focusMode" class="w-64 h-full border-r border-white/5 flex-shrink-0 flex flex-col bg-panel relative z-50">
+        {{template "navbar" .}}
+    </div>
     {{end}}
 
-    <main class="flex-grow flex flex-col" id="main-content">
-        {{if eq .Page "index"}}
-            {{template "index" .}}
-        {{else if eq .Page "dashboard"}}
-            {{template "dashboard" .}}
-        {{else if eq .Page "learn_index"}}
-            {{template "learn_index" .}}
-        {{else if eq .Page "lesson"}}
-            {{template "lesson" .}}
-        {{else if eq .Page "practice"}}
-            {{template "practice" .}}
-        {{else if eq .Page "roadmap"}}
-            {{template "roadmap" .}}
-        {{else if eq .Page "login"}}
-            {{template "login" .}}
-        {{else if eq .Page "register"}}
-            {{template "register" .}}
-        {{else if eq .Page "leaderboard"}}
-            {{template "leaderboard" .}}
-        {{else if eq .Page "settings"}}
-            {{template "settings" .}}
-        {{else if eq .Page "projects"}}
-            {{template "projects" .}}
-        {{else if eq .Page "project_detail"}}
-            {{template "project_detail" .}}
-        {{end}}
-    </main>
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col h-full relative overflow-hidden">
+        
+        {{if and (not .IsEmbedded) (ne .Page "index")}}
+        <!-- Sticky Top Header -->
+        <header x-show="!focusMode" class="glass-header h-16 w-full flex items-center justify-between px-8 flex-shrink-0 z-40">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-lg font-medium tracking-tight text-primary">{{.Title}}</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button @click="cmdOpen = true" class="flex items-center space-x-2 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-secondary hover:text-primary hover:bg-white/10 transition-colors text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <span>Search</span>
+                    <kbd class="font-mono text-xs bg-black/30 px-1.5 rounded">⌘K</kbd>
+                </button>
+                <button @click="focusMode = true" class="text-secondary hover:text-primary transition-colors" title="Focus Mode (F11)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                </button>
+            </div>
+        </header>
 
-    {{if not .IsEmbedded}}
-    {{template "footer" .}}
-    <!-- Mermaid.js for Markdown & Roadmap -->
+        <!-- Exit Focus Mode Overlay -->
+        <div x-show="focusMode" style="display: none;" class="absolute top-4 right-4 z-50">
+            <button @click="focusMode = false" class="btn-glass flex items-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <span>Exit Focus Mode</span>
+            </button>
+        </div>
+        {{end}}
+
+        <!-- Scrollable Page Content -->
+        <main class="flex-1 overflow-y-auto w-full relative" id="main-content">
+            {{if eq .Page "index"}}
+                {{template "index" .}}
+            {{else if eq .Page "dashboard"}}
+                {{template "dashboard" .}}
+            {{else if eq .Page "learn_index"}}
+                {{template "learn_index" .}}
+            {{else if eq .Page "lesson"}}
+                {{template "lesson" .}}
+            {{else if eq .Page "practice"}}
+                {{template "practice" .}}
+            {{else if eq .Page "roadmap"}}
+                {{template "roadmap" .}}
+            {{else if eq .Page "login"}}
+                {{template "login" .}}
+            {{else if eq .Page "register"}}
+                {{template "register" .}}
+            {{else if eq .Page "leaderboard"}}
+                {{template "leaderboard" .}}
+            {{else if eq .Page "settings"}}
+                {{template "settings" .}}
+            {{else if eq .Page "projects"}}
+                {{template "projects" .}}
+            {{else if eq .Page "project_detail"}}
+                {{template "project_detail" .}}
+            {{end}}
+        </main>
+    </div>
+
+    <!-- Mermaid.js -->
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         
@@ -84,7 +177,6 @@
         });
 
         window.renderMermaid = async () => {
-            // Find markdown mermaid code blocks and convert them to divs
             const codeBlocks = document.querySelectorAll('code.language-mermaid');
             codeBlocks.forEach((el) => {
                 const pre = el.parentElement;
@@ -97,24 +189,15 @@
             });
 
             try {
-                await mermaid.run({
-                    querySelector: '.mermaid'
-                });
+                await mermaid.run({ querySelector: '.mermaid' });
             } catch(e) {
                 console.error("Mermaid rendering failed:", e);
             }
         };
 
-        // Run on first load
         document.addEventListener('DOMContentLoaded', window.renderMermaid);
-
-        // Run on HTMX navigations
-        document.body.addEventListener('htmx:load', function() {
-            window.renderMermaid();
-        });
+        document.body.addEventListener('htmx:load', function() { window.renderMermaid(); });
     </script>
-    {{end}}
-
 </body>
 </html>
 {{end}}
