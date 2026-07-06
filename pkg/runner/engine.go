@@ -70,12 +70,12 @@ func ExecuteCode(ctx context.Context, files map[string]string) (*ExecutionResult
 
 	// Prepare the command to run the code
 	// Adding a hard timeout for execution to prevent infinite loops
-	runCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	runCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
-		"--memory", "256m",
-		"--cpus", "0.5",
+		"--memory", "512m",
+		"--cpus", "2.0",
 		"--network", "host",
 		"-v", tempDir+":/app:z",
 		"-w", "/app",
@@ -100,7 +100,7 @@ func ExecuteCode(ctx context.Context, files map[string]string) (*ExecutionResult
 	// If there's an error, it could be a compile error or runtime panic
 	if err != nil {
 		if runCtx.Err() == context.DeadlineExceeded {
-			result.Error = "Execution timed out (10s limit). Note: For web servers, please use the Terminal!"
+			result.Error = "Execution timed out (30s limit). Note: For web servers, please use the Terminal!"
 		} else {
 			result.Error = stderr.String()
 			if result.Error == "" {
@@ -149,12 +149,12 @@ func RunCommand(ctx context.Context, command string, files map[string]string) (*
 		os.WriteFile(filepath.Join(tempDir, "go.mod"), []byte("module example\n\ngo 1.21\n"), 0644)
 	}
 
-	runCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	runCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
-		"--memory", "256m",
-		"--cpus", "0.5",
+		"--memory", "512m",
+		"--cpus", "2.0",
 		"--network", "host",
 		"-v", tempDir+":/app:z",
 		"-w", "/app",
@@ -195,7 +195,7 @@ func RunCommand(ctx context.Context, command string, files map[string]string) (*
 
 	if err != nil {
 		if runCtx.Err() == context.DeadlineExceeded {
-			result.Error = "Command timed out (10s limit). Note: For long-running processes, please use the Terminal!"
+			result.Error = "Command timed out (30s limit). Note: For long-running processes, please use the Terminal!"
 		} else {
 			result.Error = stderr.String()
 			if result.Error == "" {

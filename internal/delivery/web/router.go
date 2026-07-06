@@ -78,12 +78,33 @@ func parseTemplates() *template.Template {
 	return tmpl
 }
 
+func (h *WebHandler) getBaseTemplateData(r *http.Request, title, page string) map[string]interface{} {
+	data := map[string]interface{}{
+		"Title":      title,
+		"Page":       page,
+		"IsLoggedIn": false,
+	}
+	claims, ok := r.Context().Value(userContextKey).(*auth.Claims)
+	if ok {
+		user, err := h.UserRepo.GetByID(r.Context(), claims.UserID)
+		if err == nil {
+			data["User"] = user
+			data["IsLoggedIn"] = true
+			profile, err := h.UserRepo.GetProfile(r.Context(), claims.UserID)
+			if err == nil {
+				data["Profile"] = profile
+			} else {
+				data["Profile"] = &domain.UserProfile{}
+			}
+		}
+	}
+	return data
+}
+
 func (h *WebHandler) HandleLandingPage(w http.ResponseWriter, r *http.Request) {
 	tmpl := parseTemplates()
-	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title": "GoVerse - The Ultimate Golang Learning Platform",
-		"Page":  "index",
-	})
+	data := h.getBaseTemplateData(r, "GoVerse - The Ultimate Golang Learning Platform", "index")
+	err := tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -91,10 +112,8 @@ func (h *WebHandler) HandleLandingPage(w http.ResponseWriter, r *http.Request) {
 
 func (h *WebHandler) HandleRoadmap(w http.ResponseWriter, r *http.Request) {
 	tmpl := parseTemplates()
-	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title": "Roadmap - GoVerse",
-		"Page":  "roadmap",
-	})
+	data := h.getBaseTemplateData(r, "Roadmap - GoVerse", "roadmap")
+	err := tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -202,11 +221,9 @@ func (h *WebHandler) HandleLeaderboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := parseTemplates()
-	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":   "Leaderboard - GoVerse",
-		"Page":    "leaderboard",
-		"Entries": entries,
-	})
+	data := h.getBaseTemplateData(r, "Leaderboard - GoVerse", "leaderboard")
+	data["Entries"] = entries
+	err = tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -220,11 +237,9 @@ func (h *WebHandler) HandleProjects(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := parseTemplates()
-	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":    "Projects - GoVerse",
-		"Page":     "projects",
-		"Projects": projects,
-	})
+	data := h.getBaseTemplateData(r, "Projects - GoVerse", "projects")
+	data["Projects"] = projects
+	err = tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -239,11 +254,9 @@ func (h *WebHandler) HandleProjectDetail(w http.ResponseWriter, r *http.Request)
 	}
 
 	tmpl := parseTemplates()
-	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":   project.Title + " - GoVerse Projects",
-		"Page":    "project_detail",
-		"Project": project,
-	})
+	data := h.getBaseTemplateData(r, project.Title+" - GoVerse Projects", "project_detail")
+	data["Project"] = project
+	err = tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -285,8 +298,37 @@ func (h *WebHandler) HandleProjectSubmit(w http.ResponseWriter, r *http.Request)
 
 	if result.Success {
 		// Mark project as complete
-		user := r.Context().Value("user").(*domain.User)
-		_ = h.ProgressRepo.MarkCompleted(r.Context(), user.ID, "project", project.ID)
+		claims, ok := r.Context().Value(userContextKey).(*auth.Claims)
+		if ok {
+			// Check if already completed to prevent duplicate scoring
+			progressList, err := h.ProgressRepo.GetProgress(r.Context(), claims.UserID)
+			alreadyCompleted := false
+			if err == nil {
+				for _, p := range progressList {
+					if p.EntityType == "project" && p.EntityID == project.ID && p.Status == "completed" {
+						alreadyCompleted = true
+						break
+					}
+				}
+			}
+
+			_ = h.ProgressRepo.MarkCompleted(r.Context(), claims.UserID, "project", project.ID)
+
+			// Award 100 points for first-time project completion
+			if !alreadyCompleted {
+				profile, err := h.UserRepo.GetProfile(r.Context(), claims.UserID)
+				if err != nil {
+					profile = &domain.UserProfile{
+						UserID:     claims.UserID,
+						TotalScore: 100,
+					}
+					_ = h.UserRepo.CreateProfile(r.Context(), profile)
+				} else {
+					profile.TotalScore += 100
+					_ = h.UserRepo.UpdateProfile(r.Context(), profile)
+				}
+			}
+		}
 		resp.Message = "Congratulations! Your project passed all tests."
 	}
 

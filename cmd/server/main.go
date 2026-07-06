@@ -58,7 +58,7 @@ func main() {
 	userRepo := repository.NewPostgresUserRepository(dbPool)
 	courseRepo := repository.NewPostgresCourseRepository(dbPool)
 	progressRepo := repository.NewPostgresProgressRepository(dbPool)
-	projectRepo := repository.NewMockProjectRepository()
+	projectRepo := repository.NewPostgresProjectRepository(dbPool)
 	workspaceRepo := repository.NewPostgresWorkspaceRepository(dbPool)
 
 	jwtSecret := os.Getenv("JWT_SECRET")

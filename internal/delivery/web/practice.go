@@ -56,15 +56,14 @@ func (h *WebHandler) HandlePracticePage(w http.ResponseWriter, r *http.Request) 
 	}
 
 	tmpl := parseTemplates()
-	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":            "Go Sandbox Playground",
-		"Page":             "practice",
-		"IsEmbedded":       r.URL.Query().Get("embed") == "true",
-		"WsType":           wsType,
-		"RefID":            refID,
-		"SettingsJSON":     template.HTML(settingsJSON),
-		"DefaultFilesJSON": template.HTML(defaultFilesJSON),
-	})
+	data := h.getBaseTemplateData(r, "Go Sandbox Playground", "practice")
+	data["IsEmbedded"] = r.URL.Query().Get("embed") == "true"
+	data["WsType"] = wsType
+	data["RefID"] = refID
+	data["SettingsJSON"] = template.HTML(settingsJSON)
+	data["DefaultFilesJSON"] = template.HTML(defaultFilesJSON)
+	
+	err := tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

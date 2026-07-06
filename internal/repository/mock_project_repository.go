@@ -512,6 +512,128 @@ func TestPercentiles(t *testing.T) {
 }
 `,
 			},
+			{
+				ID:          "proj-5",
+				Slug:        "dsa-arrays",
+				Title:       "High-Performance Arrays & Slices",
+				Description: "Master Data Structures and Algorithms with Go Arrays and Slices. Learn memory-efficient slice manipulation, pre-allocation, capacity management, and common array algorithms.",
+				Scenario: `Your company's high-frequency trading application requires lightning-fast data processing.
+Memory allocations are expensive and trigger Garbage Collection pauses.
+You must implement array operations without unnecessary memory growth, write efficient slice filtering, and implement an in-place array reversal and duplicate removal algorithm.`,
+				Difficulty:  domain.DifficultyIntermediate,
+				Tags:        []string{"DSA", "Arrays", "Slices", "Performance"},
+				Icon:        "🧮",
+				Color:       "teal",
+				Requirements: []string{
+					"Implement an efficient integer slice filter without allocating new memory.",
+					"Implement an in-place array reversal.",
+					"Remove duplicate elements from a sorted slice in O(N) time and O(1) space.",
+					"Demonstrate slice capacity pre-allocation to avoid dynamic growth overhead.",
+				},
+				Tips: []string{
+					"In Go, slices share underlying arrays. You can filter in-place by reusing the same slice.",
+					"For pre-allocation, use `make([]int, 0, capacity)`.",
+					"To remove duplicates in-place, keep a 'slow' pointer and a 'fast' pointer.",
+				},
+				StarterCode: `package main
+
+import "fmt"
+
+// FilterPositive filters out negative numbers from a slice IN-PLACE (without allocating a new slice).
+func FilterPositive(nums []int) []int {
+	// TODO: Implement in-place filtering
+	return nums
+}
+
+// Reverse reverses the elements of a slice IN-PLACE.
+func Reverse(nums []int) {
+	// TODO: Implement in-place reversal
+}
+
+// RemoveDuplicates removes duplicates from a SORTED slice IN-PLACE and returns the new slice length.
+// It should operate in O(N) time and O(1) auxiliary space.
+func RemoveDuplicates(nums []int) []int {
+	// TODO: Implement in-place duplicate removal
+	return nums
+}
+
+// GenerateSequence creates a sequence of integers from 1 to n.
+// MUST pre-allocate the exact capacity to avoid runtime memory growth.
+func GenerateSequence(n int) []int {
+	// TODO: Allocate with precise capacity
+	var seq []int
+	return seq
+}
+
+func main() {
+	fmt.Println("DSA Arrays & Slices Project")
+}
+`,
+				TestFile: `package main
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestFilterPositive(t *testing.T) {
+	input := []int{-1, 2, -3, 4, 5, -6}
+	expected := []int{2, 4, 5}
+	
+	// Create a copy to check if underlying array is reused
+	originalPointer := &input[0]
+	
+	result := FilterPositive(input)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+	
+	if len(result) > 0 && &result[0] != originalPointer {
+		t.Errorf("FilterPositive did not operate in-place, a new underlying array was allocated")
+	}
+}
+
+func TestReverse(t *testing.T) {
+	input := []int{1, 2, 3, 4, 5}
+	expected := []int{5, 4, 3, 2, 1}
+	
+	Reverse(input)
+	if !reflect.DeepEqual(input, expected) {
+		t.Errorf("expected %v, got %v", expected, input)
+	}
+}
+
+func TestRemoveDuplicates(t *testing.T) {
+	input := []int{1, 1, 2, 2, 2, 3, 4, 4, 5}
+	expected := []int{1, 2, 3, 4, 5}
+	
+	result := RemoveDuplicates(input)
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("expected %v, got %v", expected, result)
+	}
+}
+
+func TestGenerateSequence(t *testing.T) {
+	n := 1000
+	result := GenerateSequence(n)
+	
+	if len(result) != n {
+		t.Errorf("expected length %d, got %d", n, len(result))
+	}
+	
+	if cap(result) != n {
+		t.Errorf("expected capacity %d (pre-allocated), got %d. Did you use make([]int, 0, n) or make([]int, n)?", n, cap(result))
+	}
+	
+	for i := 0; i < n; i++ {
+		if result[i] != i+1 {
+			t.Errorf("expected value %d at index %d, got %d", i+1, i, result[i])
+			break
+		}
+	}
+}
+`,
+			},
 		},
 	}
 }

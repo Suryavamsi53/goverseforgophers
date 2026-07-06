@@ -180,7 +180,7 @@ func (ah *AuthHandler) HandleGitHubCallback(w http.ResponseWriter, r *http.Reque
 	code := r.FormValue("code")
 	token, err := getGithubOAuthConfig().Exchange(r.Context(), code)
 	if err != nil {
-		http.Error(w, "failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Login session expired or invalid code. Please go to /login and try again. (Details: "+err.Error()+")", http.StatusBadRequest)
 		return
 	}
 

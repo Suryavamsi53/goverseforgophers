@@ -1,125 +1,172 @@
 {{define "dashboard"}}
-<div class="w-full max-w-7xl mx-auto px-6 py-8">
-    
+<div class="relative w-full max-w-[1400px] mx-auto px-6 py-12">
+
+    <!-- Ambient Glowing Blobs for Hero Background -->
+    <div class="absolute top-0 left-1/4 w-[600px] h-[400px] bg-go-emerald/20 rounded-full mix-blend-screen filter blur-[120px] pointer-events-none animate-pulse-slow"></div>
+    <div class="absolute top-0 right-1/4 w-[500px] h-[300px] bg-blue-600/10 rounded-full mix-blend-screen filter blur-[100px] pointer-events-none"></div>
+
     <!-- Hero Row -->
-    <div class="mb-10">
-        <h1 class="text-3xl font-bold tracking-tight text-primary">
-            Welcome back, <span class="text-glow">{{.User.Username}}</span>
-        </h1>
-        <p class="text-secondary mt-1 text-base">Your engineering metrics and current sprint goals.</p>
+    <div class="flex items-center gap-6 mb-12 relative z-10">
+        <div class="relative">
+            <div class="w-20 h-20 rounded-2xl p-[2px] bg-gradient-to-br from-go-emerald to-blue-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                <img src="{{if .Profile.AvatarURL}}{{.Profile.AvatarURL}}{{else}}https://ui-avatars.com/api/?name={{.User.Username}}&background=111111&color=34d399&rounded=true{{end}}" alt="Avatar" class="w-full h-full rounded-2xl object-cover bg-dark-900">
+            </div>
+            <div class="absolute -bottom-2 -right-2 bg-dark-900 rounded-full p-1 border border-white/10">
+                <div class="w-4 h-4 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]"></div>
+            </div>
+        </div>
+        <div>
+            <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2 flex items-center gap-3">
+                Welcome back, <span class="text-transparent bg-clip-text bg-gradient-to-r from-go-emerald to-blue-400">{{.User.Username}}</span>
+                <span class="text-2xl animate-wave origin-bottom-right inline-block">👋</span>
+            </h1>
+            <p class="text-gray-400 text-lg font-medium">Your engineering metrics and current sprint goals.</p>
+        </div>
     </div>
 
     <!-- Metrics Row -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 relative z-10">
         
         <!-- StatCard 1 -->
-        <div class="glass-panel p-6 flex flex-col justify-between group hover:border-glow/50 transition-colors">
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-sm font-medium text-secondary">Current Streak</span>
-                <svg class="w-5 h-5 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-yellow-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-all"></div>
+            
+            <div class="flex justify-between items-start mb-6 relative">
+                <span class="text-sm font-bold tracking-wider uppercase text-gray-500">Current Streak</span>
+                <div class="p-2 bg-orange-500/10 rounded-xl text-orange-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></div>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-bold text-primary">{{.Profile.DailyStreak}}</span>
-                <span class="text-sm text-tertiary">Days</span>
+            <div class="flex items-baseline gap-2 relative">
+                <span class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">{{.Profile.DailyStreak}}</span>
+                <span class="text-sm font-bold text-gray-500 uppercase tracking-widest">Days</span>
             </div>
         </div>
 
         <!-- StatCard 2 -->
-        <div class="glass-panel p-6 flex flex-col justify-between group hover:border-blue-500/50 transition-colors">
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-sm font-medium text-secondary">Global Rank</span>
-                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+        <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all"></div>
+            
+            <div class="flex justify-between items-start mb-6 relative">
+                <span class="text-sm font-bold tracking-wider uppercase text-gray-500">Global Rank</span>
+                <div class="p-2 bg-blue-500/10 rounded-xl text-blue-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg></div>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-bold text-primary">#42</span>
-                <span class="text-sm text-tertiary">Top 5%</span>
+            <div class="flex items-baseline gap-2 relative">
+                <span class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">#42</span>
+                <span class="text-sm font-bold text-gray-500 uppercase tracking-widest">Top 5%</span>
             </div>
         </div>
 
         <!-- StatCard 3 -->
-        <div class="glass-panel p-6 flex flex-col justify-between group hover:border-purple-500/50 transition-colors">
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-sm font-medium text-secondary">Lessons Completed</span>
-                <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+        <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all"></div>
+            
+            <div class="flex justify-between items-start mb-4 relative">
+                <span class="text-sm font-bold tracking-wider uppercase text-gray-500">Lessons Completed</span>
+                <div class="p-2 bg-purple-500/10 rounded-xl text-purple-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg></div>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-bold text-primary">{{.CompletedLessons}}</span>
-                <span class="text-sm text-tertiary">/ {{.TotalLessons}}</span>
+            <div class="flex items-baseline gap-2 relative">
+                <span class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">{{.CompletedLessons}}</span>
+                <span class="text-sm font-bold text-gray-500">/ {{.TotalLessons}}</span>
             </div>
-            <div class="w-full bg-white/5 rounded-full h-1 mt-4">
-                <div class="bg-purple-500 h-1 rounded-full" style="width: {{.LessonPercent}}%"></div>
+            <div class="w-full bg-dark-700/50 rounded-full h-2 mt-5 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full relative" style="width: {{.LessonPercent}}%">
+                    <div class="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div>
+                </div>
             </div>
         </div>
 
         <!-- StatCard 4 -->
-        <div class="glass-panel p-6 flex flex-col justify-between group hover:border-pink-500/50 transition-colors">
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-sm font-medium text-secondary">Total XP</span>
-                <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+        <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-go-emerald to-emerald-300 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all"></div>
+            
+            <div class="flex justify-between items-start mb-6 relative">
+                <span class="text-sm font-bold tracking-wider uppercase text-gray-500">Total XP</span>
+                <div class="p-2 bg-emerald-500/10 rounded-xl text-emerald-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg></div>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-4xl font-bold text-primary">12,450</span>
-                <span class="text-sm text-tertiary">XP</span>
+            <div class="flex items-baseline gap-2 relative">
+                <span class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">{{.Profile.TotalScore}}</span>
+                <span class="text-sm font-bold text-gray-500 uppercase tracking-widest">XP</span>
             </div>
         </div>
     </div>
 
     <!-- Main Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
         
         <!-- Left Column (Span 2) -->
         <div class="lg:col-span-2 space-y-8">
             
-            <!-- Continue Learning (Up Next) -->
-            <div class="glass-panel p-8 relative overflow-hidden group">
-                <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-glow/5 to-transparent pointer-events-none group-hover:from-glow/10 transition-colors duration-500"></div>
-                <div class="flex justify-between items-end mb-6 relative z-10">
-                    <h2 class="text-xl font-semibold text-primary">Current Sprint</h2>
-                </div>
-                
-                {{if .NextLesson}}
-                <div class="flex flex-col md:flex-row gap-6 items-start md:items-center relative z-10">
-                    <div class="w-16 h-16 rounded-xl bg-app border border-white/10 flex items-center justify-center flex-shrink-0 shadow-lg group-hover:border-glow/50 transition-colors">
-                        <svg class="w-8 h-8 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                    <div class="flex-grow">
-                        <div class="text-xs font-bold text-glow uppercase tracking-wider mb-1 flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-glow animate-pulse"></span>
-                            {{.NextCourse.Title}}
+            <!-- Current Sprint / Resume -->
+            <div class="bg-dark-950/80 rounded-3xl p-1 border border-white/10 shadow-2xl relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-go-emerald/10 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                <div class="bg-dark-900 rounded-[22px] p-8 h-full flex flex-col justify-center relative">
+                    <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-go-emerald/5 to-transparent pointer-events-none group-hover:from-go-emerald/10 transition-colors duration-500"></div>
+                    
+                    <h2 class="text-sm font-bold tracking-widest text-gray-500 uppercase mb-6 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-go-emerald" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Current Sprint
+                    </h2>
+                    
+                    {{if .NextLesson}}
+                    <div class="flex flex-col md:flex-row gap-6 items-start md:items-center relative z-10">
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-dark-800 to-dark-950 p-[1px] shadow-2xl flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+                            <div class="w-full h-full bg-dark-900 rounded-2xl flex items-center justify-center">
+                                <svg class="w-10 h-10 text-go-emerald drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            </div>
                         </div>
-                        <h3 class="text-lg font-semibold text-primary mb-1">{{.NextLesson.Title}}</h3>
-                        <p class="text-sm text-secondary line-clamp-2">{{.NextLesson.Content}}</p>
+                        <div class="flex-grow">
+                            <div class="text-[11px] font-black text-go-emerald uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-go-emerald animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+                                {{.NextCourse.Title}}
+                            </div>
+                            <h3 class="text-2xl font-bold text-white mb-2">{{.NextLesson.Title}}</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed max-w-xl">{{.NextLesson.Content}}</p>
+                        </div>
+                        <a href="/learn/{{.NextCourse.Slug}}/{{.NextLesson.Slug}}" class="flex-shrink-0 px-8 py-3.5 bg-white hover:bg-gray-100 text-black font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:scale-105 flex items-center gap-2 group/btn">
+                            Resume Lesson
+                            <svg class="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </a>
                     </div>
-                    <a href="/learn/{{.NextLesson.Slug}}" class="btn-neon flex-shrink-0 flex items-center gap-2">
-                        Resume Lesson
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </a>
+                    {{else}}
+                    <div class="text-center py-8">
+                        <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+                            <span class="text-4xl">🏆</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mt-4">Master of GoVerse!</h3>
+                        <p class="text-gray-400 mt-2">You've completed all lessons. Head to the Projects Arena.</p>
+                        <a href="/projects" class="inline-block mt-6 px-6 py-2 bg-white text-black font-bold rounded-lg shadow-lg">View Projects</a>
+                    </div>
+                    {{end}}
                 </div>
-                {{else}}
-                <div class="text-center py-8">
-                    <span class="text-4xl">🏆</span>
-                    <h3 class="text-lg font-semibold text-primary mt-4">Master of GoVerse!</h3>
-                    <p class="text-sm text-secondary mt-1">You've completed all lessons. Head to the Practice Arena.</p>
-                </div>
-                {{end}}
             </div>
 
-            <!-- Activity Chart Placeholder -->
-            <div class="glass-panel p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-semibold text-primary">Learning Activity</h2>
-                    <span class="text-xs text-secondary bg-white/5 px-2 py-1 rounded">Last 14 Days</span>
+            <!-- Learning Activity Chart -->
+            <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl relative">
+                <div class="flex justify-between items-center mb-10">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-3">
+                        <div class="p-2 rounded-lg bg-white/5"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg></div>
+                        Learning Activity
+                    </h2>
+                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">Last 14 Days</span>
                 </div>
-                <div class="h-64 w-full flex items-end justify-between gap-2 px-2">
-                    <!-- Fake chart bars for mockup -->
-                    <div class="w-full bg-glowHover/20 rounded-t h-[40%] hover:bg-glowHover/40 transition-colors"></div>
-                    <div class="w-full bg-glowHover/20 rounded-t h-[60%] hover:bg-glowHover/40 transition-colors"></div>
-                    <div class="w-full bg-glowHover/20 rounded-t h-[30%] hover:bg-glowHover/40 transition-colors"></div>
-                    <div class="w-full bg-glowHover/20 rounded-t h-[80%] hover:bg-glowHover/40 transition-colors"></div>
-                    <div class="w-full bg-glowHover/20 rounded-t h-[50%] hover:bg-glowHover/40 transition-colors"></div>
-                    <div class="w-full bg-glowHover/20 rounded-t h-[20%] hover:bg-glowHover/40 transition-colors"></div>
-                    <div class="w-full bg-glowHover/20 rounded-t h-[90%] hover:bg-glowHover/40 transition-colors"></div>
-                    <div class="w-full bg-glow/80 rounded-t h-[100%] shadow-glow"></div>
+                
+                <div class="h-56 w-full flex items-end justify-between gap-3 px-2">
+                    <!-- Rounded bars with gradients -->
+                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[40%] hover:brightness-125 transition-all cursor-pointer"></div>
+                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[60%] hover:brightness-125 transition-all cursor-pointer"></div>
+                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[30%] hover:brightness-125 transition-all cursor-pointer"></div>
+                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[80%] hover:brightness-125 transition-all cursor-pointer"></div>
+                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[50%] hover:brightness-125 transition-all cursor-pointer"></div>
+                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[20%] hover:brightness-125 transition-all cursor-pointer"></div>
+                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[90%] hover:brightness-125 transition-all cursor-pointer"></div>
+                    
+                    <!-- Today's active bar -->
+                    <div class="w-full bg-gradient-to-t from-go-emerald/40 to-go-emerald rounded-full h-[100%] shadow-[0_0_20px_rgba(52,211,153,0.4)] relative cursor-pointer group">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
                 </div>
             </div>
 
@@ -128,38 +175,65 @@
         <!-- Right Column (Span 1) -->
         <div class="space-y-8">
             
-            <!-- Today's Goals (Alpine.js checklist) -->
-            <div class="glass-panel p-8" x-data="{ goals: [ {id:1, text:'Complete Goroutines Lesson', done:false}, {id:2, text:'Solve 2 Practice Problems', done:false}, {id:3, text:'Review Heap Allocation', done:true} ] }">
-                <h2 class="text-xl font-semibold text-primary mb-6">Today's Goals</h2>
-                <div class="space-y-3">
+            <!-- Today's Goals -->
+            <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl" x-data="{ goals: [ {id:1, text:'Complete Goroutines Lesson', done:false}, {id:2, text:'Solve 2 Practice Problems', done:false}, {id:3, text:'Review Heap Allocation', done:true} ] }">
+                <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-3">
+                    <div class="p-2 rounded-lg bg-white/5"><svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></div>
+                    Daily Goals
+                </h2>
+                <div class="space-y-4">
                     <template x-for="goal in goals" :key="goal.id">
-                        <label class="flex items-center gap-3 p-3 rounded-lg bg-app/50 border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
-                            <input type="checkbox" x-model="goal.done" class="w-4 h-4 rounded border-white/10 bg-app text-glow focus:ring-glow focus:ring-offset-app">
-                            <span class="text-sm select-none transition-all duration-200" :class="goal.done ? 'text-tertiary line-through' : 'text-primary'" x-text="goal.text"></span>
+                        <label class="flex items-center gap-4 p-4 rounded-2xl bg-dark-950 border border-white/5 cursor-pointer hover:bg-dark-800 transition-all shadow-sm group">
+                            <div class="relative flex items-center justify-center w-5 h-5">
+                                <input type="checkbox" x-model="goal.done" class="peer appearance-none w-5 h-5 border-2 border-gray-600 rounded cursor-pointer checked:bg-go-emerald checked:border-go-emerald transition-all">
+                                <svg class="absolute w-3 h-3 text-dark-900 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <span class="text-[14px] font-medium select-none transition-all duration-300" :class="goal.done ? 'text-gray-500 line-through' : 'text-gray-200'" x-text="goal.text"></span>
                         </label>
                     </template>
                 </div>
             </div>
 
-            <!-- Skills Radar Placeholder -->
-            <div class="glass-panel p-8">
-                <h2 class="text-xl font-semibold text-primary mb-6">Skills Radar</h2>
-                <div class="relative w-full aspect-square bg-app/50 rounded-full border border-white/5 flex items-center justify-center">
-                    <!-- Fake Radar Web -->
-                    <div class="absolute w-3/4 h-3/4 border border-white/10 rounded-full"></div>
-                    <div class="absolute w-1/2 h-1/2 border border-white/10 rounded-full"></div>
-                    <div class="absolute inset-0 m-auto w-full h-0 border-t border-white/10"></div>
-                    <div class="absolute inset-0 m-auto w-0 h-full border-l border-white/10"></div>
+            <!-- Skills Radar -->
+            <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl overflow-hidden relative group">
+                <div class="absolute inset-0 bg-gradient-to-t from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                <h2 class="text-lg font-bold text-white mb-8 flex items-center gap-3 relative z-10">
+                    <div class="p-2 rounded-lg bg-white/5"><svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg></div>
+                    Skills Radar
+                </h2>
+                <div class="relative w-full aspect-square flex items-center justify-center">
                     
-                    <!-- Fake Data Polygon -->
-                    <svg class="absolute inset-0 w-full h-full text-glow/30 fill-current stroke-glow stroke-2" viewBox="0 0 100 100">
-                        <polygon points="50,10 80,40 60,90 20,80 15,35" />
+                    <!-- Concentric Octagons / Circles -->
+                    <div class="absolute w-[90%] h-[90%] border border-white/10 rounded-full"></div>
+                    <div class="absolute w-[60%] h-[60%] border border-white/10 rounded-full"></div>
+                    <div class="absolute w-[30%] h-[30%] border border-white/10 rounded-full"></div>
+                    
+                    <!-- Axes -->
+                    <div class="absolute inset-0 m-auto w-full h-[1px] bg-white/10"></div>
+                    <div class="absolute inset-0 m-auto w-[1px] h-full bg-white/10"></div>
+                    <div class="absolute inset-0 m-auto w-full h-[1px] bg-white/10 rotate-45"></div>
+                    <div class="absolute inset-0 m-auto w-[1px] h-full bg-white/10 rotate-45"></div>
+                    
+                    <!-- Filled Polygon area (Mock) -->
+                    <svg class="absolute inset-0 w-full h-full text-blue-500/20 fill-current drop-shadow-[0_0_15px_rgba(59,130,246,0.3)] z-10" viewBox="0 0 100 100">
+                        <polygon points="50,15 75,30 85,50 65,85 50,75 25,60 15,45 35,25" class="stroke-blue-400 stroke-[1.5px] stroke-linejoin-round" />
+                        
+                        <!-- Data Points -->
+                        <circle cx="50" cy="15" r="2" class="fill-white" />
+                        <circle cx="75" cy="30" r="2" class="fill-white" />
+                        <circle cx="85" cy="50" r="2" class="fill-white" />
+                        <circle cx="65" cy="85" r="2" class="fill-white" />
+                        <circle cx="50" cy="75" r="2" class="fill-white" />
+                        <circle cx="25" cy="60" r="2" class="fill-white" />
+                        <circle cx="15" cy="45" r="2" class="fill-white" />
+                        <circle cx="35" cy="25" r="2" class="fill-white" />
                     </svg>
                     
-                    <span class="absolute top-2 text-[10px] text-secondary">Concurrency</span>
-                    <span class="absolute right-2 text-[10px] text-secondary">Network</span>
-                    <span class="absolute bottom-2 text-[10px] text-secondary">Memory</span>
-                    <span class="absolute left-2 text-[10px] text-secondary">Design</span>
+                    <!-- Labels -->
+                    <span class="absolute -top-1 font-bold text-[9px] uppercase tracking-widest text-gray-500">Concurrency</span>
+                    <span class="absolute -right-2 font-bold text-[9px] uppercase tracking-widest text-gray-500">Networking</span>
+                    <span class="absolute -bottom-1 font-bold text-[9px] uppercase tracking-widest text-gray-500">Algorithms</span>
+                    <span class="absolute -left-2 font-bold text-[9px] uppercase tracking-widest text-gray-500">Architecture</span>
                 </div>
             </div>
 
@@ -167,4 +241,23 @@
 
     </div>
 </div>
+
+<style>
+    @keyframes wave {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-15deg); }
+        50% { transform: rotate(10deg); }
+        75% { transform: rotate(-15deg); }
+    }
+    .animate-wave {
+        animation: wave 1.5s infinite;
+    }
+    @keyframes pulse-slow {
+        0%, 100% { opacity: 0.8; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.05); }
+    }
+    .animate-pulse-slow {
+        animation: pulse-slow 6s ease-in-out infinite;
+    }
+</style>
 {{end}}d}}

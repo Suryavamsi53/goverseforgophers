@@ -47,23 +47,15 @@
          x-data="{ 
             isSpeaking: false,
             isPaused: false,
-            speech: null,
+            speechChunks: [],
+            currentChunkIndex: 0,
+            currentUtterance: null,
             init() {
-                this.speech = new SpeechSynthesisUtterance();
-                this.speech.onend = () => { this.isSpeaking = false; this.isPaused = false; };
+                window.speechSynthesis.cancel();
             },
             toggleSpeech() {
                 if (!this.isSpeaking) {
-                    const text = $refs.content.innerText;
-                    this.speech.text = text;
-                    // Get first available English voice
-                    const voices = window.speechSynthesis.getVoices();
-                    const enVoice = voices.find(v => v.lang.startsWith('en-'));
-                    if (enVoice) this.speech.voice = enVoice;
-                    
-                    window.speechSynthesis.speak(this.speech);
-                    this.isSpeaking = true;
-                    this.isPaused = false;
+                    this.startSpeech();
                 } else if (this.isPaused) {
                     window.speechSynthesis.resume();
                     this.isPaused = false;
@@ -72,10 +64,60 @@
                     this.isPaused = true;
                 }
             },
+            startSpeech() {
+                window.speechSynthesis.cancel();
+                this.isSpeaking = true;
+                this.isPaused = false;
+                let rawText = $refs.content.innerText;
+                let chunks = rawText.match(/[^\.!\?]+[\.!\?]+/g) || [rawText];
+                this.speechChunks = chunks.map(t => t.trim()).filter(t => t.length > 0);
+                this.currentChunkIndex = 0;
+                this.playChunk();
+            },
+            playChunk() {
+                if (this.currentChunkIndex >= this.speechChunks.length || this.currentChunkIndex < 0) {
+                    this.isSpeaking = false;
+                    this.isPaused = false;
+                    return;
+                }
+                let text = this.speechChunks[this.currentChunkIndex];
+                this.currentUtterance = new SpeechSynthesisUtterance(text);
+                let voices = window.speechSynthesis.getVoices();
+                let enVoice = voices.find(v => v.lang.startsWith('en-'));
+                if (enVoice) this.currentUtterance.voice = enVoice;
+                
+                this.currentUtterance.onend = () => {
+                    if (this.isSpeaking && !this.isPaused) {
+                        this.currentChunkIndex++;
+                        this.playChunk();
+                    }
+                };
+                this.currentUtterance.onerror = (e) => {
+                    console.error('Speech error', e);
+                    this.isSpeaking = false;
+                };
+                window.speechSynthesis.speak(this.currentUtterance);
+            },
+            nextChunk() {
+                if(this.isSpeaking) {
+                    window.speechSynthesis.cancel();
+                    this.currentChunkIndex++;
+                    this.playChunk();
+                }
+            },
+            prevChunk() {
+                if(this.isSpeaking) {
+                    window.speechSynthesis.cancel();
+                    this.currentChunkIndex = Math.max(0, this.currentChunkIndex - 1);
+                    this.playChunk();
+                }
+            },
             stopSpeech() {
                 window.speechSynthesis.cancel();
                 this.isSpeaking = false;
                 this.isPaused = false;
+                this.speechChunks = [];
+                this.currentChunkIndex = 0;
             }
          }">
          
@@ -103,6 +145,15 @@
                     </template>
                     <span x-text="(!isSpeaking) ? 'Play' : (isPaused ? 'Resume' : 'Pause')"></span>
                 </button>
+                
+                <div x-show="isSpeaking" class="flex items-center gap-1" x-transition>
+                    <button @click="prevChunk" class="btn-glass p-2 flex items-center justify-center" title="Repeat Previous">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+                    </button>
+                    <button @click="nextChunk" class="btn-glass p-2 flex items-center justify-center" title="Skip to Next">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                    </button>
+                </div>
                 
                 <button x-show="isSpeaking" @click="stopSpeech" x-transition
                         class="px-4 py-2 bg-error/10 hover:bg-error/20 text-error border border-error/30 rounded-lg text-sm font-medium transition-colors flex items-center justify-center">

@@ -70,19 +70,17 @@ func EvaluateProblem(ctx context.Context, code string, problem *domain.PracticeP
 		return nil, err
 	}
 
-	modCmd := exec.CommandContext(ctx, "go", "mod", "init", "run")
-	modCmd.Dir = tempDir
-	if err := modCmd.Run(); err != nil {
+	if err := os.WriteFile(filepath.Join(tempDir, "go.mod"), []byte("module run\n\ngo 1.21\n"), 0644); err != nil {
 		return nil, err
 	}
 
-	runCtx, cancel := context.WithTimeout(ctx, 15*time.Second) // Increase timeout for docker overhead
+	runCtx, cancel := context.WithTimeout(ctx, 30*time.Second) // Increase timeout for docker overhead
 	defer cancel()
 
 	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
-		"--memory", "256m",
-		"--cpus", "0.5",
-		"-v", tempDir+":/app",
+		"--memory", "512m",
+		"--cpus", "2.0",
+		"-v", tempDir+":/app:z",
 		"-w", "/app",
 		"golang:1.21-alpine",
 		"go", "run", "main.go", "solution.go")
@@ -190,21 +188,19 @@ func EvaluateProject(ctx context.Context, code string, project *domain.Project) 
 		return nil, err
 	}
 
-	modCmd := exec.CommandContext(ctx, "go", "mod", "init", "project")
-	modCmd.Dir = tempDir
-	if err := modCmd.Run(); err != nil {
+	if err := os.WriteFile(filepath.Join(tempDir, "go.mod"), []byte("module project\n\ngo 1.21\n"), 0644); err != nil {
 		return nil, err
 	}
 
-	runCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	runCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	// Run go test in json mode to parse output if we want, or just check exit status.
 	// For MVP, if it exits 0, it passes.
 	cmd := exec.CommandContext(runCtx, "docker", "run", "--rm",
-		"--memory", "256m",
-		"--cpus", "0.5",
-		"-v", tempDir+":/app",
+		"--memory", "512m",
+		"--cpus", "2.0",
+		"-v", tempDir+":/app:z",
 		"-w", "/app",
 		"golang:1.21-alpine",
 		"go", "test", "-v", ".")

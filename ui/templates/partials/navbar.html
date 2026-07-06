@@ -59,6 +59,23 @@
 
     <!-- User Profile Footer -->
     <div class="p-4 border-t border-white/5">
+        {{if .User}}
+        <a href="/settings" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-glow to-blue-500 p-[2px]">
+                <div class="w-full h-full bg-panel rounded-full flex items-center justify-center overflow-hidden">
+                    {{if and .Profile .Profile.AvatarURL}}
+                        <img src="{{.Profile.AvatarURL}}" alt="avatar" class="w-full h-full object-cover">
+                    {{else}}
+                        <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    {{end}}
+                </div>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-medium text-primary truncate">{{.User.Username}}</p>
+                <p class="text-xs text-tertiary truncate">Logged in via GitHub</p>
+            </div>
+        </a>
+        {{else}}
         <a href="/login" class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors">
             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-glow to-blue-500 p-[2px]">
                 <div class="w-full h-full bg-panel rounded-full flex items-center justify-center">
@@ -70,6 +87,7 @@
                 <p class="text-xs text-tertiary truncate">Sign in to save progress</p>
             </div>
         </a>
+        {{end}}
     </div>
 </nav>
 {{end}}

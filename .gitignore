@@ -20,3 +20,5 @@ tailwindcss
 # Temp test files
 hello.go
 test_cli.go
+server
+server.log

@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/suryavamsivaggu/goverse/internal/domain"
+	"github.com/suryavamsivaggu/goverse/pkg/auth"
 	"github.com/suryavamsivaggu/goverse/pkg/markdown"
 )
 
@@ -50,12 +51,10 @@ func (h *WebHandler) HandleLearnIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := parseTemplates()
-	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":          "Learn Golang - GoVerse",
-		"Page":           "learn_index",
-		"GroupedCourses": groupedCourses,
-		"GroupOrder":     groupOrder,
-	})
+	data := h.getBaseTemplateData(r, "Learn Golang - GoVerse", "learn_index")
+	data["GroupedCourses"] = groupedCourses
+	data["GroupOrder"] = groupOrder
+	err = tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -98,7 +97,10 @@ func (h *WebHandler) HandleLesson(w http.ResponseWriter, r *http.Request) {
 	// Fetch lesson details from DB to check completion status
 	lesson, err := h.CourseRepo.GetLessonBySlug(r.Context(), cleanLesson)
 	var isCompleted bool
-	userID := "11111111-1111-1111-1111-111111111111" // Hardcoded current user
+	var userID string
+	if claims, ok := r.Context().Value(userContextKey).(*auth.Claims); ok {
+		userID = claims.UserID
+	}
 	
 	if err == nil && lesson != nil {
 		progressList, progressErr := h.ProgressRepo.GetProgress(r.Context(), userID)
@@ -161,19 +163,18 @@ func (h *WebHandler) HandleLesson(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl := parseTemplates()
-	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":          strings.Title(strings.ReplaceAll(cleanLesson, "-", " ")) + " - GoVerse",
-		"Page":           "lesson",
-		"Content":        template.HTML(htmlContent), // Safe because we trust our own markdown
-		"TOC":            toc,
-		"Course":         cleanCourse,
-		"CourseTitle":    courseTitle,
-		"Slug":           cleanLesson,
-		"IsCompleted":    isCompleted,
-		"Lessons":        sidebarLessons,
-		"PrevLesson":     prevLesson,
-		"NextLesson":     nextLesson,
-	})
+	data := h.getBaseTemplateData(r, strings.Title(strings.ReplaceAll(cleanLesson, "-", " ")) + " - GoVerse", "lesson")
+	data["Content"] = template.HTML(htmlContent) // Safe because we trust our own markdown
+	data["TOC"] = toc
+	data["Course"] = cleanCourse
+	data["CourseTitle"] = courseTitle
+	data["Slug"] = cleanLesson
+	data["IsCompleted"] = isCompleted
+	data["Lessons"] = sidebarLessons
+	data["PrevLesson"] = prevLesson
+	data["NextLesson"] = nextLesson
+	
+	err = tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -183,7 +184,14 @@ func (h *WebHandler) HandleMarkProgress(w http.ResponseWriter, r *http.Request) 
 	lessonSlug := chi.URLParam(r, "lesson")
 	cleanLesson := filepath.Base(lessonSlug)
 	
-	userID := "11111111-1111-1111-1111-111111111111" // Hardcoded user
+	var userID string
+	if claims, ok := r.Context().Value(userContextKey).(*auth.Claims); ok {
+		userID = claims.UserID
+	}
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	
 	// Find lesson ID by slug
 	lesson, err := h.CourseRepo.GetLessonBySlug(r.Context(), cleanLesson)
@@ -199,6 +207,7 @@ func (h *WebHandler) HandleMarkProgress(w http.ResponseWriter, r *http.Request) 
 	}
 	
 	w.Header().Set("Content-Type", "text/html")
+	w.Header().Set("HX-Refresh", "true")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`
 		<div class="w-full flex items-center justify-center px-4 py-2 bg-go-cyan/10 text-go-cyan rounded-lg font-medium border border-go-cyan/30">
