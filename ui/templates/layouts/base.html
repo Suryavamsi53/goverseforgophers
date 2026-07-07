@@ -78,7 +78,7 @@
          x-transition:leave="ease-in duration-100" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="cmdOpen = false"></div>
         <div class="relative w-full max-w-2xl bg-elevated border border-white/10 rounded-2xl shadow-modal overflow-hidden">
-            <input type="text" placeholder="Search lessons, projects, docs... (Esc to close)" class="w-full bg-transparent text-lg text-primary placeholder-secondary px-6 py-4 outline-none border-b border-white/5" @keydown.escape.window="cmdOpen = false" autofocus>
+            <input type="text" name="q" placeholder="Search lessons, projects, docs... (Esc to close)" class="w-full bg-transparent text-lg text-primary placeholder-secondary px-6 py-4 outline-none border-b border-white/5" @keydown.escape.window="cmdOpen = false" autofocus hx-get="/api/search" hx-target="#search-results" hx-trigger="keyup changed delay:300ms, search">
             <!-- HTMX Search Results Target -->
             <div id="search-results" class="p-2 max-h-[60vh] overflow-y-auto">
                 <div class="text-secondary text-sm p-4 text-center">Type to search...</div>

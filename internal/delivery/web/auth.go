@@ -42,6 +42,11 @@ func RegisterAuthRoutes(r chi.Router, authUseCase domain.AuthUseCase, jwtManager
 func AuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Disable caching for protected routes to prevent back-button access after logout
+			w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
+
 			cookie, err := r.Cookie("token")
 			if err != nil {
 				http.Redirect(w, r, "/login", http.StatusSeeOther)

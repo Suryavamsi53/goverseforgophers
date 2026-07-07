@@ -33,6 +33,7 @@ func RegisterRoutes(r chi.Router, userRepo domain.UserRepository, courseRepo dom
 
 	r.Get("/", h.HandleLandingPage)
 	r.Get("/roadmap", h.HandleRoadmap)
+	r.Get("/api/search", h.HandleSearch)
 
 	// Auth routes
 	RegisterAuthRoutes(r, authUseCase, jwtManager, userRepo)
@@ -43,6 +44,7 @@ func RegisterRoutes(r chi.Router, userRepo domain.UserRepository, courseRepo dom
 		r.Get("/dashboard", h.HandleDashboard)
 		r.Get("/settings", h.HandleSettingsPage)
 		r.Post("/api/v1/settings", h.HandleUpdateSettings)
+		r.Post("/api/v1/editor-settings", h.HandleUpdateEditorSettings)
 		r.Get("/leaderboard", h.HandleLeaderboard)
 		r.Get("/projects", h.HandleProjects)
 		r.Get("/projects/{slug}", h.HandleProjectDetail)
@@ -361,12 +363,25 @@ func (h *WebHandler) HandleSettingsPage(w http.ResponseWriter, r *http.Request) 
 		profile = &domain.UserProfile{}
 	}
 
+	settings, err := h.UserRepo.GetSettings(r.Context(), user.ID)
+	if err != nil {
+		settings = &domain.UserSettings{
+			EditorSettings: map[string]interface{}{
+				"theme": "vs-dark",
+				"fontSize": 14,
+				"keyMap": "default",
+				"formatOnSave": true,
+			},
+		}
+	}
+
 	tmpl := parseTemplates()
 	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
 		"Title":      "Settings - GoVerse",
 		"Page":       "settings",
 		"User":       user,
 		"Profile":    profile,
+		"Settings":   settings,
 		"IsLoggedIn": true,
 	})
 	if err != nil {
@@ -422,4 +437,71 @@ func (h *WebHandler) HandleUpdateSettings(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]bool{"success": true})
+}
+
+func (h *WebHandler) HandleUpdateEditorSettings(w http.ResponseWriter, r *http.Request) {
+	claims, ok := r.Context().Value(userContextKey).(*auth.Claims)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	settings := &domain.UserSettings{
+		UserID:         claims.UserID,
+		EditorSettings: req,
+	}
+
+	if err := h.UserRepo.UpdateSettings(r.Context(), settings); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to save settings"})
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]bool{"success": true})
+}
+
+func (h *WebHandler) HandleSearch(w http.ResponseWriter, r *http.Request) {
+	q := strings.ToLower(r.URL.Query().Get("q"))
+	if q == "" {
+		w.Write([]byte(`<div class="text-secondary text-sm p-4 text-center">Type to search...</div>`))
+		return
+	}
+
+	// Simple search through courses and lessons
+	courses, _ := h.CourseRepo.GetAll(r.Context())
+	
+	var results []string
+	
+	for _, c := range courses {
+		if strings.Contains(strings.ToLower(c.Title), q) || strings.Contains(strings.ToLower(c.Description), q) {
+			results = append(results, `<a href="/learn/`+c.Slug+`" class="block p-3 hover:bg-white/5 rounded-lg mb-1"><div class="text-white font-medium">`+c.Title+`</div><div class="text-xs text-secondary">Course</div></a>`)
+		}
+		
+		lessons, _ := h.CourseRepo.GetLessonsByCourseID(r.Context(), c.ID)
+		for _, l := range lessons {
+			if strings.Contains(strings.ToLower(l.Title), q) {
+				results = append(results, `<a href="/learn/`+c.Slug+`/`+l.Slug+`" class="block p-3 hover:bg-white/5 rounded-lg mb-1"><div class="text-white font-medium">`+l.Title+`</div><div class="text-xs text-secondary">Lesson in `+c.Title+`</div></a>`)
+			}
+		}
+	}
+
+	if len(results) == 0 {
+		w.Write([]byte(`<div class="text-secondary text-sm p-4 text-center">No results found for "` + q + `"</div>`))
+		return
+	}
+
+	// Limit to top 10 results
+	if len(results) > 10 {
+		results = results[:10]
+	}
+
+	w.Write([]byte(strings.Join(results, "")))
 }
