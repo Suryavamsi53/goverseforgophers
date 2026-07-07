@@ -2,22 +2,22 @@
 <div class="relative w-full max-w-[1400px] mx-auto px-6 py-12">
 
     <!-- Ambient Glowing Blobs for Hero Background -->
-    <div class="absolute top-0 left-1/4 w-[600px] h-[400px] bg-go-emerald/20 rounded-full mix-blend-screen filter blur-[120px] pointer-events-none animate-pulse-slow"></div>
+    <div class="absolute top-0 left-1/4 w-[600px] h-[400px] bg-glow/20 rounded-full mix-blend-screen filter blur-[120px] pointer-events-none animate-pulse-slow"></div>
     <div class="absolute top-0 right-1/4 w-[500px] h-[300px] bg-blue-600/10 rounded-full mix-blend-screen filter blur-[100px] pointer-events-none"></div>
 
     <!-- Hero Row -->
     <div class="flex items-center gap-6 mb-12 relative z-10">
         <div class="relative">
-            <div class="w-20 h-20 rounded-2xl p-[2px] bg-gradient-to-br from-go-emerald to-blue-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-                <img src="{{if .Profile.AvatarURL}}{{.Profile.AvatarURL}}{{else}}https://ui-avatars.com/api/?name={{.User.Username}}&background=111111&color=34d399&rounded=true{{end}}" alt="Avatar" class="w-full h-full rounded-2xl object-cover bg-dark-900">
+            <div class="w-20 h-20 rounded-2xl p-[2px] bg-gradient-to-br from-glow to-blue-500 shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+                <img src="{{if .Profile.AvatarURL}}{{.Profile.AvatarURL}}{{else}}https://ui-avatars.com/api/?name={{.User.Username}}&background=111111&color=34d399&rounded=true{{end}}" alt="Avatar" class="w-full h-full rounded-2xl object-cover bg-panel">
             </div>
-            <div class="absolute -bottom-2 -right-2 bg-dark-900 rounded-full p-1 border border-white/10">
-                <div class="w-4 h-4 bg-emerald-500 rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]"></div>
+            <div class="absolute -bottom-2 -right-2 bg-panel rounded-full p-1 border border-white/10">
+                <div class="w-4 h-4 bg-glow rounded-full shadow-[0_0_10px_rgba(16,185,129,1)]"></div>
             </div>
         </div>
         <div>
             <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2 flex items-center gap-3">
-                Welcome back, <span class="text-transparent bg-clip-text bg-gradient-to-r from-go-emerald to-blue-400">{{.User.Username}}</span>
+                Welcome back, <span class="text-transparent bg-clip-text bg-gradient-to-r from-glow to-blue-400">{{.User.Username}}</span>
                 <span class="text-2xl animate-wave origin-bottom-right inline-block">👋</span>
             </h1>
             <p class="text-gray-400 text-lg font-medium">Your engineering metrics and current sprint goals.</p>
@@ -28,7 +28,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 relative z-10">
         
         <!-- StatCard 1 -->
-        <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+        <div class="bg-panel/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 to-yellow-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
             <div class="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/10 rounded-full blur-3xl group-hover:bg-orange-500/20 transition-all"></div>
             
@@ -43,7 +43,7 @@
         </div>
 
         <!-- StatCard 2 -->
-        <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+        <div class="bg-panel/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-400 opacity-50 group-hover:opacity-100 transition-opacity"></div>
             <div class="absolute -right-6 -top-6 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl group-hover:bg-blue-500/20 transition-all"></div>
             
@@ -58,7 +58,7 @@
         </div>
 
         <!-- StatCard 3 -->
-        <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+        <div class="bg-panel/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50 group-hover:opacity-100 transition-opacity"></div>
             <div class="absolute -right-6 -top-6 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl group-hover:bg-purple-500/20 transition-all"></div>
             
@@ -70,7 +70,7 @@
                 <span class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">{{.CompletedLessons}}</span>
                 <span class="text-sm font-bold text-gray-500">/ {{.TotalLessons}}</span>
             </div>
-            <div class="w-full bg-dark-700/50 rounded-full h-2 mt-5 overflow-hidden">
+            <div class="w-full bg-tertiary/50 rounded-full h-2 mt-5 overflow-hidden">
                 <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full relative" style="width: {{.LessonPercent}}%">
                     <div class="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[2px]"></div>
                 </div>
@@ -78,13 +78,13 @@
         </div>
 
         <!-- StatCard 4 -->
-        <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-go-emerald to-emerald-300 opacity-50 group-hover:opacity-100 transition-opacity"></div>
-            <div class="absolute -right-6 -top-6 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl group-hover:bg-emerald-500/20 transition-all"></div>
+        <div class="bg-panel/50 backdrop-blur-xl rounded-3xl p-7 border border-white/5 shadow-2xl relative overflow-hidden group hover:-translate-y-2 transition-all duration-300">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-glow to-glowHover opacity-50 group-hover:opacity-100 transition-opacity"></div>
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-glow/10 rounded-full blur-3xl group-hover:bg-glow/20 transition-all"></div>
             
             <div class="flex justify-between items-start mb-6 relative">
                 <span class="text-sm font-bold tracking-wider uppercase text-gray-500">Total XP</span>
-                <div class="p-2 bg-emerald-500/10 rounded-xl text-emerald-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg></div>
+                <div class="p-2 bg-glow/10 rounded-xl text-glowHover"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg></div>
             </div>
             <div class="flex items-baseline gap-2 relative">
                 <span class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">{{.Profile.TotalScore}}</span>
@@ -100,26 +100,26 @@
         <div class="lg:col-span-2 space-y-8">
             
             <!-- Current Sprint / Resume -->
-            <div class="bg-dark-950/80 rounded-3xl p-1 border border-white/10 shadow-2xl relative overflow-hidden group">
-                <div class="absolute inset-0 bg-gradient-to-br from-go-emerald/10 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                <div class="bg-dark-900 rounded-[22px] p-8 h-full flex flex-col justify-center relative">
-                    <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-go-emerald/5 to-transparent pointer-events-none group-hover:from-go-emerald/10 transition-colors duration-500"></div>
+            <div class="bg-app/80 rounded-3xl p-1 border border-white/10 shadow-2xl relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-glow/10 via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                <div class="bg-panel rounded-[22px] p-8 h-full flex flex-col justify-center relative">
+                    <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-glow/5 to-transparent pointer-events-none group-hover:from-glow/10 transition-colors duration-500"></div>
                     
                     <h2 class="text-sm font-bold tracking-widest text-gray-500 uppercase mb-6 flex items-center gap-2">
-                        <svg class="w-4 h-4 text-go-emerald" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <svg class="w-4 h-4 text-glow" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         Current Sprint
                     </h2>
                     
                     {{if .NextLesson}}
                     <div class="flex flex-col md:flex-row gap-6 items-start md:items-center relative z-10">
-                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-dark-800 to-dark-950 p-[1px] shadow-2xl flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
-                            <div class="w-full h-full bg-dark-900 rounded-2xl flex items-center justify-center">
-                                <svg class="w-10 h-10 text-go-emerald drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-elevated to-app p-[1px] shadow-2xl flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+                            <div class="w-full h-full bg-panel rounded-2xl flex items-center justify-center">
+                                <svg class="w-10 h-10 text-glow drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                             </div>
                         </div>
                         <div class="flex-grow">
-                            <div class="text-[11px] font-black text-go-emerald uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-go-emerald animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+                            <div class="text-[11px] font-black text-glow uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-glow animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
                                 {{.NextCourse.Title}}
                             </div>
                             <h3 class="text-2xl font-bold text-white mb-2">{{.NextLesson.Title}}</h3>
@@ -132,7 +132,7 @@
                     </div>
                     {{else}}
                     <div class="text-center py-8">
-                        <div class="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+                        <div class="w-20 h-20 bg-glow/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-glow/20">
                             <span class="text-4xl">🏆</span>
                         </div>
                         <h3 class="text-xl font-bold text-white mt-4">Master of GoVerse!</h3>
@@ -144,28 +144,110 @@
             </div>
 
             <!-- Learning Activity Chart -->
-            <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl relative">
-                <div class="flex justify-between items-center mb-10">
+            <div class="bg-panel/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl relative group">
+                <div class="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/5 via-transparent to-glow/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                
+                <div class="flex justify-between items-center mb-10 relative z-10">
                     <h2 class="text-lg font-bold text-white flex items-center gap-3">
-                        <div class="p-2 rounded-lg bg-white/5"><svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg></div>
+                        <div class="p-2 rounded-xl bg-gradient-to-br from-elevated to-app border border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                            <svg class="w-4 h-4 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                        </div>
                         Learning Activity
                     </h2>
-                    <span class="text-xs font-bold uppercase tracking-widest text-gray-500 bg-black/40 px-3 py-1.5 rounded-lg border border-white/5">Last 14 Days</span>
+                    <div class="flex items-center gap-3">
+                        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-glow/10 border border-glow/20">
+                            <span class="w-2 h-2 rounded-full bg-glow animate-pulse"></span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-glow">On Fire</span>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 bg-zinc-900 px-3 py-1.5 rounded-lg border border-white/5 shadow-inner">Last 14 Days</span>
+                    </div>
                 </div>
                 
-                <div class="h-56 w-full flex items-end justify-between gap-3 px-2">
-                    <!-- Rounded bars with gradients -->
-                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[40%] hover:brightness-125 transition-all cursor-pointer"></div>
-                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[60%] hover:brightness-125 transition-all cursor-pointer"></div>
-                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[30%] hover:brightness-125 transition-all cursor-pointer"></div>
-                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[80%] hover:brightness-125 transition-all cursor-pointer"></div>
-                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[50%] hover:brightness-125 transition-all cursor-pointer"></div>
-                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[20%] hover:brightness-125 transition-all cursor-pointer"></div>
-                    <div class="w-full bg-gradient-to-t from-dark-700/50 to-dark-700 rounded-full h-[90%] hover:brightness-125 transition-all cursor-pointer"></div>
+                <div class="relative h-48 w-full mt-4 flex items-end">
+                    <!-- Y Axis Grid & Labels -->
+                    <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
+                        <div class="w-full h-[1px] bg-white/5 border-b border-dashed border-white/5 relative"><span class="absolute -top-2 -left-2 text-[9px] font-bold text-gray-500 -translate-x-full">100%</span></div>
+                        <div class="w-full h-[1px] bg-white/5 border-b border-dashed border-white/5 relative"><span class="absolute -top-2 -left-2 text-[9px] font-bold text-gray-500 -translate-x-full">50%</span></div>
+                        <div class="w-full h-[1px] bg-white/5 relative"><span class="absolute -top-2 -left-2 text-[9px] font-bold text-gray-500 -translate-x-full">0%</span></div>
+                    </div>
                     
-                    <!-- Today's active bar -->
-                    <div class="w-full bg-gradient-to-t from-go-emerald/40 to-go-emerald rounded-full h-[100%] shadow-[0_0_20px_rgba(52,211,153,0.4)] relative cursor-pointer group">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-2 h-2 bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.8)] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <!-- Chart Bars -->
+                    <div class="flex-grow flex items-end justify-between gap-1 sm:gap-2 h-full relative z-10 pl-8 pb-6">
+                        
+                        <!-- Bar 1 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[30%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">2 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 2 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[50%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">4 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 3 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[20%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">1 Lesson</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 4 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[60%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">5 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 5 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[40%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">3 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 6 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[75%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">6 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 7 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[55%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">4 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 8 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[35%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">3 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 9 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[85%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">7 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 10 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[45%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">3 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 11 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[65%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">5 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 12 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[90%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">8 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 13 -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[70%]">
+                            <div class="absolute -top-10 bg-zinc-900 text-white text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-white/10 shadow-2xl pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">6 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-white/5 to-white/10 rounded-t-md h-full transition-all group-hover/bar:from-blue-600/40 group-hover/bar:to-blue-400/30 group-hover/bar:border-t border-blue-400/50 hover:shadow-[0_0_15px_rgba(96,165,250,0.3)]"></div>
+                        </div>
+                        <!-- Bar 14 (Today - Active) -->
+                        <div class="relative group/bar flex-1 flex flex-col items-center justify-end h-[100%]">
+                            <div class="absolute -top-10 bg-glow/90 text-zinc-900 text-[10px] font-bold px-3 py-1.5 rounded-md opacity-0 group-hover/bar:opacity-100 transition-all border border-glowHover/50 shadow-[0_0_15px_rgba(52,211,153,0.5)] pointer-events-none transform group-hover/bar:-translate-y-2 whitespace-nowrap z-20">9 Lessons</div>
+                            <div class="w-full bg-gradient-to-t from-glow/40 to-glow rounded-t-md h-full transition-all shadow-[0_0_20px_rgba(52,211,153,0.3)] border-t border-white/50 relative overflow-hidden group-hover/bar:brightness-125 cursor-pointer">
+                                <div class="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent"></div>
+                                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-1 bg-white/80 rounded-full blur-[1px] mt-1"></div>
+                            </div>
+                            <span class="absolute -bottom-5 text-[9px] font-bold text-glow tracking-wider uppercase">Today</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -176,17 +258,17 @@
         <div class="space-y-8">
             
             <!-- Today's Goals -->
-            <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl" x-data="{ goals: [ {id:1, text:'Complete Goroutines Lesson', done:false}, {id:2, text:'Solve 2 Practice Problems', done:false}, {id:3, text:'Review Heap Allocation', done:true} ] }">
+            <div class="bg-panel/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl" x-data="{ goals: [ {id:1, text:'Complete Goroutines Lesson', done:false}, {id:2, text:'Solve 2 Practice Problems', done:false}, {id:3, text:'Review Heap Allocation', done:true} ] }">
                 <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-3">
                     <div class="p-2 rounded-lg bg-white/5"><svg class="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg></div>
                     Daily Goals
                 </h2>
                 <div class="space-y-4">
                     <template x-for="goal in goals" :key="goal.id">
-                        <label class="flex items-center gap-4 p-4 rounded-2xl bg-dark-950 border border-white/5 cursor-pointer hover:bg-dark-800 transition-all shadow-sm group">
+                        <label class="flex items-center gap-4 p-4 rounded-2xl bg-app border border-white/5 cursor-pointer hover:bg-elevated transition-all shadow-sm group">
                             <div class="relative flex items-center justify-center w-5 h-5">
-                                <input type="checkbox" x-model="goal.done" class="peer appearance-none w-5 h-5 border-2 border-gray-600 rounded cursor-pointer checked:bg-go-emerald checked:border-go-emerald transition-all">
-                                <svg class="absolute w-3 h-3 text-dark-900 opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                <input type="checkbox" x-model="goal.done" class="peer appearance-none w-5 h-5 border-2 border-gray-600 rounded cursor-pointer checked:bg-glow checked:border-glow transition-all">
+                                <svg class="absolute w-3 h-3 text-panel opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                             </div>
                             <span class="text-[14px] font-medium select-none transition-all duration-300" :class="goal.done ? 'text-gray-500 line-through' : 'text-gray-200'" x-text="goal.text"></span>
                         </label>
@@ -195,7 +277,7 @@
             </div>
 
             <!-- Skills Radar -->
-            <div class="bg-dark-900/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl overflow-hidden relative group">
+            <div class="bg-panel/50 backdrop-blur-xl rounded-3xl p-8 border border-white/5 shadow-2xl overflow-hidden relative group">
                 <div class="absolute inset-0 bg-gradient-to-t from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 <h2 class="text-lg font-bold text-white mb-8 flex items-center gap-3 relative z-10">
                     <div class="p-2 rounded-lg bg-white/5"><svg class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg></div>
