@@ -161,6 +161,8 @@
                 {{template "projects" .}}
             {{else if eq .Page "project_detail"}}
                 {{template "project_detail" .}}
+            {{else if eq .Page "devops"}}
+                {{template "devops" .}}
             {{end}}
         </main>
     </div>

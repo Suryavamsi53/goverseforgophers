@@ -1,0 +1,598 @@
+{{define "devops"}}
+<div class="h-full flex flex-col w-full bg-app overflow-auto relative text-gray-300 pb-16">
+    <!-- Ambient Background Effects -->
+    <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0 fixed">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px] mix-blend-screen"></div>
+        <div class="absolute top-[40%] -right-[10%] w-[30%] h-[50%] rounded-full bg-glow/5 blur-[120px] mix-blend-screen"></div>
+    </div>
+
+    <!-- Header -->
+    <div class="pt-10 pb-6 px-8 text-center relative z-10 shrink-0 border-b border-white/5 bg-app/80 backdrop-blur-xl">
+        <h1 class="text-3xl font-extrabold text-white tracking-tight sm:text-4xl mb-3 flex items-center justify-center gap-3">
+            Load Balancers & <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-glow">DevOps Roadmap</span>
+        </h1>
+        <p class="text-sm text-gray-400 max-w-2xl mx-auto">A comprehensive resource covering Load Balancing fundamentals and a complete DevOps Learning Path.</p>
+    </div>
+
+    <!-- Content Area -->
+    <div class="w-full max-w-4xl mx-auto mt-10 px-4 md:px-8 relative z-10">
+        <!-- Part 1 -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-2">Part 1: Understanding Load Balancers</h2>
+            
+            <div class="mb-8 bg-white/5 border border-white/10 p-6 rounded-xl backdrop-blur-sm shadow-xl">
+                <h3 class="text-xl font-semibold text-white mb-3">What is a Load Balancer?</h3>
+                <p class="mb-4 leading-relaxed">
+                    A <strong class="text-glow font-semibold">load balancer</strong> is a device or software that distributes incoming network traffic across multiple servers to ensure no single server becomes overwhelmed. Its primary goal is to improve the <strong>availability</strong>, <strong>reliability</strong>, and <strong>scalability</strong> of applications.
+                </p>
+                <h4 class="text-white font-medium mb-2">Key Benefits:</h4>
+                <ul class="list-none space-y-2">
+                    <li class="flex items-start">
+                        <svg class="w-5 h-5 text-green-400 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span><strong class="text-white">High Availability:</strong> Prevents downtime by rerouting traffic away from failed servers.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-5 h-5 text-blue-400 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                        <span><strong class="text-white">Scalability:</strong> Easily add more servers to handle increased traffic.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-5 h-5 text-yellow-400 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        <span><strong class="text-white">Performance:</strong> Reduces latency by directing users to the closest or least busy server.</span>
+                    </li>
+                    <li class="flex items-start">
+                        <svg class="w-5 h-5 text-red-400 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        <span><strong class="text-white">Security:</strong> Acts as a first line of defense against DDoS attacks.</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-white mb-4">Types of Load Balancers</h3>
+                <div class="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-xl">
+                    <table class="min-w-full divide-y divide-white/10">
+                        <thead class="bg-black/20">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">OSI Layer</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Basis of Routing</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Speed</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/10">
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">Layer 4</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">Transport</td>
+                                <td class="px-6 py-4 text-sm">IP Address & Port (TCP/UDP)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-green-400">Fast</td>
+                                <td class="px-6 py-4 text-sm">General traffic, simple routing.</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">Layer 7</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">Application</td>
+                                <td class="px-6 py-4 text-sm">Content (URL, Headers, Cookies)</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-orange-400">Slower</td>
+                                <td class="px-6 py-4 text-sm">Modern apps, microservices, SSL termination.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold text-white mb-3">Popular Tools</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-white/5 border border-white/10 p-4 rounded-lg flex items-start gap-3">
+                        <div class="text-green-500 mt-1">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white">NGINX</h4>
+                            <p class="text-sm">High-performance web server and reverse proxy.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 p-4 rounded-lg flex items-start gap-3">
+                        <div class="text-blue-500 mt-1">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white">HAProxy</h4>
+                            <p class="text-sm">Extremely high availability for TCP/HTTP.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 p-4 rounded-lg flex items-start gap-3">
+                        <div class="text-orange-500 mt-1">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white">AWS ELB</h4>
+                            <p class="text-sm">Managed service for cloud-native apps.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 p-4 rounded-lg flex items-start gap-3">
+                        <div class="text-indigo-500 mt-1">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"></path></svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-white">Kubernetes Ingress</h4>
+                            <p class="text-sm">Manages external access to services in a K8s cluster.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent my-12"></div>
+
+        <!-- Part 2 -->
+        <div>
+            <h2 class="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-2">Part 2: DevOps Learning Roadmap</h2>
+            
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🚀</span> Executive Summary
+                </h3>
+                <p class="mb-4">
+                    <strong>DevOps</strong> is a cultural and technical movement that unifies software development (Dev) and IT operations (Ops). Its primary goal is to shorten the systems development life cycle and provide continuous delivery with high software quality.
+                </p>
+                <div class="bg-white/5 border border-white/10 p-6 rounded-xl mt-4">
+                    <h4 class="text-white font-medium mb-3">The 6 Pillars of DevOps:</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">1</div>
+                            <span><strong>CI/CD:</strong> Cont. Integration & Deployment</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs shrink-0">2</div>
+                            <span><strong>IaC:</strong> Infrastructure as Code</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center font-bold text-xs shrink-0">3</div>
+                            <span><strong>Automation:</strong> Eliminate manual toil</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center font-bold text-xs shrink-0">4</div>
+                            <span><strong>Monitoring:</strong> Full observability</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold text-xs shrink-0">5</div>
+                            <span><strong>Security:</strong> DevSecOps (Shift-Left)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0">6</div>
+                            <span><strong>Collaboration:</strong> Breaking down silos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                    <span>🗺️</span> Visual Learning Roadmap
+                </h3>
+                
+                <div class="w-full bg-panel/30 border border-white/5 rounded-2xl backdrop-blur-sm shadow-2xl p-6 relative flex flex-col items-center">
+                    <pre class="mermaid text-base">
+graph TD
+    %% Custom Styling
+    classDef default fill:#111111,stroke:#333333,stroke-width:1px,color:#A1A1AA,rx:8px,ry:8px,font-family:Inter;
+    classDef cluster fill:none,stroke:#52525B,stroke-width:1px,color:#EDEDED,font-weight:bold,rx:8px,ry:8px;
+    classDef phase fill:#1A1A1A,stroke:#00D084,stroke-width:2px,color:#00D084,font-weight:bold,rx:8px,ry:8px;
+    classDef node fill:#0A0A0A,stroke:#333333,stroke-width:1px,color:#A1A1AA,rx:6px,ry:6px;
+
+    A[Phase 1: Foundations]:::phase --> B[Phase 2: Core Tools]:::phase
+    B --> C[Phase 3: Advanced Orchestration]:::phase
+    C --> D[Phase 4: Automation & Security]:::phase
+    D --> E[Phase 5: Observability & Scale]:::phase
+
+    subgraph Phase 1
+    A1[Linux & Bash]:::node
+    A2[Networking: DNS, HTTP, TCP/IP]:::node
+    A3[Git & Version Control]:::node
+    A1 --> A2 --> A3
+    end
+    style Phase 1 fill:none,stroke:#52525B,stroke-width:1px,color:#EDEDED,stroke-dasharray: 5 5
+
+    subgraph Phase 2
+    B1[Cloud Providers: AWS/Azure/GCP]:::node
+    B2[Containerization: Docker]:::node
+    B3[Scripting: Python/Go]:::node
+    B1 --> B2 --> B3
+    end
+    style Phase 2 fill:none,stroke:#52525B,stroke-width:1px,color:#EDEDED,stroke-dasharray: 5 5
+
+    subgraph Phase 3
+    C1[Kubernetes: Pods, Services, Ingress]:::node
+    C2[Helm Charts]:::node
+    C1 --> C2
+    end
+    style Phase 3 fill:none,stroke:#52525B,stroke-width:1px,color:#EDEDED,stroke-dasharray: 5 5
+
+    subgraph Phase 4
+    D1[CI/CD: Jenkins, GitHub Actions]:::node
+    D2[IaC: Terraform, Ansible]:::node
+    D3[DevSecOps: Vault, Snyk]:::node
+    D1 --> D2 --> D3
+    end
+    style Phase 4 fill:none,stroke:#52525B,stroke-width:1px,color:#EDEDED,stroke-dasharray: 5 5
+
+    subgraph Phase 5
+    E1[Monitoring: Prometheus, Grafana]:::node
+    E2[Logging: ELK, Loki]:::node
+    E3[Tracing: Jaeger]:::node
+    E1 --> E2 --> E3
+    end
+    style Phase 5 fill:none,stroke:#52525B,stroke-width:1px,color:#EDEDED,stroke-dasharray: 5 5
+                    </pre>
+                </div>
+            </div>
+
+            <!-- Detailed Learning Path (The 8 Sections) -->
+            <div class="mt-16">
+                <h2 class="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-2">Detailed Learning Path</h2>
+                
+                <div class="space-y-6">
+                    <!-- Section 1 -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-glow mb-2">1. Linux, Networking, Git</h3>
+                        <p class="text-sm text-gray-400 mb-5 leading-relaxed">The bedrock of all modern infrastructure. Linux is the OS of the cloud, networking dictates how systems communicate, and Git provides the version control necessary for tracking infrastructure code changes.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">⚡ Fast Learning (1-2 Weeks)</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Linux:</strong> Navigate filesystem, manage users, permissions (chmod, chown), process management, text processing (grep, awk, sed).</li>
+                                    <li><strong>Networking:</strong> IP addresses, Subnets, DNS, HTTP/S, Ports, Firewalls.</li>
+                                    <li><strong>Git:</strong> Clone, commit, push, pull, merge, conflicts.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">🧠 In-Depth Learning (1 Month+)</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Linux Internals:</strong> Kernel modules, systemd, file systems (ext4, xfs), memory management, IO scheduling.</li>
+                                    <li><strong>Networking:</strong> TCP 3-way handshake, SSL/TLS, Load Balancing algorithms, CIDR, BGP basics.</li>
+                                    <li><strong>Advanced Git:</strong> Rebasing, git hooks, submodules, GitFlow vs Trunk-Based.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2 -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-blue-400 mb-2">2. Cloud Computing</h3>
+                        <p class="text-sm text-gray-400 mb-5 leading-relaxed">The virtualized datacenters that power the internet. Cloud computing abstracts physical hardware, enabling you to provision compute, storage, and networking resources on-demand globally.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">⚡ Fast Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>AWS/Azure/GCP:</strong> Select one provider.</li>
+                                    <li><strong>Core Services:</strong> Compute (EC2), Storage (S3), Networking (VPC), Identity (IAM).</li>
+                                    <li><strong>Concept:</strong> Shared Responsibility Model.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">🧠 In-Depth Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Architecture:</strong> HA and Fault Tolerance across AZs.</li>
+                                    <li><strong>Advanced:</strong> Serverless (Lambda), Managed DBs (RDS), CDN (CloudFront).</li>
+                                    <li><strong>Cost Optimization:</strong> Spot/Reserved instances, tagging.</li>
+                                    <li><strong>Multi-Cloud:</strong> Differences in networking models.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3 -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-cyan-400 mb-2">3. Containerization (Docker)</h3>
+                        <p class="text-sm text-gray-400 mb-5 leading-relaxed">The standard unit of software packaging. Docker allows you to package an application and its dependencies into a single image that runs identically across various environments.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">⚡ Fast Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Concepts:</strong> Image vs. Container, Dockerfile basics.</li>
+                                    <li><strong>Commands:</strong> run, build, push, pull, compose up.</li>
+                                    <li><strong>Networking:</strong> Bridge vs. Host network.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">🧠 In-Depth Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Optimization:</strong> Multi-stage builds, Distroless images, layer caching.</li>
+                                    <li><strong>Security:</strong> Non-root, vulnerability scanning (Trivy), seccomp.</li>
+                                    <li><strong>Storage:</strong> Volumes vs. Bind mounts, persistent drivers.</li>
+                                    <li><strong>Networking:</strong> Custom networks, overlay networks.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4 -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-indigo-400 mb-2">4. Orchestration (Kubernetes)</h3>
+                        <p class="text-sm text-gray-400 mb-5 leading-relaxed">The "operating system" for the cloud. Kubernetes automates the deployment, scaling, networking, and resilience of thousands of containers across a cluster of virtual machines.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">⚡ Fast Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Core Objects:</strong> Pod, Deployment, Service, Namespace.</li>
+                                    <li><strong>CLI:</strong> kubectl get, apply, delete, describe, logs.</li>
+                                    <li><strong>Tools:</strong> Minikube, Kind, context switching.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">🧠 In-Depth Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Architecture:</strong> Control Plane (API, etcd, Scheduler) vs. Worker Nodes.</li>
+                                    <li><strong>Advanced Workloads:</strong> StatefulSets, DaemonSets, Jobs.</li>
+                                    <li><strong>Networking:</strong> CNI plugins (Calico), Ingress (Nginx), Service Mesh (Istio).</li>
+                                    <li><strong>Scaling & Packages:</strong> HPA, VPA, Helm charts, Kustomize.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5 -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-purple-400 mb-2">5. Infrastructure as Code (IaC)</h3>
+                        <p class="text-sm text-gray-400 mb-5 leading-relaxed">Managing infrastructure through code rather than manual clicks. Tools like Terraform and Ansible allow you to predictably version, audit, and recreate entire cloud environments in minutes.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">⚡ Fast Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Terraform:</strong> Providers, Resources, State, init, plan, apply.</li>
+                                    <li><strong>Ansible:</strong> Playbooks, Inventory, Roles, Ad-hoc commands.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">🧠 In-Depth Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Terraform Advanced:</strong> State locking, S3 backend, Modules, Workspaces.</li>
+                                    <li><strong>Ansible Advanced:</strong> Custom modules, Jinja2, Dynamic Inventory, AWX.</li>
+                                    <li><strong>Policy/GitOps:</strong> OPA, Sentinel, ArgoCD, Flux.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6 -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-pink-400 mb-2">6. CI/CD Pipelines</h3>
+                        <p class="text-sm text-gray-400 mb-5 leading-relaxed">The automated assembly line of software. CI/CD ensures that every code change is automatically built, tested for regressions, and securely deployed to production with minimal human intervention.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">⚡ Fast Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Tools:</strong> GitHub Actions, GitLab CI, Jenkins.</li>
+                                    <li><strong>Flow:</strong> Code → Build → Test → Deploy.</li>
+                                    <li><strong>Concepts:</strong> Agents, Runners, Artifacts.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">🧠 In-Depth Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Strategies:</strong> Blue/Green, Canary, Rolling, Feature Flags.</li>
+                                    <li><strong>Security:</strong> Pipeline secrets, OIDC, artifact signing.</li>
+                                    <li><strong>Optimization:</strong> Parallel jobs, matrix builds, Jenkins shared libraries.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 7 -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-red-400 mb-2">7. Security (DevSecOps)</h3>
+                        <p class="text-sm text-gray-400 mb-5 leading-relaxed">Embedding security at every stage of the lifecycle. DevSecOps shifts security "left", meaning vulnerabilities are detected during code commits and image builds rather than after deployment.</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">⚡ Fast Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Concepts:</strong> Shift-Left, OWASP Top 10.</li>
+                                    <li><strong>Tools:</strong> Snyk, Trivy, SonarQube.</li>
+                                    <li><strong>Secrets:</strong> AWS Secrets Manager, HashiCorp Vault.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">🧠 In-Depth Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Container Security:</strong> Runtime security, Cosign, network policies.</li>
+                                    <li><strong>Compliance & Identity:</strong> CIS, SOC2, OIDC, SSO, RBAC.</li>
+                                    <li><strong>Threat Modeling:</strong> STRIDE, DREAD.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 8 -->
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-orange-400 mb-2">8. Monitoring & Observability</h3>
+                        <p class="text-sm text-gray-400 mb-5 leading-relaxed">The nervous system of your applications. Monitoring tells you when something is broken (metrics/alerts), while observability helps you understand why it broke (logs/traces).</p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">⚡ Fast Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Metrics:</strong> Prometheus, Grafana.</li>
+                                    <li><strong>Logs:</strong> ELK Stack, Loki.</li>
+                                    <li><strong>Alerting:</strong> Threshold alerts.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-white mb-2 flex items-center gap-2">🧠 In-Depth Learning</h4>
+                                <ul class="list-disc list-inside text-sm space-y-1 text-gray-300">
+                                    <li><strong>Tracing:</strong> Jaeger, Zipkin.</li>
+                                    <li><strong>SLO/SLI:</strong> Defining objectives and indicators.</li>
+                                    <li><strong>Log Aggregation & Chaos:</strong> Fluentd, structured logging, Chaos Mesh.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Strategy Table -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-2">⚡ Learning Strategy: Fast vs. Deep</h3>
+                <div class="overflow-x-auto rounded-xl border border-white/10 shadow-xl">
+                    <table class="min-w-full divide-y divide-white/10 bg-white/5 backdrop-blur-sm">
+                        <thead class="bg-black/40">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-300 uppercase tracking-wider">Topic</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-300 uppercase tracking-wider">⚡ Fast Learning (Do It Now)</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-300 uppercase tracking-wider">🧠 Deep Dive (Mastery)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/10 text-sm">
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white whitespace-nowrap">Linux</td>
+                                <td class="px-6 py-4 text-gray-300">Navigate CLI, manage files, basic permissions.</td>
+                                <td class="px-6 py-4 text-gray-400">Kernel tuning, memory debugging, IO analysis.</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white whitespace-nowrap">Networking</td>
+                                <td class="px-6 py-4 text-gray-300">DNS, HTTP, basic IP routing.</td>
+                                <td class="px-6 py-4 text-gray-400">TCP/IP internals, BGP, LB logic, SSL termination.</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white whitespace-nowrap">Docker</td>
+                                <td class="px-6 py-4 text-gray-300">Build images, run containers, basic networking.</td>
+                                <td class="px-6 py-4 text-gray-400">Image optimization, security, storage drivers.</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white whitespace-nowrap">Kubernetes</td>
+                                <td class="px-6 py-4 text-gray-300">Deploy apps, manage pods/services.</td>
+                                <td class="px-6 py-4 text-gray-400">Custom Operators, Service Mesh, CNI, multi-cluster.</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white whitespace-nowrap">Terraform</td>
+                                <td class="px-6 py-4 text-gray-300">Provision VMs and S3 buckets.</td>
+                                <td class="px-6 py-4 text-gray-400">Modular architecture, state management, policy.</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white whitespace-nowrap">CI/CD</td>
+                                <td class="px-6 py-4 text-gray-300">Create a build/deploy pipeline.</td>
+                                <td class="px-6 py-4 text-gray-400">Canary deployments, rollback, security scanning.</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-bold text-white whitespace-nowrap">Monitoring</td>
+                                <td class="px-6 py-4 text-gray-300">View CPU/Memory graphs.</td>
+                                <td class="px-6 py-4 text-gray-400">Define SLOs, trace transactions, chaos engineering.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Capstone Project -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-white mb-6 border-b border-white/10 pb-2">🛠️ Capstone Project: "The Scalable E-Commerce App"</h3>
+                <div class="bg-gradient-to-br from-white/5 to-white/10 border border-white/10 p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-glow/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                    <p class="text-lg text-white mb-6"><strong>Objective:</strong> Build a fully automated, scalable, and secure web application.</p>
+                    
+                    <ul class="space-y-4 text-gray-300 relative z-10">
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">Development:</strong> Create a simple Node.js/Python app with a database.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">Containerization:</strong> Write optimized Dockerfiles for app and DB.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">Orchestration:</strong> Deploy on a Kubernetes cluster (EKS/GKE/AKS or local Kind).</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">Networking:</strong> Configure an Ingress Controller with SSL and a Load Balancer.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">IaC:</strong> Provision the entire infrastructure (Cluster, VPC, DB) using Terraform.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">Config Management:</strong> Use Ansible or Helm to configure the cluster nodes.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">CI/CD:</strong> Set up a GitHub Actions pipeline to run tests, build/scan images, deploy to staging, and manually promote to production.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">Observability:</strong> Install Prometheus/Grafana for metrics, and Loki for logs.</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="text-glow font-bold">✓</span>
+                            <span><strong class="text-white">Security:</strong> Integrate vulnerability scanner (Trivy) and manage secrets via Vault.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Timeline and Tips -->
+            <div class="mt-16 grid md:grid-cols-2 gap-8">
+                <!-- Timeline -->
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">📅 Suggested Timeline</h3>
+                    <div class="space-y-6 border-l-2 border-white/10 pl-6 ml-2">
+                        <div class="relative">
+                            <div class="absolute w-4 h-4 bg-glow rounded-full -left-[33px] top-1 ring-4 ring-app"></div>
+                            <h4 class="text-white font-bold mb-1">Phase 1 (Month 1)</h4>
+                            <p class="text-sm text-gray-400">Linux, Networking, Git, Bash Scripting.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute w-4 h-4 bg-blue-400 rounded-full -left-[33px] top-1 ring-4 ring-app"></div>
+                            <h4 class="text-white font-bold mb-1">Phase 2 (Month 2)</h4>
+                            <p class="text-sm text-gray-400">Cloud Basics, Docker, Python/Go Scripting.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute w-4 h-4 bg-purple-400 rounded-full -left-[33px] top-1 ring-4 ring-app"></div>
+                            <h4 class="text-white font-bold mb-1">Phase 3 (Month 3)</h4>
+                            <p class="text-sm text-gray-400">Kubernetes, Helm, Terraform, Ansible.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute w-4 h-4 bg-pink-400 rounded-full -left-[33px] top-1 ring-4 ring-app"></div>
+                            <h4 class="text-white font-bold mb-1">Phase 4 (Month 4)</h4>
+                            <p class="text-sm text-gray-400">CI/CD Pipelines, Monitoring, Security Basics.</p>
+                        </div>
+                        <div class="relative">
+                            <div class="absolute w-4 h-4 bg-yellow-400 rounded-full -left-[33px] top-1 ring-4 ring-app"></div>
+                            <h4 class="text-white font-bold mb-1">Phase 5 (Month 5+)</h4>
+                            <p class="text-sm text-gray-400">Capstone Project, Advanced Topics, Certification Prep.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Final Tips -->
+                <div class="bg-white/5 rounded-2xl p-6 border border-white/10 shadow-xl h-fit">
+                    <h3 class="text-xl font-bold text-white mb-5 flex items-center gap-2">💡 Final Tips</h3>
+                    <ul class="space-y-5">
+                        <li class="bg-black/20 p-4 rounded-lg border border-white/5">
+                            <strong class="text-glow block mb-1">Consistency is Key:</strong>
+                            <span class="text-sm text-gray-300 block">Coding and command-line practice daily is better than binge-learning once a week.</span>
+                        </li>
+                        <li class="bg-black/20 p-4 rounded-lg border border-white/5">
+                            <strong class="text-blue-400 block mb-1">Build Things:</strong>
+                            <span class="text-sm text-gray-300 block">You cannot learn DevOps by reading alone. Break things, fix them, and rebuild them.</span>
+                        </li>
+                        <li class="bg-black/20 p-4 rounded-lg border border-white/5">
+                            <strong class="text-purple-400 block mb-1">Join Communities:</strong>
+                            <span class="text-sm text-gray-300 block">Follow r/devops, DevOps subreddits, and local meetups.</span>
+                        </li>
+                        <li class="bg-black/20 p-4 rounded-lg border border-white/5">
+                            <strong class="text-pink-400 block mb-1">Certifications:</strong>
+                            <span class="text-sm text-gray-300 block">Consider AWS Certified Solutions Architect, CKA (Kubernetes), or Terraform Associate to validate skills.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .mermaid .edgePath .path { stroke: #3F3F46 !important; stroke-width: 2px !important; }
+    .mermaid .edgeLabel { color: #A1A1AA !important; background-color: transparent !important; }
+    .mermaid .marker { fill: #3F3F46 !important; stroke: #3F3F46 !important; }
+</style>
+{{end}}

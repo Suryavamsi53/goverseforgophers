@@ -33,6 +33,7 @@ func RegisterRoutes(r chi.Router, userRepo domain.UserRepository, courseRepo dom
 
 	r.Get("/", h.HandleLandingPage)
 	r.Get("/roadmap", h.HandleRoadmap)
+	r.Get("/devops", h.HandleDevOps)
 	r.Get("/api/search", h.HandleSearch)
 
 	// Auth routes
@@ -115,6 +116,15 @@ func (h *WebHandler) HandleLandingPage(w http.ResponseWriter, r *http.Request) {
 func (h *WebHandler) HandleRoadmap(w http.ResponseWriter, r *http.Request) {
 	tmpl := parseTemplates()
 	data := h.getBaseTemplateData(r, "Roadmap - GoVerse", "roadmap")
+	err := tmpl.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (h *WebHandler) HandleDevOps(w http.ResponseWriter, r *http.Request) {
+	tmpl := parseTemplates()
+	data := h.getBaseTemplateData(r, "DevOps Roadmap & Load Balancers - GoVerse", "devops")
 	err := tmpl.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
