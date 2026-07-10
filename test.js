@@ -1,28 +1,3 @@
-{{define "practice_questions"}}
-<div class="h-full flex flex-col w-full bg-app overflow-y-auto relative">
-    <!-- Ambient Background Effects -->
-    <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0 fixed">
-        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-glow/5 blur-[120px] mix-blend-screen"></div>
-        <div class="absolute top-[40%] -right-[10%] w-[30%] h-[50%] rounded-full bg-emerald-500/5 blur-[120px] mix-blend-screen"></div>
-    </div>
-
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full relative z-10">
-        <div class="mb-12 text-center">
-            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-4 flex items-center justify-center gap-3">
-                <svg class="w-10 h-10 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                GoVerse <span class="text-transparent bg-clip-text bg-gradient-to-r from-glow to-emerald-400">Practice</span>
-            </h1>
-            <p class="text-xl text-gray-400 max-w-2xl mx-auto">Master Go through a comprehensive, sequentially leveled curriculum of technical questions and programming challenges.</p>
-        </div>
-
-        <!-- Render Markdown Content -->
-        <article id="curriculum-container" class="glass-card p-8 md:p-12 prose prose-invert prose-pre:bg-dark-800 prose-pre:border prose-pre:border-dark-border prose-a:text-emerald-400 hover:prose-a:text-emerald-300 prose-headings:text-white prose-p:text-gray-300 max-w-none">
-            {{.Content}}
-        </article>
-    </div>
-</div>
-
-<script>
 (function() {
     const container = document.getElementById('curriculum-container');
     if (!container) return;
@@ -213,5 +188,3 @@
         return card;
     }
 })();
-</script>
-{{end}}

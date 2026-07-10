@@ -1384,4 +1384,224 @@ func main() {
 
 ---
 
-**End of Beginner Tier.** Total: 120 questions (100 MCQ/predict-output + 20 coding problems) across Levels 1–6.
+# Go Programming Curriculum — INTERMEDIATE TIER
+### Covers Level 7–8: Error Handling and Pointers
+
+---
+
+# LEVEL 7: Error Handling
+
+**7.1** What is the `error` type in Go fundamentally?
+a) A concrete struct  b) A built-in interface with a single `Error() string` method  c) An alias for string  d) A special keyword
+**Answer: b) An interface with `Error() string`**
+
+**7.2** What is the idiomatic way to create a basic error in Go?
+a) `new Error("msg")`  b) `errors.New("msg")`  c) `panic("msg")`  d) `err("msg")`
+**Answer: b) `errors.New("msg")` or `fmt.Errorf("...")`**
+
+**7.3** How do you check if an error `err` is specifically an `io.EOF` error?
+a) `if err == io.EOF` or `if errors.Is(err, io.EOF)`  b) `if err.type == io.EOF`  c) `if err.contains("EOF")`  d) You cannot
+**Answer: a) `if errors.Is(err, io.EOF)` is the modern, robust way**
+
+**7.4** What does `fmt.Errorf("failed to open: %w", err)` do?
+a) Formats a string only  b) Wraps the original `err` so it can be extracted later via `errors.Unwrap` or `errors.Is`  c) Panics if err is nil  d) Compile error
+**Answer: b) The `%w` verb wraps the error, retaining the original error for inspection**
+
+**7.5** When should you use `panic` in a standard Go application?
+a) For all errors  b) For database connection failures  c) For truly unrecoverable programming errors (e.g., nil pointer dereference, out of bounds)  d) Instead of returning `error`
+**Answer: c) Only for unrecoverable errors/bugs, not for expected runtime failures**
+
+**7.6** What function is used to stop a panic and regain control of the program?
+a) `catch()`  b) `recover()`  c) `rescue()`  d) `stopPanic()`
+**Answer: b) `recover()`, which must be called inside a deferred function**
+
+**7.7** Predict the output:
+```go
+err1 := errors.New("error")
+err2 := errors.New("error")
+fmt.Println(err1 == err2)
+```
+a) true  b) false  c) Compile error  d) Panic
+**Answer: b) false — `errors.New` returns a pointer to a struct, so each call creates a distinct pointer**
+
+**7.8** What is the result of `recover()` if the program is NOT panicking?
+a) Panics  b) Returns `nil`  c) Compile error  d) Blocks forever
+**Answer: b) Returns `nil`**
+
+**7.9** Which package provides `Is` and `As` functions for error handling?
+a) `fmt`  b) `log`  c) `errors`  d) `runtime`
+**Answer: c) The `errors` package (introduced in Go 1.13)**
+
+**7.10** If a function returns `(int, error)`, what is the recommended way to name the error return variable if it's named?
+a) `e`  b) `error`  c) `err`  d) `Exception`
+**Answer: c) `err` is the standard idiomatic name for an error variable**
+
+---
+
+### Level 7 — Coding Problems
+
+**7.11** Write a custom error type `HTTPError` (a struct containing `Code int` and `Message string`) that implements the `error` interface.
+**Answer:**
+```go
+package main
+
+import "fmt"
+
+type HTTPError struct {
+	Code    int
+	Message string
+}
+
+func (e *HTTPError) Error() string {
+	return fmt.Sprintf("HTTP %d: %s", e.Code, e.Message)
+}
+
+func doRequest() error {
+	return &HTTPError{Code: 404, Message: "Not Found"}
+}
+
+func main() {
+	err := doRequest()
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+```
+
+**7.12** Write a function that attempts to parse a config string and wraps any resulting error with additional context using `fmt.Errorf` and `%w`.
+**Answer:**
+```go
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrInvalidFormat = errors.New("invalid format")
+
+func parseConfig(data string) error {
+	if data == "" {
+		return fmt.Errorf("parsing config failed: %w", ErrInvalidFormat)
+	}
+	return nil
+}
+
+func main() {
+	err := parseConfig("")
+	if errors.Is(err, ErrInvalidFormat) {
+		fmt.Println("Matched wrapped error!")
+	}
+}
+```
+
+---
+
+# LEVEL 8: Pointers
+
+**8.1** What does the `&` operator do in Go?
+a) Logical AND  b) Bitwise AND  c) Takes the memory address of a variable  d) Both b and c
+**Answer: d) Bitwise AND, and Address-of operator**
+
+**8.2** What does the `*` operator do when placed before a pointer variable (e.g., `*ptr`)?
+a) Multiplies it by zero  b) Dereferences the pointer to access or mutate the underlying value  c) Declares a pointer type  d) Nothing
+**Answer: b) Dereferences the pointer**
+
+**8.3** Does Go support pointer arithmetic (e.g., `ptr++`) like C/C++?
+a) Yes  b) No, not by default (only via the unsafe package)  c) Only on arrays  d) Yes, but only for ints
+**Answer: b) No, pointer arithmetic is not allowed in safe Go**
+
+**8.4** What happens if you dereference a `nil` pointer?
+a) Returns zero value  b) Compile error  c) Runtime panic  d) Silently ignored
+**Answer: c) Runtime panic (invalid memory address or nil pointer dereference)**
+
+**8.5** Why would you pass a pointer to a struct into a function instead of passing the struct by value?
+a) To allow the function to mutate the original struct  b) To avoid copying a large struct (performance)  c) Both a and b  d) You shouldn't
+**Answer: c) Both a and b — mutation and performance**
+
+**8.6** What is the output of this code?
+```go
+func modify(x *int) {
+	*x = 20
+}
+func main() {
+	a := 10
+	modify(&a)
+	fmt.Println(a)
+}
+```
+a) 10  b) 20  c) Compile error  d) 0
+**Answer: b) 20**
+
+**8.7** What does `new(int)` return?
+a) `int` initialized to 0  b) `*int` pointing to a newly allocated zeroed integer  c) Compile error  d) `nil`
+**Answer: b) `*int` pointing to an integer with value 0**
+
+**8.8** Can you take the address of a literal value directly (e.g., `&5`)?
+a) Yes  b) No, you can only take the address of an addressable value like a variable  c) Yes, but only for strings  d) Only inside structs
+**Answer: b) No, literals are not addressable**
+
+**8.9** What is the output of this code?
+```go
+func changePtr(p *int) {
+	newVal := 100
+	p = &newVal
+}
+func main() {
+	a := 50
+	changePtr(&a)
+	fmt.Println(a)
+}
+```
+a) 50  b) 100  c) Compile error  d) Panic
+**Answer: a) 50 — The function modifies its local copy of the pointer `p`, not the value `a` points to.**
+
+**8.10** Which built-in function is often used interchangeably with struct initialization to get a pointer, e.g., `&MyStruct{}`?
+a) `make`  b) `new`  c) `alloc`  d) `ptr`
+**Answer: b) `new(MyStruct)` is equivalent to `&MyStruct{}`**
+
+---
+
+### Level 8 — Coding Problems
+
+**8.11** Write a function `swap(a, b *int)` that swaps the values of two integers using their pointers.
+**Answer:**
+```go
+package main
+
+import "fmt"
+
+func swap(a, b *int) {
+	temp := *a
+	*a = *b
+	*b = temp
+}
+
+func main() {
+	x, y := 1, 2
+	swap(&x, &y)
+	fmt.Println(x, y) // Output: 2 1
+}
+```
+
+**8.12** Write a program that demonstrates returning a pointer to a local variable from a function (which is safe in Go due to escape analysis).
+**Answer:**
+```go
+package main
+
+import "fmt"
+
+func createCounter() *int {
+	count := 10
+	return &count // Perfectly safe, count escapes to the heap
+}
+
+func main() {
+	counterPtr := createCounter()
+	fmt.Println(*counterPtr)
+}
+```
+
+---
+
+**End of Intermediate Tier (Part 1).** Total questions across Levels 1–8: 144.

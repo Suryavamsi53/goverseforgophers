@@ -1,30 +1,17 @@
 package main
 
 import (
-	"html/template"
+	"fmt"
 	"os"
+
+	"github.com/russross/blackfriday/v2"
 )
 
 func main() {
-	tmpl := template.New("").Funcs(template.FuncMap{
-		"add": func(a, b int) int { return a + b },
-	})
+	md := `**1.1** What is the zero value of an int in Go?
+a) null b) 0 c) undefined d) Compile error
+**Answer: b) 0**`
 	
-	// Create dummy files
-	os.WriteFile("test1.html", []byte(`{{define "base"}}{{end}}`), 0644)
-	os.WriteFile("test2.html", []byte(`{{define "leaderboard"}}{{add 1 2}}{{end}}`), 0644)
-	defer os.Remove("test1.html")
-	defer os.Remove("test2.html")
-
-	var err error
-	tmpl, err = tmpl.ParseGlob("test1.html")
-	if err != nil {
-		panic(err)
-	}
-	tmpl, err = tmpl.ParseGlob("test2.html")
-	if err != nil {
-		panic(err)
-	}
-
-	tmpl.ExecuteTemplate(os.Stdout, "test1.html", nil)
+	html := blackfriday.Run([]byte(md))
+	fmt.Println(string(html))
 }
