@@ -49,24 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-SELECT * FROM articles 
-WHERE body ILIKE '%postgres%'; -- Slow, O(N)
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Native Full Text Search (Replaces Elasticsearch for medium datasets)
--- Creates GIN index on lexemes (stemmed words)
-CREATE INDEX idx_articles_fts ON articles USING GIN (to_tsvector('english', body));
-
--- Ranks results by relevance mathematically
-SELECT title, ts_rank(to_tsvector('english', body), to_tsquery('english', 'fast & database')) as rank
-FROM articles
-WHERE to_tsvector('english', body) @@ to_tsquery('english', 'fast & database')
-ORDER BY rank DESC;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

@@ -43,24 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-CREATE ROLE api_worker LOGIN PASSWORD 'secret';
-GRANT SELECT, INSERT ON users TO api_worker;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Row Level Security (RLS) for Multi-Tenant Data Isolation
-ALTER TABLE tenant_data ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY isolate_tenants ON tenant_data
-USING (tenant_id = current_setting('app.current_tenant')::UUID);
-
--- Go backend sets context before query:
--- SET LOCAL app.current_tenant = 'uuid...';
--- DB physically blocks reading other tenants even if Go has a bug.
+-- Optimized query with indexes or advanced features
 ```
 
 ---

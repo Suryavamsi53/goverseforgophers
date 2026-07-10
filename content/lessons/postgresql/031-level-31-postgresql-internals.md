@@ -67,20 +67,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-SHOW shared_buffers;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Internals tuning for massive scale
--- postgresql.conf
-shared_buffers = 16GB       # Cache frequently accessed data (25% of RAM)
-work_mem = 64MB             # RAM allocated PER sort/hash operation
-maintenance_work_mem = 2GB  # Speeds up VACUUM and CREATE INDEX
-effective_cache_size = 48GB # Hints to Planner how much RAM OS has for caching
+-- Optimized query with indexes or advanced features
 ```
 
 ---

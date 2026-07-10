@@ -73,23 +73,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- N+1 Query Problem
--- Query 1: SELECT * FROM users;
--- Query 2-100: SELECT * FROM posts WHERE user_id = X;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- MVCC and Dead Tuples explanation via SQL
--- After 1M UPDATEs, physical disk is full of "dead" invisible rows.
--- Check bloat:
-SELECT n_dead_tup, n_live_tup FROM pg_stat_user_tables WHERE relname = 'users';
-
--- Fix bloat (Autovacuum usually handles this, but MANUAL vacuum forces it):
-VACUUM ANALYZE users;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

@@ -43,19 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Under the hood of SERIAL
-CREATE SEQUENCE order_id_seq;
-SELECT nextval('order_id_seq');
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Fixing a sequence desync after manual DB imports
--- If max(id) is 5000, next insert will fail if sequence is at 100
-SELECT setval('users_id_seq', (SELECT COALESCE(MAX(id), 1) FROM users));
+-- Optimized query with indexes or advanced features
 ```
 
 ---

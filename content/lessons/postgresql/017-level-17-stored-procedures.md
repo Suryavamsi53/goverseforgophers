@@ -49,25 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-CREATE FUNCTION get_active_user_count() RETURNS INT AS $$
-    SELECT count(*)::INT FROM users WHERE status = 'active';
-$$ LANGUAGE sql;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Stored Procedure (Supports internal Transactions!)
-CREATE OR REPLACE PROCEDURE transfer_funds(sender INT, receiver INT, amount NUMERIC) 
-LANGUAGE plpgsql AS $$
-BEGIN
-    UPDATE accounts SET balance = balance - amount WHERE id = sender;
-    UPDATE accounts SET balance = balance + amount WHERE id = receiver;
-    COMMIT; -- Procedures can commit mid-execution, Functions cannot.
-END;
-$$;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

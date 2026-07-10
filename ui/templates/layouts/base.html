@@ -163,6 +163,10 @@
                 {{template "project_detail" .}}
             {{else if eq .Page "devops"}}
                 {{template "devops" .}}
+            {{else if eq .Page "architecture"}}
+                {{template "architecture" .}}
+            {{else if eq .Page "practice_questions"}}
+                {{template "practice_questions" .}}
             {{end}}
         </main>
     </div>

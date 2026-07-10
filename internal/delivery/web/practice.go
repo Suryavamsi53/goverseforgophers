@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"html/template"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
@@ -13,7 +15,8 @@ import (
 )
 
 func (h *WebHandler) RegisterPracticeRoutes(r chi.Router) {
-	r.Get("/practice", h.HandlePracticePage)
+	r.Get("/ide", h.HandlePracticePage)
+	r.Get("/practice", h.HandlePracticeQuestions)
 	r.Post("/api/v1/execute", h.HandleExecuteCode)
 	r.Post("/api/v1/terminal", h.HandleTerminalCommand)
 	r.Get("/api/v1/ws/terminal", h.HandleWSTerminal)
@@ -22,6 +25,29 @@ func (h *WebHandler) RegisterPracticeRoutes(r chi.Router) {
 	r.Get("/api/v1/workspace", h.HandleGetWorkspace)
 	r.Post("/api/v1/workspace", h.HandleSaveWorkspace)
 	r.Post("/api/v1/user/ide-settings", h.HandleUpdateIDESettings)
+}
+
+func (h *WebHandler) HandlePracticeQuestions(w http.ResponseWriter, r *http.Request) {
+	mdBytes, err := os.ReadFile(filepath.Join(getProjectRoot(), "Go_Comprehensive_Curriculum.md"))
+	if err != nil {
+		http.Error(w, "Curriculum not found", http.StatusNotFound)
+		return
+	}
+
+	htmlContent, err := mdRenderer.Render(mdBytes)
+	if err != nil {
+		http.Error(w, "Error rendering content", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl := parseTemplates()
+	data := h.getBaseTemplateData(r, "Practice Curriculum - GoVerse", "practice_questions")
+	data["Content"] = template.HTML(htmlContent)
+	
+	err = tmpl.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func (h *WebHandler) HandlePracticePage(w http.ResponseWriter, r *http.Request) {

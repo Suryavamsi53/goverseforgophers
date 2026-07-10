@@ -49,23 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-CREATE TABLE logs (
-    id SERIAL,
-    created_at TIMESTAMP
-) PARTITION BY RANGE (created_at);
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Declarative Range Partitioning for High-Volume Time-Series
-CREATE TABLE logs_2026_07 PARTITION OF logs
-FOR VALUES FROM ('2026-07-01') TO ('2026-08-01');
-
--- Deleting old data? NEVER use DELETE. Use DROP TABLE.
--- DROP TABLE logs_2024_01; -> instantly frees 500GB with ZERO disk IO.
+-- Optimized query with indexes or advanced features
 ```
 
 ---

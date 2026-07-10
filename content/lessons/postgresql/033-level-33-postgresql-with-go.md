@@ -49,27 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
-```go
-// database/sql + lib/pq
-db, err := sql.Open("postgres", uri)
-rows, err := db.Query("SELECT name FROM users")
+```sql
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
-```go
-// pgxpool for native Postgres protocol and connection pooling
-pool, _ := pgxpool.New(context.Background(), "postgres://...")
-
-// Bulk Copy (Millions of rows in seconds, bypassing INSERT overhead)
-rows := [][]interface{}{{"Alice", 25}, {"Bob", 30}}
-pool.CopyFrom(
-    context.Background(),
-    pgx.Identifier{"users"},
-    []string{"name", "age"},
-    pgx.CopyFromRows(rows),
-)
+```sql
+-- Optimized query with indexes or advanced features
 ```
 
 ---

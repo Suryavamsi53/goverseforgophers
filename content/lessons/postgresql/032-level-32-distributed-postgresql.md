@@ -49,22 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Single node logic
-CREATE TABLE user_events (id SERIAL, tenant_id INT, data JSONB);
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Citus Extension for Horizontal Sharding
-CREATE TABLE user_events (id BIGSERIAL, tenant_id INT, data JSONB);
-
--- Distribute the table across 10+ worker nodes transparently
-SELECT create_distributed_table('user_events', 'tenant_id');
-
--- Queries filtering by tenant_id are routed to the exact node instantly.
+-- Optimized query with indexes or advanced features
 ```
 
 ---

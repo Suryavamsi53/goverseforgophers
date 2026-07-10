@@ -72,6 +72,23 @@ func AuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler
 	}
 }
 
+func OptionalAuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			cookie, err := r.Cookie("token")
+			if err == nil {
+				claims, err := jwtManager.VerifyToken(cookie.Value)
+				if err == nil {
+					ctx := context.WithValue(r.Context(), userContextKey, claims)
+					next.ServeHTTP(w, r.WithContext(ctx))
+					return
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 func (ah *AuthHandler) HandleLoginPage(w http.ResponseWriter, r *http.Request) {
 	tmpl := parseTemplates()
 	err := tmpl.ExecuteTemplate(w, "base", map[string]interface{}{

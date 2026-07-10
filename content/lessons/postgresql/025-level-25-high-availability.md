@@ -49,23 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
-```ini
-# PgBouncer Config
-[databases]
-prod_db = host=127.0.0.1 port=5432 dbname=prod
+```sql
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
-```ini
-# Transaction-level connection pooling for Go/Serverless scaling
-[pgbouncer]
-pool_mode = transaction
-max_client_conn = 10000
-default_pool_size = 50
-
-# 10,000 incoming Lambda/Go connections multiplexed onto just 50 physical Postgres sockets.
+```sql
+-- Optimized query with indexes or advanced features
 ```
 
 ---

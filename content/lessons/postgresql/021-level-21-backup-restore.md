@@ -43,23 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
-```bash
-# Logical Backup (SQL Dump)
-pg_dump -U postgres -d mydb > backup.sql
+```sql
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
-```bash
-# Physical Backup with WAL-G / pgBackRest for PITR (Point in Time Recovery)
-# In postgresql.conf:
-archive_mode = on
-archive_command = 'wal-g wal-push %p'
-
-# To restore DB to exact millisecond before DROP TABLE:
-restore_command = 'wal-g wal-fetch %f %p'
-recovery_target_time = '2026-07-08 14:15:00'
+```sql
+-- Optimized query with indexes or advanced features
 ```
 
 ---

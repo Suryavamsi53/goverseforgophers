@@ -65,11 +65,11 @@
         <!-- Activity Bar (Far Left) -->
         <div class="w-14 bg-black/40 border-r border-white/5 flex flex-col items-center py-4 shrink-0">
             <!-- Explorer Icon -->
-            <button @click="sidebarMode = 'files'" :class="sidebarMode === 'files' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-3 transition-colors" title="Explorer">
+            <button @click="sidebarMode = sidebarMode === 'files' ? '' : 'files'" :class="sidebarMode === 'files' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-3 transition-colors" title="Explorer">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
             </button>
             <!-- Extensions Icon -->
-            <button @click="sidebarMode = 'extensions'" :class="sidebarMode === 'extensions' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-4 transition-colors" title="Extensions">
+            <button @click="sidebarMode = sidebarMode === 'extensions' ? '' : 'extensions'" :class="sidebarMode === 'extensions' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-4 transition-colors" title="Extensions">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             </button>
             
@@ -120,7 +120,7 @@
         </div>
 
         <!-- Sidebar Panel Container -->
-        <div class="w-64 bg-black/20 border-r border-white/5 flex flex-col shrink-0">
+        <div x-show="sidebarMode !== ''" class="w-64 bg-black/20 border-r border-white/5 flex flex-col shrink-0" style="display: none;">
             
             <!-- FILES EXPLORER MODE -->
             <div x-show="sidebarMode === 'files'" class="flex flex-col h-full" style="display: none;">
@@ -153,8 +153,11 @@
                                     
                                     <!-- Folder Hover Actions -->
                                     <div class="ml-auto opacity-0 group-hover:opacity-100 flex items-center shrink-0 pl-2">
-                                        <button @click.stop="createFileInFolder(item.path)" title="New File in Folder" class="text-gray-500 hover:text-emerald-400 p-1">
+                                        <button @click.stop="createFileInFolder(item.path)" title="New File in Folder" class="text-gray-500 hover:text-emerald-400 p-1 mr-0.5">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        </button>
+                                        <button @click.stop="deleteFolder(item.path)" title="Delete Folder" class="text-gray-500 hover:text-red-400 p-1 transition-all">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                         </button>
                                     </div>
                                 </div>
@@ -526,6 +529,7 @@
             },
             isResizing: false,
             terminalHeight: 32,
+            folderState: {},
             term: null,
             fitAddon: null,
             ws: null,
@@ -546,8 +550,6 @@
                 { id: 'html-preview', name: 'HTML Live Preview', desc: 'Preview HTML rendering in a side panel as you type.', icon: 'H5', color: '#f97316', bg: 'rgba(249, 115, 22, 0.2)' },
                 { id: 'html-snippets', name: 'HTML5 Snippets', desc: 'Boilerplates and common HTML tags autocomplete.', icon: '<>', color: '#fb923c', bg: 'rgba(251, 146, 60, 0.1)' },
                 { id: 'rest-client', name: 'REST Client', desc: 'Send HTTP requests and view API responses in the editor.', icon: 'API', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)' },
-                { id: 'docker', name: 'Docker Explorer', desc: 'Manage containers, images, and streamline Dockerfile editing.', icon: '🐳', color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.2)' },
-                { id: 'sql-tools', name: 'Database Tools', desc: 'SQL formatter and schema explorer for PostgreSQL/MySQL.', icon: 'DB', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.2)' },
                 { id: 'fmt', name: 'Go Format on Save', desc: 'Automatically runs standard Go formatting and linting.', icon: 'fmt', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.2)' }
             ],
 
@@ -1089,6 +1091,9 @@
             },
 
             finishRename(oldName, newName) {
+                // Prevent duplicate calls from Enter + Blur firing simultaneously
+                if (this.isRenaming !== oldName) return;
+                
                 newName = newName.trim();
                 this.isRenaming = null;
                 
@@ -1121,6 +1126,25 @@
                         this.switchFile('main.go');
                     }
                     this.saveWorkspace();
+                }
+            },
+
+            deleteFolder(folderPath) {
+                if (confirm('Are you sure you want to delete the folder "' + folderPath + '" and all its contents?')) {
+                    const prefix = folderPath + '/';
+                    let deleted = false;
+                    for (const filename of Object.keys(this.files)) {
+                        if (filename.startsWith(prefix)) {
+                            delete this.files[filename];
+                            deleted = true;
+                            if (this.activeFile === filename) {
+                                this.switchFile('main.go');
+                            }
+                        }
+                    }
+                    if (deleted) {
+                        this.saveWorkspace();
+                    }
                 }
             },
 

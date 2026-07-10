@@ -43,22 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Basic String and Math
-SELECT UPPER(name), ROUND(price, 2) FROM products;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- COALESCE for Fallbacks and DATE_TRUNC for time-series aggregation
-SELECT 
-    DATE_TRUNC('hour', created_at) as signup_hour,
-    COUNT(COALESCE(referral_code, 'organic')) as total_signups
-FROM users
-GROUP BY 1 
-ORDER BY 1 DESC;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

@@ -55,25 +55,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Select a specific key from a JSON object
-SELECT metadata->>'theme' as user_theme FROM users;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- JSONB Containment Operator (@>) utilizing GIN Index
--- Lightning fast search for all users who have dark mode enabled
-SELECT id, email 
-FROM users 
-WHERE settings @> '{"theme": "dark"}'::jsonb;
-
--- Updating a nested JSON key in-place
-UPDATE users 
-SET settings = jsonb_set(settings, '{notifications,email}', 'false'::jsonb)
-WHERE id = 1;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

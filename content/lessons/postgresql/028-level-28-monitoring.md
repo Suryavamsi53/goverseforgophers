@@ -49,24 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- View all currently executing queries
-SELECT pid, query, state FROM pg_stat_activity WHERE state = 'active';
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Find the top 5 most CPU/Disk intensive queries in your cluster
-SELECT 
-    query, 
-    calls, 
-    total_exec_time / 1000 as total_seconds, 
-    mean_exec_time as avg_ms
-FROM pg_stat_statements
-ORDER BY total_exec_time DESC
-LIMIT 5;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

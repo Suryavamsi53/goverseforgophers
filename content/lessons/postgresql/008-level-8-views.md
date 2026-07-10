@@ -37,24 +37,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Standard View (Logical alias, runs query every time)
-CREATE VIEW active_users AS 
-SELECT * FROM users WHERE status = 'active';
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Materialized View (Caches result to disk for reporting)
-CREATE MATERIALIZED VIEW monthly_revenue_report AS
-SELECT DATE_TRUNC('month', created_at) as month, SUM(amount) 
-FROM transactions 
-GROUP BY 1;
-
--- Refresh it concurrently via pg_cron (zero downtime for readers)
-REFRESH MATERIALIZED VIEW CONCURRENTLY monthly_revenue_report;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

@@ -85,26 +85,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- OFFSET Pagination (Gets exponentially slower as offset grows)
-SELECT * FROM feed ORDER BY created_at DESC LIMIT 20 OFFSET 50000;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Cursor (Keyset) Pagination: O(1) Time Complexity
-SELECT * FROM feed 
-WHERE (created_at, id) < ('2026-07-08 14:00:00', 98765)
-ORDER BY created_at DESC, id DESC 
-LIMIT 20;
-
--- Upsert Pattern (Insert if new, Update if exists)
-INSERT INTO user_stats (user_id, logins)
-VALUES (1, 1)
-ON CONFLICT (user_id) DO UPDATE 
-SET logins = user_stats.logins + 1;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

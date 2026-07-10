@@ -49,24 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- In postgresql.conf for Master
-wal_level = replica
-max_wal_senders = 10
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Logical Replication (CDC: Change Data Capture)
--- Master (Publisher): Only replicate specific tables to the Data Warehouse
-CREATE PUBLICATION analytics_pub FOR TABLE users, orders;
-
--- Analytics DB (Subscriber)
-CREATE SUBSCRIPTION analytics_sub 
-CONNECTION 'host=master port=5432 user=rep_user password=secret dbname=prod'
-PUBLICATION analytics_pub;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

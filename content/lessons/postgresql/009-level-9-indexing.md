@@ -61,21 +61,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Standard B-Tree Index
-CREATE INDEX idx_users_email ON users(email);
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Partial Index: Extremely small and fast index for a tiny subset of data
-CREATE INDEX idx_pending_orders ON orders(created_at) 
-WHERE status = 'pending';
-
--- GIN Index: O(1) searches inside JSONB documents
-CREATE INDEX idx_users_metadata ON users USING GIN (metadata);
+-- Optimized query with indexes or advanced features
 ```
 
 ---

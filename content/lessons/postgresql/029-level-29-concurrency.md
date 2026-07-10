@@ -49,21 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Row-level locking (Pessimistic)
-SELECT * FROM wallets WHERE user_id = 1 FOR UPDATE;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Advisory Locks: App-level distributed locks managed by PostgreSQL
--- E.g., Ensure only ONE cron job worker processes payouts globally.
-SELECT pg_try_advisory_lock(9999); -- Returns TRUE if lock acquired
-
--- In Go:
--- if acquired { processPayouts(); pg_advisory_unlock(9999); }
+-- Optimized query with indexes or advanced features
 ```
 
 ---

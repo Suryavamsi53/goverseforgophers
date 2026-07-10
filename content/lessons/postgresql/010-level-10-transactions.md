@@ -43,26 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-BEGIN;
-UPDATE accounts SET balance = balance - 100 WHERE id = 1;
-UPDATE accounts SET balance = balance + 100 WHERE id = 2;
-COMMIT;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Serializable Isolation: Prevents all race conditions and anomalies
-BEGIN;
-SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-
--- If another transaction modifies this balance simultaneously,
--- PostgreSQL will mathematically detect the conflict and abort one of them.
-SELECT balance FROM accounts WHERE id = 1;
-UPDATE accounts SET balance = balance - 100 WHERE id = 1;
-COMMIT;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

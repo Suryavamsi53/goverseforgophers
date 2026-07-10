@@ -43,21 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- View the execution plan without running the query
-EXPLAIN SELECT * FROM orders WHERE status = 'shipped';
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- EXPLAIN ANALYZE actually runs the query and compares Planner estimates vs Reality
-EXPLAIN (ANALYZE, BUFFERS) 
-SELECT * FROM large_table WHERE indexed_col = 123;
-
--- Watch for "Seq Scan" (Disk Read) vs "Index Only Scan" (RAM Read)
--- Watch for "Buffers: shared hit=500 read=1000" (Read from disk means lack of RAM)
+-- Optimized query with indexes or advanced features
 ```
 
 ---

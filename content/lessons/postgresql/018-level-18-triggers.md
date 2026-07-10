@@ -43,29 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-CREATE TRIGGER update_timestamp
-BEFORE UPDATE ON users
-FOR EACH ROW
-EXECUTE FUNCTION trigger_set_timestamp();
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Bulletproof Audit Logging Trigger
-CREATE OR REPLACE FUNCTION audit_log_changes() RETURNS trigger AS $$
-BEGIN
-    INSERT INTO audit_logs (table_name, record_id, old_data, new_data)
-    VALUES (TG_TABLE_NAME, OLD.id, row_to_json(OLD), row_to_json(NEW));
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER users_audit
-AFTER UPDATE ON users
-FOR EACH ROW EXECUTE FUNCTION audit_log_changes();
+-- Optimized query with indexes or advanced features
 ```
 
 ---

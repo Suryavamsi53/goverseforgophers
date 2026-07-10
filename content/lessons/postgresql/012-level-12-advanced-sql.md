@@ -43,25 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Common Table Expression (CTE)
-WITH ActiveUsers AS (
-    SELECT id FROM users WHERE last_login > NOW() - INTERVAL '7 days'
-)
-SELECT * FROM orders WHERE user_id IN (SELECT id FROM ActiveUsers);
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Window Functions: Calculate Month-over-Month Growth without Self-Joins
-SELECT 
-    month,
-    revenue,
-    LAG(revenue) OVER (ORDER BY month) as previous_month_revenue,
-    revenue - LAG(revenue) OVER (ORDER BY month) as growth
-FROM monthly_stats;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

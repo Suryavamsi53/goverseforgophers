@@ -43,22 +43,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Creating and querying an array
-CREATE TABLE posts (id SERIAL, tags TEXT[]);
-SELECT * FROM posts WHERE 'golang' = ANY(tags);
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Overlap Operator (&&) with GIN Indexing
--- Find posts that have ANY of the provided tags
-CREATE INDEX idx_posts_tags ON posts USING GIN (tags);
-
-SELECT * FROM posts 
-WHERE tags && ARRAY['microservices', 'distributed-systems'];
+-- Optimized query with indexes or advanced features
 ```
 
 ---

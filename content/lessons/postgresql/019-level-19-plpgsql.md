@@ -49,32 +49,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-DO $$
-DECLARE
-    user_count INT;
-BEGIN
-    SELECT count(*) INTO user_count FROM users;
-    RAISE NOTICE 'Total users: %', user_count;
-END $$;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Dynamic SQL Generation for Table Partitioning via Cron
-DO $$
-DECLARE
-    next_month text := to_char(NOW() + interval '1 month', 'YYYY_MM');
-BEGIN
-    EXECUTE format(
-        'CREATE TABLE IF NOT EXISTS metrics_%s PARTITION OF metrics FOR VALUES FROM (%L) TO (%L)', 
-        next_month, 
-        DATE_TRUNC('month', NOW() + interval '1 month'),
-        DATE_TRUNC('month', NOW() + interval '2 months')
-    );
-END $$;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

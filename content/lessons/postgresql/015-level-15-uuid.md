@@ -37,21 +37,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-SELECT uuid_generate_v4();
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Using UUID as Primary Key for Distributed Systems
-CREATE TABLE distributed_events (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), -- Built-in PG 13+
-    tenant_id UUID NOT NULL,
-    payload JSONB
-);
+-- Optimized query with indexes or advanced features
 ```
 
 ---

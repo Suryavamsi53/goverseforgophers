@@ -61,25 +61,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
-CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- PostGIS: Geospatial calculations in milliseconds
-CREATE EXTENSION postgis;
-
--- Find all delivery drivers within 5km of a restaurant's coordinates
-SELECT id, name 
-FROM drivers
-WHERE ST_DWithin(
-    location_geom, 
-    ST_MakePoint(-122.4194, 37.7749)::geography, 
-    5000 -- meters
-);
+-- Optimized query with indexes or advanced features
 ```
 
 ---

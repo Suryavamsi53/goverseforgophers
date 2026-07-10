@@ -61,22 +61,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- 3NF Database Structure
-CREATE TABLE customers (id SERIAL, name TEXT);
-CREATE TABLE orders (id SERIAL, customer_id INT);
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- Intentional Denormalization for extreme read performance
--- Instead of COUNT() joining millions of likes on every API call,
--- store the aggregate directly on the post.
-ALTER TABLE posts ADD COLUMN cached_like_count INT DEFAULT 0;
-
--- Updated via Trigger when a like is inserted.
+-- Optimized query with indexes or advanced features
 ```
 
 ---

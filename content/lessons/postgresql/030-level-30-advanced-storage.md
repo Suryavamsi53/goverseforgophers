@@ -55,19 +55,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Standard table size checking
-SELECT pg_size_pretty(pg_total_relation_size('events'));
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- TOAST (The Oversized-Attribute Storage Technique)
--- 8KB page limits mean big JSON is compressed and stored out-of-line automatically.
--- You can force external storage without compression for extremely fast writes of large payloads:
-ALTER TABLE heavy_payloads ALTER COLUMN raw_json SET STORAGE EXTERNAL;
+-- Optimized query with indexes or advanced features
 ```
 
 ---

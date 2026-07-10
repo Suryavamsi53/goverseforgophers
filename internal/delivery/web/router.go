@@ -31,13 +31,19 @@ func RegisterRoutes(r chi.Router, userRepo domain.UserRepository, courseRepo dom
 		WorkspaceRepo: workspaceRepo,
 	}
 
-	r.Get("/", h.HandleLandingPage)
-	r.Get("/roadmap", h.HandleRoadmap)
-	r.Get("/devops", h.HandleDevOps)
-	r.Get("/api/search", h.HandleSearch)
+	// Public routes with optional auth for navbar state
+	r.Group(func(r chi.Router) {
+		r.Use(OptionalAuthMiddleware(jwtManager))
+		
+		r.Get("/", h.HandleLandingPage)
+		r.Get("/roadmap", h.HandleRoadmap)
+		r.Get("/architecture", h.HandleArchitecture)
+		r.Get("/devops", h.HandleDevOps)
+		r.Get("/api/search", h.HandleSearch)
 
-	// Auth routes
-	RegisterAuthRoutes(r, authUseCase, jwtManager, userRepo)
+		// Auth routes
+		RegisterAuthRoutes(r, authUseCase, jwtManager, userRepo)
+	})
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
@@ -121,6 +127,30 @@ func (h *WebHandler) HandleRoadmap(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+func (h *WebHandler) HandleArchitecture(w http.ResponseWriter, r *http.Request) {
+	mdBytes, err := os.ReadFile(filepath.Join(getProjectRoot(), "Project_Architecture.md"))
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	htmlContent, err := mdRenderer.Render(mdBytes)
+	if err != nil {
+		http.Error(w, "Error rendering content", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl := parseTemplates()
+	data := h.getBaseTemplateData(r, "Architecture - GoVerse", "architecture")
+	data["Content"] = template.HTML(htmlContent)
+
+	err = tmpl.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 
 func (h *WebHandler) HandleDevOps(w http.ResponseWriter, r *http.Request) {
 	tmpl := parseTemplates()

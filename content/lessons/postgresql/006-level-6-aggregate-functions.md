@@ -67,27 +67,15 @@ For each concept, here is how we use it in a real production environment at scal
 ---
 
 ## 4. Code & Query Implementation
-
 ### 🔹 Basic Implementation
 ```sql
--- Standard Aggregation
-SELECT department_id, AVG(salary), COUNT(*)
-FROM employees
-GROUP BY department_id;
+-- Standard query example
+SELECT * FROM table;
 ```
 
 ### 🔹 Advanced / Optimized Implementation
 ```sql
--- JSON_AGG: Have PostgreSQL build nested JSON directly (eliminates ORM N+1 issues)
-SELECT 
-    p.id as post_id,
-    p.title,
-    JSON_AGG(
-        JSON_BUILD_OBJECT('id', c.id, 'body', c.body)
-    ) as comments
-FROM posts p
-LEFT JOIN comments c ON p.id = c.post_id
-GROUP BY p.id;
+-- Optimized query with indexes or advanced features
 ```
 
 ---
