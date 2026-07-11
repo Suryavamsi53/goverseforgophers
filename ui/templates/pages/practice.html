@@ -72,6 +72,10 @@
             <button @click="sidebarMode = sidebarMode === 'extensions' ? '' : 'extensions'" :class="sidebarMode === 'extensions' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-4 transition-colors" title="Extensions">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
             </button>
+            <!-- Challenges Icon -->
+            <button @click="sidebarMode = sidebarMode === 'challenges' ? '' : 'challenges'" :class="sidebarMode === 'challenges' ? 'text-emerald-400 bg-white/5' : 'text-gray-500 hover:text-gray-300'" class="p-3 rounded-xl mb-4 transition-colors" title="Fundamental Scenarios">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            </button>
             
             <div class="mt-auto relative w-full flex flex-col items-center">
                 <button @click="showSettings = !showSettings" class="p-3 rounded-xl text-gray-500 hover:text-gray-300 transition-colors" title="Settings">
@@ -234,6 +238,25 @@
                         No extensions found matching your search.
                     </div>
 
+                </div>
+            </div>
+
+            <!-- CHALLENGES MODE -->
+            <div x-show="sidebarMode === 'challenges'" class="flex flex-col h-full" style="display: none;">
+                <div class="p-4 border-b border-white/5 flex flex-col shrink-0">
+                    <h2 class="text-[11px] font-bold tracking-widest text-emerald-400 mb-2">FUNDAMENTAL SCENARIOS</h2>
+                    <p class="text-[10px] text-gray-400 leading-tight">Master Go data types through practical real-world scenarios.</p>
+                </div>
+                <div class="flex-1 overflow-y-auto p-3 space-y-3">
+                    <template x-for="chal in availableChallenges" :key="chal.id">
+                        <div class="bg-black/30 border border-white/5 hover:border-emerald-500/30 rounded-xl p-3 cursor-pointer group transition-all" @click="loadChallenge(chal.id)">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[10px] font-bold tracking-wider text-emerald-500" x-text="chal.category"></span>
+                            </div>
+                            <h3 class="text-[13px] font-bold text-gray-200 group-hover:text-emerald-400 transition-colors" x-text="chal.title"></h3>
+                            <p class="text-[11px] text-gray-500 mt-1 leading-snug" x-text="chal.desc"></p>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
@@ -515,6 +538,40 @@
             terminalInput: '',
             cursorPos: "Ln 1, Col 1",
             sidebarMode: 'files',
+            availableChallenges: [
+                {
+                    id: "type-1",
+                    category: "Strings",
+                    title: "String Parsing for Configs",
+                    desc: "Safely extract hosts and ports from strings.",
+                    readme: "# String Parsing for Configs\n\nYou are building a CLI tool. A user provides a configuration string in the format `\"HOST:PORT\"`.\n\nWrite a function `ParseConfig(config string) (string, string)` that safely extracts the host and port. If the string is malformed, return `\"localhost\"` and `\"8080\"`.",
+                    code: "package main\n\nimport (\n\t\"fmt\"\n\t\"strings\"\n)\n\nfunc ParseConfig(config string) (string, string) {\n\t// TODO: Safely extract host and port\n\treturn \"\", \"\"\n}\n\nfunc main() {\n\thost, port := ParseConfig(\"api.goverse.com:443\")\n\tfmt.Printf(\"Connecting to %s on port %s\\n\", host, port)\n\t// Expected: Connecting to api.goverse.com on port 443\n}"
+                },
+                {
+                    id: "type-2",
+                    category: "Integers & Floats",
+                    title: "Financial Rounding",
+                    desc: "Convert imprecise float tax calculations into exact integer cents.",
+                    readme: "# Financial Rounding\n\nFloating-point math can be imprecise. You are calculating a 15% tax on a shopping cart total of `$45.67`.\n\nWrite a function `CalculateTax(amount float64) int` that calculates the tax and returns the result in **cents** (integer) to avoid float precision loss in financial systems.",
+                    code: "package main\n\nimport (\n\t\"fmt\"\n\t\"math\"\n)\n\nfunc CalculateTax(amount float64) int {\n\t// TODO: Calculate 15% tax, convert to cents and round properly\n\treturn 0\n}\n\nfunc main() {\n\tcents := CalculateTax(45.67)\n\tfmt.Printf(\"Tax in cents: %d\\n\", cents) // Expected Output: 685\n}"
+                },
+                {
+                    id: "type-3",
+                    category: "Booleans",
+                    title: "Flag Toggling System",
+                    desc: "Evaluate 3 system states to return ONLINE, IDLE, or OFFLINE.",
+                    readme: "# Flag Toggling System\n\nYou have three system flags: `isReady`, `hasData`, and `isError`.\n\nWrite a function `SystemStatus(isReady, hasData, isError bool) string` that returns:\n- `\"ONLINE\"` if ready and has data but no errors.\n- `\"IDLE\"` if ready but no data and no errors.\n- `\"OFFLINE\"` otherwise.",
+                    code: "package main\n\nimport \"fmt\"\n\nfunc SystemStatus(isReady, hasData, isError bool) string {\n\t// TODO: Implement the flag logic\n\treturn \"\"\n}\n\nfunc main() {\n\tfmt.Println(\"Status:\", SystemStatus(true, true, false)) // Expected: ONLINE\n}"
+                },
+                {
+                    id: "type-4",
+                    category: "Complex Numbers",
+                    title: "Signal Processing",
+                    desc: "Multiply a complex number to simulate a phase shift.",
+                    readme: "# Signal Processing\n\nGo natively supports complex numbers (`complex64`, `complex128`). You are simulating a basic signal phase shift.\n\nWrite a function `PhaseShift(signal complex128) complex128` that takes a signal and rotates it by 90 degrees (multiplying it by the imaginary number `1i`).",
+                    code: "package main\n\nimport \"fmt\"\n\nfunc PhaseShift(signal complex128) complex128 {\n\t// TODO: Multiply by 0 + 1i\n\treturn 0\n}\n\nfunc main() {\n\tvar signal complex128 = 5 + 2i\n\tshifted := PhaseShift(signal)\n\tfmt.Printf(\"Original: %v, Shifted: %v\\n\", signal, shifted)\n\t// Expected: Original: (5+2i), Shifted: (-2+5i)\n}"
+                }
+            ],
             extensions: savedSettings.extensions || {
                 'gemini': false,
                 'dracula': false,
@@ -1234,6 +1291,29 @@
                 if (this.activePanel === 'TERMINAL') this.terminalHistory = [];
                 if (this.activePanel === 'OUTPUT') this.outputHistory = [];
                 if (this.activePanel === 'DEBUG_CONSOLE') this.debugHistory = [];
+            },
+
+            loadChallenge(id) {
+                const c = this.availableChallenges.find(x => x.id === id);
+                if (!c) return;
+                
+                this.files = {
+                    "README.md": c.readme,
+                    "main.go": c.code
+                };
+                this.fileTree = this.buildFileTree(this.files);
+                this.sidebarMode = 'files';
+                
+                // Open README.md first to initialize it
+                setTimeout(() => {
+                    this.switchFile("README.md");
+                    setTimeout(() => {
+                        this.switchFile("main.go");
+                        if(window.globalMonacoEditor) {
+                            window.globalMonacoEditor.setValue(c.code);
+                        }
+                    }, 100);
+                }, 50);
             },
             
             scrollToBottom(id) {

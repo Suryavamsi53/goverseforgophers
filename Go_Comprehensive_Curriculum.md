@@ -1593,15 +1593,114 @@ import "fmt"
 
 func createCounter() *int {
 	count := 10
-	return &count // Perfectly safe, count escapes to the heap
-}
+	return &count // Pe---
 
-func main() {
-	counterPtr := createCounter()
-	fmt.Println(*counterPtr)
-}
-```
+# Fundamental Coding Scenarios: Data Types
+### Hands-on scenario questions covering Go's fundamental data types.
 
 ---
 
-**End of Intermediate Tier (Part 1).** Total questions across Levels 1–8: 144.
+# Strings
+
+**TYPE.1 String Parsing for Configs**
+**Question:** You are building a CLI tool. A user provides a configuration string in the format `"HOST:PORT"`. Write a function `ParseConfig(config string) (string, string)` that safely extracts the host and port. If the string is malformed, return `"localhost"` and `"8080"`.
+**Answer:**
+```go
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func ParseConfig(config string) (string, string) {
+	parts := strings.Split(config, ":")
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return "localhost", "8080"
+	}
+	return parts[0], parts[1]
+}
+
+func main() {
+	host, port := ParseConfig("api.goverse.com:443")
+	fmt.Printf("Connecting to %s on port %s\n", host, port)
+}
+```
+
+# Integers & Floats
+
+**TYPE.2 Financial Rounding (Floats & Integers)**
+**Question:** Floating-point math can be imprecise. You are calculating a 15% tax on a shopping cart total of `$45.67`. Write a function `CalculateTax(amount float64) int` that calculates the tax and returns the result in **cents** (integer) to avoid float precision loss in financial systems.
+**Answer:**
+```go
+package main
+
+import (
+	"fmt"
+	"math"
+)
+
+func CalculateTax(amount float64) int {
+	tax := amount * 0.15
+	// Convert to cents and round properly
+	cents := int(math.Round(tax * 100))
+	return cents
+}
+
+func main() {
+	cents := CalculateTax(45.67)
+	fmt.Printf("Tax in cents: %d\n", cents) // Output: 685
+}
+```
+
+# Booleans
+
+**TYPE.3 Flag Toggling System**
+**Question:** You have three system flags: `isReady`, `hasData`, and `isError`. Write a function `SystemStatus(isReady, hasData, isError bool) string` that returns "ONLINE" if the system is ready and has data but no errors, "IDLE" if ready but no data and no errors, and "OFFLINE" otherwise.
+**Answer:**
+```go
+package main
+
+import "fmt"
+
+func SystemStatus(isReady, hasData, isError bool) string {
+	if isError {
+		return "OFFLINE"
+	}
+	if isReady && hasData {
+		return "ONLINE"
+	}
+	if isReady && !hasData {
+		return "IDLE"
+	}
+	return "OFFLINE"
+}
+
+func main() {
+	fmt.Println("Status:", SystemStatus(true, true, false)) // Output: ONLINE
+}
+```
+
+# Complex Numbers
+
+**TYPE.4 Signal Processing (Complex Types)**
+**Question:** Go natively supports complex numbers (`complex64`, `complex128`). You are simulating a basic signal phase shift. Write a function `PhaseShift(signal complex128) complex128` that takes a signal and rotates it by 90 degrees (multiplying it by the imaginary number `1i`).
+**Answer:**
+```go
+package main
+
+import "fmt"
+
+func PhaseShift(signal complex128) complex128 {
+	// Multiply by 0 + 1i
+	return signal * 1i
+}
+
+func main() {
+	// Signal with real part 5, imaginary part 2
+	var signal complex128 = 5 + 2i
+	shifted := PhaseShift(signal)
+	fmt.Printf("Original: %v, Shifted: %v\n", signal, shifted)
+	// Output: Original: (5+2i), Shifted: (-2+5i)
+}
+```
