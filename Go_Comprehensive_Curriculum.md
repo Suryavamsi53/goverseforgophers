@@ -1704,3 +1704,217 @@ func main() {
 	// Output: Original: (5+2i), Shifted: (-2+5i)
 }
 ```
+
+---
+
+# Frequently Asked Interview MCQs
+
+**INT.1** What is the default behavior of a channel when you send data to it without a receiver?
+a) It buffers the data up to 10 elements.
+b) It blocks the sending goroutine forever or until a receiver is ready.
+c) It returns an error.
+d) It drops the data.
+**Answer: b) It blocks.** Unbuffered channels block until the other side is ready.
+
+**INT.2** How does Go achieve inheritance?
+a) Using the `extends` keyword.
+b) Using struct embedding (composition).
+c) Go does not support object-oriented programming.
+d) Using abstract classes.
+**Answer: b) Struct embedding.** Go uses composition over inheritance.
+
+**INT.3** Which of the following statements about `defer` is true?
+a) Deferred functions are executed in FIFO order.
+b) Deferred functions are executed when the program exits.
+c) Deferred functions are executed in LIFO order just before the surrounding function returns.
+d) Arguments to deferred functions are evaluated at execution time.
+**Answer: c) Executed in LIFO order.** Also note arguments are evaluated at defer-time.
+
+**INT.4** What happens if you run a Go program with a data race?
+a) It deterministically panics.
+b) It prints a warning but continues.
+c) It has undefined behavior unless compiled with `-race` which will panic.
+d) Go prevents data races at compile time.
+**Answer: c) Undefined behavior.** The race detector (`-race`) helps find them.
+
+**INT.5** What does `sync.WaitGroup` do?
+a) Limits the number of goroutines running concurrently.
+b) Waits for a collection of goroutines to finish executing.
+c) Blocks a channel until data is available.
+d) Replaces the need for a Mutex.
+**Answer: b) Waits for a collection of goroutines to finish.**
+
+**INT.6** Can you return a pointer to a local variable safely in Go?
+a) No, it will cause a segmentation fault.
+b) Yes, Go's escape analysis moves the variable to the heap.
+c) Yes, but only for primitive types.
+d) No, it creates a memory leak.
+**Answer: b) Yes, thanks to escape analysis.**
+
+**INT.7** What is the correct way to initialize an empty slice with a specific capacity but zero length?
+a) `s := make([]int, 0, 10)`
+b) `s := make([]int, 10)`
+c) `s := []int{10}`
+d) `s := new([]int)`
+**Answer: a) `make([]int, 0, 10)`**
+
+**INT.8** What happens when you read from a closed channel?
+a) Panic.
+b) It blocks forever.
+c) It yields the zero value of the channel's type immediately.
+d) It returns a compiler error.
+**Answer: c) Yields the zero value.** (You can also use the comma-ok idiom to check if it's open).
+
+**INT.9** What is an empty interface (`interface{}`) used for in Go?
+a) To represent a lack of data (null).
+b) To define a struct with no fields.
+c) To hold values of any type.
+d) To define functions with no arguments.
+**Answer: c) To hold values of any type.** Since every type implements zero methods, every type satisfies the empty interface.
+
+**INT.10** How are map keys compared in Go?
+a) Using a hash function provided by the developer.
+b) They must implement the `Comparable` interface.
+c) Map keys can be of any type, including slices.
+d) Map keys must be of a comparable type (e.g., int, string, pointer, struct without slices/maps).
+**Answer: d) Keys must be comparable.** You cannot use slices, maps, or functions as map keys.
+
+**INT.11** What is the primary difference between a value receiver and a pointer receiver in a Go method?
+a) Value receivers can mutate the original struct; pointer receivers cannot.
+b) Pointer receivers avoid copying the struct and allow mutation of the original struct.
+c) They are completely interchangeable with no performance or behavioral difference.
+d) Value receivers are required for interfaces, pointer receivers are not.
+**Answer: b) Pointer receivers allow mutation and avoid copying.** Use pointer receivers if the method needs to mutate the receiver or if the struct is large.
+
+**INT.12** What does the `init()` function do in a Go package?
+a) It acts as the main entry point of the application.
+b) It is executed once per file when the package is initialized, before `main()`.
+c) It must be called manually to initialize variables.
+d) It runs concurrently in a separate goroutine.
+**Answer: b) Executed automatically during package initialization.** You can have multiple `init()` functions in a single package or even a single file.
+
+**INT.13** How does the `select` statement behave if multiple `case` channels are ready at the same time?
+a) It executes the first one listed top-to-bottom.
+b) It panics.
+c) It chooses one pseudo-randomly.
+d) It executes all of them concurrently.
+**Answer: c) It chooses one pseudo-randomly.** This prevents starvation of cases further down the list.
+
+**INT.14** When passing a `map` to a function, what is actually being passed?
+a) A deep copy of the entire map.
+b) A pointer to the map descriptor, meaning modifications inside the function affect the original map.
+c) A read-only copy of the map.
+d) Maps cannot be passed to functions.
+**Answer: b) A pointer to the map descriptor.** Maps (like slices and channels) act as reference types, so mutating a map inside a function mutates the original.
+
+**INT.15** What is the initial stack size of a new goroutine in modern Go (>= 1.4)?
+a) 2 KB
+b) 8 KB
+c) 1 MB
+d) 2 MB
+**Answer: a) 2 KB.** This incredibly small footprint allows Go programs to spawn hundreds of thousands of goroutines easily. The stack grows and shrinks dynamically as needed.
+
+**INT.16** What is a common way to cause a memory leak in Go using slices?
+a) Appending to a slice in a loop.
+b) Slicing a small portion of a massive array/slice and keeping it in memory.
+c) Passing a slice to a function by value.
+d) Using `make` instead of `new`.
+**Answer: b) Slicing a small portion of a massive array.** The small slice retains a reference to the *entire* underlying array, preventing the garbage collector from freeing the massive array.
+
+**INT.17** What is the difference between `new(T)` and `make(T)`?
+a) `new` allocates memory and returns a pointer; `make` initializes slices, maps, and channels and returns the value itself.
+b) `new` is for primitives; `make` is for structs.
+c) `new` returns an initialized object; `make` returns a zeroed object.
+d) There is no difference; they are aliases.
+**Answer: a) `new` allocates zeroed memory and returns a pointer; `make` initializes internal data structures for slices/maps/channels and returns the value.**
+
+**INT.18** How do you explicitly check if an interface value holds a specific underlying type?
+a) By using a regular `if` statement like `if val == type`.
+b) Using a Type Assertion: `v, ok := val.(SpecificType)`.
+c) Using the `typeof()` function.
+d) Interfaces cannot be checked at runtime.
+**Answer: b) Using a Type Assertion.**
+
+**INT.19** What does `errors.Is(err, targetErr)` do differently from `err == targetErr`?
+a) It compares the string values of the errors.
+b) It panics if the errors are not equal.
+c) It unwraps the error chain to see if `targetErr` exists anywhere in the chain.
+d) It casts the error to a struct.
+**Answer: c) It unwraps the error chain.** This was introduced in Go 1.13 and is the standard way to check wrapped errors.
+
+**INT.20** Which of the following is true about strings in Go?
+a) They are mutable arrays of bytes.
+b) They are immutable slices of bytes.
+c) They are mutable slices of runes.
+d) They are essentially linked lists of characters.
+**Answer: b) They are immutable slices of bytes.** Once created, a string's contents cannot be changed.
+
+**INT.21** In the Go scheduler's G-P-M model, what does the 'P' stand for?
+a) Process
+b) Pointer
+c) Logical Processor
+d) Program Counter
+**Answer: c) Logical Processor.** 'P' represents a logical processor (context). 'M' is an OS thread, and 'G' is a Goroutine.
+
+**INT.22** What is the "blank identifier" (`_`) used for in Go?
+a) To define private variables.
+b) To discard return values or avoid unused variable errors.
+c) To act as a wildcard in regular expressions.
+d) To define an untyped constant.
+**Answer: b) To discard return values or avoid "unused variable/import" compile errors.**
+
+**INT.23** How can you enforce that a struct `MyStruct` implements an interface `MyInterface` at compile time?
+a) By adding `implements MyInterface` to the struct declaration.
+b) By assigning a blank identifier: `var _ MyInterface = (*MyStruct)(nil)`.
+c) It is impossible to check at compile time.
+d) By using the `CheckInterface()` standard library function.
+**Answer: b) `var _ MyInterface = (*MyStruct)(nil)`.** This forces the compiler to verify that the pointer to `MyStruct` satisfies the interface.
+
+**INT.24** What happens if you panic inside a Goroutine, but put a `recover()` in the `main` Goroutine?
+a) The `main` Goroutine catches the panic and continues safely.
+b) The panic cannot cross Goroutine boundaries; the whole program crashes.
+c) The panicked Goroutine dies quietly, the rest of the program continues.
+d) It creates a deadlock.
+**Answer: b) The program crashes.** A `recover()` must be placed in a `defer` block *within the same Goroutine* where the panic occurs.
+
+**INT.25** What is the correct way to perform simple, lock-free counter increments across multiple Goroutines?
+a) Using a standard integer `count++`
+b) Using `sync.Mutex` (though this introduces locking)
+c) Using the `sync/atomic` package: `atomic.AddInt64(&count, 1)`
+d) Using a `select` statement.
+**Answer: c) Using `sync/atomic`.** The `atomic` package provides low-level, lock-free hardware-level synchronization, which is faster than Mutexes for simple counters.
+
+**INT.26** Which of the following is a key difference between `sync.Map` and a standard `map` wrapped in an `RWMutex`?
+a) `sync.Map` is slower for all operations.
+b) `sync.Map` is optimized for append-only data or disjoint sets of keys (e.g., caches where keys are written once and read many times).
+c) `sync.Map` is strongly typed, standard maps are not.
+d) `sync.Map` does not require `make()`.
+**Answer: b) Optimized for specific concurrent workloads.** For heavily contended, write-heavy workloads, an RWMutex-wrapped map is often faster.
+
+**INT.27** If you have a buffered channel of size 5, and 3 elements are in it, what happens when you read from it?
+a) It blocks until the channel is full.
+b) It reads the first element immediately without blocking.
+c) It reads all 3 elements at once.
+d) It panics.
+**Answer: b) It reads immediately.** Buffered channels only block on read when they are completely empty, and block on write when completely full.
+
+**INT.28** What is "variable shadowing" in Go?
+a) Changing the type of a variable at runtime.
+b) Declaring a new variable with the same name in an inner scope, effectively hiding the outer variable.
+c) A security feature to hide memory addresses.
+d) A compilation optimization technique.
+**Answer: b) Declaring a new variable in an inner scope.** This often happens accidentally with the `:=` operator inside `if` statements or loops.
+
+**INT.29** Can a Go program have a memory leak?
+a) No, the Garbage Collector prevents all memory leaks.
+b) Yes, primarily through unclosed goroutines (Goroutine leaks) or keeping references to large objects (like sliced arrays).
+c) Yes, but only if you use the `unsafe` package.
+d) Yes, but the compiler catches them.
+**Answer: b) Yes.** Goroutine leaks are one of the most common causes of memory leaks in Go, occurring when a Goroutine is blocked forever waiting on a channel that will never be written to or read from.
+
+**INT.30** What does the Context package (`context.Context`) provide in Go?
+a) It replaces global variables for application state.
+b) It provides deadlines, cancellation signals, and request-scoped values across API boundaries and goroutines.
+c) It is primarily used for database migrations.
+d) It manages memory allocation.
+**Answer: b) Deadlines, cancellations, and request-scoped values.** It is the idiomatic way to handle request timeouts and cancellations in Go backend services.

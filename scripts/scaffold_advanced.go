@@ -257,9 +257,28 @@ How to troubleshoot %s in production:
 
 ## 14. Quiz
 1. **MCQ**: What happens when you read from a closed %s?
-2. **Output Prediction**: What does this program print?
-3. **Debugging**: Find the hidden memory leak in this snippet.
-4. **Code Review**: Critique this pull request.
+   - A) Panic
+   - B) Blocks forever
+   - C) Returns the zero value immediately
+   - D) Compiler error
+2. **MCQ**: What is the primary difference between a Mutex and an RWMutex when working with %s?
+   - A) RWMutex allows concurrent reads, Mutex does not.
+   - B) Mutex is always faster.
+   - C) RWMutex cannot be used in goroutines.
+   - D) They are exactly the same under the hood.
+3. **MCQ**: How does the Garbage Collector handle %s if it escapes to the heap?
+   - A) It is ignored by the GC.
+   - B) It increases GC latency due to trace pointer scanning.
+   - C) It is immediately deallocated after the function returns.
+   - D) It causes a memory leak.
+4. **MCQ**: What is the default value of an uninitialized %s in Go?
+   - A) nil
+   - B) 0
+   - C) "" (empty string)
+   - D) Depends on the specific type
+5. **Output Prediction**: What does this program print?
+6. **Debugging**: Find the hidden memory leak in this snippet.
+7. **Code Review**: Critique this pull request.
 
 ---
 
