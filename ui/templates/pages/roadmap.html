@@ -61,91 +61,600 @@
             <pre class="mermaid bg-transparent w-full h-full flex justify-center items-center text-base"
                 id="mermaid-target">
 flowchart TD
-    %% Custom Styling - Increased font sizes for readability
-    classDef default fill:#111111,stroke:#333333,stroke-width:1px,color:#A1A1AA,rx:8px,ry:8px,font-family:Inter,font-size:16px;
-    classDef root fill:#00D08415,stroke:#00D084,stroke-width:2px,color:#00D084,font-weight:bold,rx:12px,ry:12px,font-size:20px;
-    classDef section fill:#1A1A1A,stroke:#52525B,stroke-width:1px,color:#EDEDED,font-weight:bold,rx:8px,ry:8px,font-size:18px;
-    classDef node fill:#0A0A0A,stroke:#333333,stroke-width:1px,color:#A1A1AA,rx:6px,ry:6px,font-size:16px;
-    classDef topic fill:#050505,stroke:#222222,stroke-width:1px,color:#888888,rx:4px,ry:4px,stroke-dasharray: 5 5,font-size:14px;
+    %% Styling Classes
+    classDef core fill:#00D08415,stroke:#00D084,stroke-width:2px,color:#00D084,font-weight:bold,rx:12px,ry:12px,font-size:20px;
+    classDef intermediate fill:#2F81F715,stroke:#2F81F7,stroke-width:2px,color:#2F81F7,font-weight:bold,rx:12px,ry:12px,font-size:20px;
+    classDef advanced fill:#D2992215,stroke:#D29922,stroke-width:2px,color:#D29922,font-weight:bold,rx:12px,ry:12px,font-size:20px;
+    classDef expert fill:#F8514915,stroke:#F85149,stroke-width:2px,color:#F85149,font-weight:bold,rx:12px,ry:12px,font-size:20px;
+    classDef systemdesign fill:#A371F715,stroke:#A371F7,stroke-width:2px,color:#A371F7,font-weight:bold,rx:12px,ry:12px,font-size:20px;
+    classDef backend fill:#111111,stroke:#444444,stroke-width:1px,color:#EDEDED,rx:6px,ry:6px;
+    classDef concurrency fill:#111111,stroke:#D29922,stroke-width:1px,color:#EDEDED,rx:6px,ry:6px;
+    classDef runtime fill:#111111,stroke:#F85149,stroke-width:1px,color:#EDEDED,rx:6px,ry:6px;
+    classDef memory fill:#111111,stroke:#F85149,stroke-width:1px,color:#EDEDED,rx:6px,ry:6px;
+    classDef metadata fill:#050505,stroke:#222222,stroke-width:1px,color:#888888,rx:4px,ry:4px,stroke-dasharray: 5 5,font-size:12px;
 
-    %% Nodesd
-    Go[Go Language]:::root
-    
-    %% Prerequisites
-    Prereq[1. Prerequisites]:::section
-    Go --> Prereq
-    Prereq --> CLI[Command Line]:::node
-    Prereq --> Net[Networking Basics]:::node
-    Prereq --> Git[Git & Version Control]:::node
-    
-    %% Fundamentals
-    Fund[2. Fundamentals]:::section
-    Prereq --> Fund
-    Fund --> Syntax[Basic Syntax]:::node
-    Fund --> Vars[Variables & Data Types]:::node
-    Fund --> Control[Control Structures]:::node
-    Control --> If[if / else]:::topic
-    Control --> Switch[switch / select]:::topic
-    Control --> For[for loop]:::topic
-    
-    %% Data Structures
-    Data[3. Data Structures]:::section
-    Fund --> Data
-    Data --> Arrays[Arrays & Slices]:::node
-    Data --> Maps[Maps]:::node
-    Data --> Structs[Structs]:::node
-    
-    %% Functions & Pointers
-    Funcs[4. Functions & Pointers]:::section
-    Data --> Funcs
-    Funcs --> Functions[Functions]:::node
-    Functions --> Variadic[Variadic]:::topic
-    Functions --> Closures[Closures]:::topic
-    Funcs --> Pointers[Pointers]:::node
-    Funcs --> Methods[Methods]:::node
-    
-    %% Interfaces & Error Handling
-    Intf[5. Interfaces & Errors]:::section
-    Funcs --> Intf
-    Intf --> Interfaces[Interfaces]:::node
-    Interfaces --> TypeAssert[Type Assertions]:::topic
-    Intf --> Errors[Error Handling]:::node
-    Errors --> Panic[Panic & Recover]:::topic
-    
-    %% Concurrency
-    Conc[6. Concurrency]:::root
-    Intf --> Conc
-    Conc --> Goroutines[Goroutines]:::section
-    Conc --> Channels[Channels]:::section
-    Channels --> Buffered[Buffered / Unbuffered]:::topic
-    Channels --> SelectSt[Select Statement]:::topic
-    Conc --> Sync[Sync Package]:::section
-    Sync --> Mutex[Mutex / RWMutex]:::topic
-    Sync --> WaitGroup[WaitGroup]:::topic
-    Sync --> Atomic[Atomic Operations]:::topic
-    
-    %% Advanced
-    Adv[7. Advanced Topics]:::section
-    Conc --> Adv
-    Adv --> Context[Context Package]:::node
-    Adv --> Generics[Generics]:::node
-    Adv --> Modules[Go Modules]:::node
-    Adv --> Testing[Testing & Benchmarking]:::node
-    Testing --> Fuzzing[Fuzzing]:::topic
-    
-    %% Backend Dev
-    Backend[8. Backend & Systems]:::root
-    Adv --> Backend
-    Backend --> StdLib[Standard Library]:::section
-    StdLib --> nethttp[net/http]:::topic
-    StdLib --> io[io / os]:::topic
-    StdLib --> json[encoding/json]:::topic
-    Backend --> DB[Databases]:::section
-    DB --> SQL[database/sql]:::topic
-    DB --> ORM[GORM / sqlc]:::topic
-    Backend --> API[API Design]:::section
-    API --> REST[RESTful APIs]:::topic
-    API --> gRPC[gRPC & Protobuf]:::topic
+    %% Main Nodes
+    Syntax[Syntax]:::core
+    Variables[Variables]:::core
+    ControlStructures[ControlStructures]:::core
+    Arrays[Arrays]:::core
+    Slices[Slices]:::core
+    Maps[Maps]:::core
+    Structs[Structs]:::core
+    Pointers[Pointers]:::core
+    Functions[Functions]:::core
+    Methods[Methods]:::intermediate
+    Interfaces[Interfaces]:::intermediate
+    ErrorHandling[ErrorHandling]:::intermediate
+    Testing[Testing]:::intermediate
+    Goroutines[Goroutines]:::concurrency
+    Channels[Channels]:::concurrency
+    Mutex[Mutex]:::concurrency
+    Context[Context]:::concurrency
+    Generics[Generics]:::advanced
+    Reflection[Reflection]:::advanced
+    GoModules[GoModules]:::backend
+    Networking[Networking]:::backend
+    MemoryLayout[MemoryLayout]:::memory
+    EscapeAnalysis[EscapeAnalysis]:::memory
+    GarbageCollection[GarbageCollection]:::runtime
+    Compiler[Compiler]:::runtime
+
+    %% Metadata Chains
+    Syntax_Definition["Definition"]:::metadata
+    Syntax -.-> Syntax_Definition
+    Syntax_Why_it_Exists["Why it Exists"]:::metadata
+    Syntax_Definition -.-> Syntax_Why_it_Exists
+    Syntax_Syntax_Rules["Syntax Rules"]:::metadata
+    Syntax_Why_it_Exists -.-> Syntax_Syntax_Rules
+    Syntax_Memory_Representation["Memory Representation"]:::metadata
+    Syntax_Syntax_Rules -.-> Syntax_Memory_Representation
+    Syntax_Types_Categories["Types Categories"]:::metadata
+    Syntax_Memory_Representation -.-> Syntax_Types_Categories
+    Syntax_When_To_Use["When To Use"]:::metadata
+    Syntax_Types_Categories -.-> Syntax_When_To_Use
+    Syntax_Anti_Patterns["Anti Patterns"]:::metadata
+    Syntax_When_To_Use -.-> Syntax_Anti_Patterns
+    Syntax_Performance["Performance"]:::metadata
+    Syntax_Anti_Patterns -.-> Syntax_Performance
+    Syntax_Interview_Questions["Interview Questions"]:::metadata
+    Syntax_Performance -.-> Syntax_Interview_Questions
+    Syntax_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Syntax_Interview_Questions -.-> Syntax_RealWorld_Examples
+    Variables_Definition["Definition"]:::metadata
+    Variables -.-> Variables_Definition
+    Variables_Why_it_Exists["Why it Exists"]:::metadata
+    Variables_Definition -.-> Variables_Why_it_Exists
+    Variables_Syntax_Rules["Syntax Rules"]:::metadata
+    Variables_Why_it_Exists -.-> Variables_Syntax_Rules
+    Variables_Memory_Representation["Memory Representation"]:::metadata
+    Variables_Syntax_Rules -.-> Variables_Memory_Representation
+    Variables_Types_Categories["Types Categories"]:::metadata
+    Variables_Memory_Representation -.-> Variables_Types_Categories
+    Variables_When_To_Use["When To Use"]:::metadata
+    Variables_Types_Categories -.-> Variables_When_To_Use
+    Variables_Anti_Patterns["Anti Patterns"]:::metadata
+    Variables_When_To_Use -.-> Variables_Anti_Patterns
+    Variables_Performance["Performance"]:::metadata
+    Variables_Anti_Patterns -.-> Variables_Performance
+    Variables_Interview_Questions["Interview Questions"]:::metadata
+    Variables_Performance -.-> Variables_Interview_Questions
+    Variables_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Variables_Interview_Questions -.-> Variables_RealWorld_Examples
+    ControlStructures_Definition["Definition"]:::metadata
+    ControlStructures -.-> ControlStructures_Definition
+    ControlStructures_Why_it_Exists["Why it Exists"]:::metadata
+    ControlStructures_Definition -.-> ControlStructures_Why_it_Exists
+    ControlStructures_Syntax_Rules["Syntax Rules"]:::metadata
+    ControlStructures_Why_it_Exists -.-> ControlStructures_Syntax_Rules
+    ControlStructures_Memory_Representation["Memory Representation"]:::metadata
+    ControlStructures_Syntax_Rules -.-> ControlStructures_Memory_Representation
+    ControlStructures_Types_Categories["Types Categories"]:::metadata
+    ControlStructures_Memory_Representation -.-> ControlStructures_Types_Categories
+    ControlStructures_When_To_Use["When To Use"]:::metadata
+    ControlStructures_Types_Categories -.-> ControlStructures_When_To_Use
+    ControlStructures_Anti_Patterns["Anti Patterns"]:::metadata
+    ControlStructures_When_To_Use -.-> ControlStructures_Anti_Patterns
+    ControlStructures_Performance["Performance"]:::metadata
+    ControlStructures_Anti_Patterns -.-> ControlStructures_Performance
+    ControlStructures_Interview_Questions["Interview Questions"]:::metadata
+    ControlStructures_Performance -.-> ControlStructures_Interview_Questions
+    ControlStructures_RealWorld_Examples["RealWorld Examples"]:::metadata
+    ControlStructures_Interview_Questions -.-> ControlStructures_RealWorld_Examples
+    Arrays_Definition["Definition"]:::metadata
+    Arrays -.-> Arrays_Definition
+    Arrays_Why_it_Exists["Why it Exists"]:::metadata
+    Arrays_Definition -.-> Arrays_Why_it_Exists
+    Arrays_Syntax_Rules["Syntax Rules"]:::metadata
+    Arrays_Why_it_Exists -.-> Arrays_Syntax_Rules
+    Arrays_Memory_Representation["Memory Representation"]:::metadata
+    Arrays_Syntax_Rules -.-> Arrays_Memory_Representation
+    Arrays_Types_Categories["Types Categories"]:::metadata
+    Arrays_Memory_Representation -.-> Arrays_Types_Categories
+    Arrays_When_To_Use["When To Use"]:::metadata
+    Arrays_Types_Categories -.-> Arrays_When_To_Use
+    Arrays_Anti_Patterns["Anti Patterns"]:::metadata
+    Arrays_When_To_Use -.-> Arrays_Anti_Patterns
+    Arrays_Performance["Performance"]:::metadata
+    Arrays_Anti_Patterns -.-> Arrays_Performance
+    Arrays_Interview_Questions["Interview Questions"]:::metadata
+    Arrays_Performance -.-> Arrays_Interview_Questions
+    Arrays_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Arrays_Interview_Questions -.-> Arrays_RealWorld_Examples
+    Slices_Definition["Definition"]:::metadata
+    Slices -.-> Slices_Definition
+    Slices_Why_it_Exists["Why it Exists"]:::metadata
+    Slices_Definition -.-> Slices_Why_it_Exists
+    Slices_Syntax_Rules["Syntax Rules"]:::metadata
+    Slices_Why_it_Exists -.-> Slices_Syntax_Rules
+    Slices_Memory_Representation["Memory Representation"]:::metadata
+    Slices_Syntax_Rules -.-> Slices_Memory_Representation
+    Slices_Types_Categories["Types Categories"]:::metadata
+    Slices_Memory_Representation -.-> Slices_Types_Categories
+    Slices_When_To_Use["When To Use"]:::metadata
+    Slices_Types_Categories -.-> Slices_When_To_Use
+    Slices_Anti_Patterns["Anti Patterns"]:::metadata
+    Slices_When_To_Use -.-> Slices_Anti_Patterns
+    Slices_Performance["Performance"]:::metadata
+    Slices_Anti_Patterns -.-> Slices_Performance
+    Slices_Interview_Questions["Interview Questions"]:::metadata
+    Slices_Performance -.-> Slices_Interview_Questions
+    Slices_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Slices_Interview_Questions -.-> Slices_RealWorld_Examples
+    Maps_Definition["Definition"]:::metadata
+    Maps -.-> Maps_Definition
+    Maps_Why_it_Exists["Why it Exists"]:::metadata
+    Maps_Definition -.-> Maps_Why_it_Exists
+    Maps_Syntax_Rules["Syntax Rules"]:::metadata
+    Maps_Why_it_Exists -.-> Maps_Syntax_Rules
+    Maps_Memory_Representation["Memory Representation"]:::metadata
+    Maps_Syntax_Rules -.-> Maps_Memory_Representation
+    Maps_Types_Categories["Types Categories"]:::metadata
+    Maps_Memory_Representation -.-> Maps_Types_Categories
+    Maps_When_To_Use["When To Use"]:::metadata
+    Maps_Types_Categories -.-> Maps_When_To_Use
+    Maps_Anti_Patterns["Anti Patterns"]:::metadata
+    Maps_When_To_Use -.-> Maps_Anti_Patterns
+    Maps_Performance["Performance"]:::metadata
+    Maps_Anti_Patterns -.-> Maps_Performance
+    Maps_Interview_Questions["Interview Questions"]:::metadata
+    Maps_Performance -.-> Maps_Interview_Questions
+    Maps_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Maps_Interview_Questions -.-> Maps_RealWorld_Examples
+    Structs_Definition["Definition"]:::metadata
+    Structs -.-> Structs_Definition
+    Structs_Why_it_Exists["Why it Exists"]:::metadata
+    Structs_Definition -.-> Structs_Why_it_Exists
+    Structs_Syntax_Rules["Syntax Rules"]:::metadata
+    Structs_Why_it_Exists -.-> Structs_Syntax_Rules
+    Structs_Memory_Representation["Memory Representation"]:::metadata
+    Structs_Syntax_Rules -.-> Structs_Memory_Representation
+    Structs_Types_Categories["Types Categories"]:::metadata
+    Structs_Memory_Representation -.-> Structs_Types_Categories
+    Structs_When_To_Use["When To Use"]:::metadata
+    Structs_Types_Categories -.-> Structs_When_To_Use
+    Structs_Anti_Patterns["Anti Patterns"]:::metadata
+    Structs_When_To_Use -.-> Structs_Anti_Patterns
+    Structs_Performance["Performance"]:::metadata
+    Structs_Anti_Patterns -.-> Structs_Performance
+    Structs_Interview_Questions["Interview Questions"]:::metadata
+    Structs_Performance -.-> Structs_Interview_Questions
+    Structs_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Structs_Interview_Questions -.-> Structs_RealWorld_Examples
+    Pointers_Definition["Definition"]:::metadata
+    Pointers -.-> Pointers_Definition
+    Pointers_Why_it_Exists["Why it Exists"]:::metadata
+    Pointers_Definition -.-> Pointers_Why_it_Exists
+    Pointers_Syntax_Rules["Syntax Rules"]:::metadata
+    Pointers_Why_it_Exists -.-> Pointers_Syntax_Rules
+    Pointers_Memory_Representation["Memory Representation"]:::metadata
+    Pointers_Syntax_Rules -.-> Pointers_Memory_Representation
+    Pointers_Types_Categories["Types Categories"]:::metadata
+    Pointers_Memory_Representation -.-> Pointers_Types_Categories
+    Pointers_When_To_Use["When To Use"]:::metadata
+    Pointers_Types_Categories -.-> Pointers_When_To_Use
+    Pointers_Anti_Patterns["Anti Patterns"]:::metadata
+    Pointers_When_To_Use -.-> Pointers_Anti_Patterns
+    Pointers_Performance["Performance"]:::metadata
+    Pointers_Anti_Patterns -.-> Pointers_Performance
+    Pointers_Interview_Questions["Interview Questions"]:::metadata
+    Pointers_Performance -.-> Pointers_Interview_Questions
+    Pointers_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Pointers_Interview_Questions -.-> Pointers_RealWorld_Examples
+    Functions_Definition["Definition"]:::metadata
+    Functions -.-> Functions_Definition
+    Functions_Why_it_Exists["Why it Exists"]:::metadata
+    Functions_Definition -.-> Functions_Why_it_Exists
+    Functions_Syntax_Rules["Syntax Rules"]:::metadata
+    Functions_Why_it_Exists -.-> Functions_Syntax_Rules
+    Functions_Memory_Representation["Memory Representation"]:::metadata
+    Functions_Syntax_Rules -.-> Functions_Memory_Representation
+    Functions_Types_Categories["Types Categories"]:::metadata
+    Functions_Memory_Representation -.-> Functions_Types_Categories
+    Functions_When_To_Use["When To Use"]:::metadata
+    Functions_Types_Categories -.-> Functions_When_To_Use
+    Functions_Anti_Patterns["Anti Patterns"]:::metadata
+    Functions_When_To_Use -.-> Functions_Anti_Patterns
+    Functions_Performance["Performance"]:::metadata
+    Functions_Anti_Patterns -.-> Functions_Performance
+    Functions_Interview_Questions["Interview Questions"]:::metadata
+    Functions_Performance -.-> Functions_Interview_Questions
+    Functions_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Functions_Interview_Questions -.-> Functions_RealWorld_Examples
+    Methods_Definition["Definition"]:::metadata
+    Methods -.-> Methods_Definition
+    Methods_Why_it_Exists["Why it Exists"]:::metadata
+    Methods_Definition -.-> Methods_Why_it_Exists
+    Methods_Syntax_Rules["Syntax Rules"]:::metadata
+    Methods_Why_it_Exists -.-> Methods_Syntax_Rules
+    Methods_Memory_Representation["Memory Representation"]:::metadata
+    Methods_Syntax_Rules -.-> Methods_Memory_Representation
+    Methods_Types_Categories["Types Categories"]:::metadata
+    Methods_Memory_Representation -.-> Methods_Types_Categories
+    Methods_When_To_Use["When To Use"]:::metadata
+    Methods_Types_Categories -.-> Methods_When_To_Use
+    Methods_Anti_Patterns["Anti Patterns"]:::metadata
+    Methods_When_To_Use -.-> Methods_Anti_Patterns
+    Methods_Performance["Performance"]:::metadata
+    Methods_Anti_Patterns -.-> Methods_Performance
+    Methods_Interview_Questions["Interview Questions"]:::metadata
+    Methods_Performance -.-> Methods_Interview_Questions
+    Methods_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Methods_Interview_Questions -.-> Methods_RealWorld_Examples
+    Interfaces_Definition["Definition"]:::metadata
+    Interfaces -.-> Interfaces_Definition
+    Interfaces_Why_it_Exists["Why it Exists"]:::metadata
+    Interfaces_Definition -.-> Interfaces_Why_it_Exists
+    Interfaces_Syntax_Rules["Syntax Rules"]:::metadata
+    Interfaces_Why_it_Exists -.-> Interfaces_Syntax_Rules
+    Interfaces_Memory_Representation["Memory Representation"]:::metadata
+    Interfaces_Syntax_Rules -.-> Interfaces_Memory_Representation
+    Interfaces_Types_Categories["Types Categories"]:::metadata
+    Interfaces_Memory_Representation -.-> Interfaces_Types_Categories
+    Interfaces_When_To_Use["When To Use"]:::metadata
+    Interfaces_Types_Categories -.-> Interfaces_When_To_Use
+    Interfaces_Anti_Patterns["Anti Patterns"]:::metadata
+    Interfaces_When_To_Use -.-> Interfaces_Anti_Patterns
+    Interfaces_Performance["Performance"]:::metadata
+    Interfaces_Anti_Patterns -.-> Interfaces_Performance
+    Interfaces_Interview_Questions["Interview Questions"]:::metadata
+    Interfaces_Performance -.-> Interfaces_Interview_Questions
+    Interfaces_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Interfaces_Interview_Questions -.-> Interfaces_RealWorld_Examples
+    ErrorHandling_Definition["Definition"]:::metadata
+    ErrorHandling -.-> ErrorHandling_Definition
+    ErrorHandling_Why_it_Exists["Why it Exists"]:::metadata
+    ErrorHandling_Definition -.-> ErrorHandling_Why_it_Exists
+    ErrorHandling_Syntax_Rules["Syntax Rules"]:::metadata
+    ErrorHandling_Why_it_Exists -.-> ErrorHandling_Syntax_Rules
+    ErrorHandling_Memory_Representation["Memory Representation"]:::metadata
+    ErrorHandling_Syntax_Rules -.-> ErrorHandling_Memory_Representation
+    ErrorHandling_Types_Categories["Types Categories"]:::metadata
+    ErrorHandling_Memory_Representation -.-> ErrorHandling_Types_Categories
+    ErrorHandling_When_To_Use["When To Use"]:::metadata
+    ErrorHandling_Types_Categories -.-> ErrorHandling_When_To_Use
+    ErrorHandling_Anti_Patterns["Anti Patterns"]:::metadata
+    ErrorHandling_When_To_Use -.-> ErrorHandling_Anti_Patterns
+    ErrorHandling_Performance["Performance"]:::metadata
+    ErrorHandling_Anti_Patterns -.-> ErrorHandling_Performance
+    ErrorHandling_Interview_Questions["Interview Questions"]:::metadata
+    ErrorHandling_Performance -.-> ErrorHandling_Interview_Questions
+    ErrorHandling_RealWorld_Examples["RealWorld Examples"]:::metadata
+    ErrorHandling_Interview_Questions -.-> ErrorHandling_RealWorld_Examples
+    Testing_Definition["Definition"]:::metadata
+    Testing -.-> Testing_Definition
+    Testing_Why_it_Exists["Why it Exists"]:::metadata
+    Testing_Definition -.-> Testing_Why_it_Exists
+    Testing_Syntax_Rules["Syntax Rules"]:::metadata
+    Testing_Why_it_Exists -.-> Testing_Syntax_Rules
+    Testing_Memory_Representation["Memory Representation"]:::metadata
+    Testing_Syntax_Rules -.-> Testing_Memory_Representation
+    Testing_Types_Categories["Types Categories"]:::metadata
+    Testing_Memory_Representation -.-> Testing_Types_Categories
+    Testing_When_To_Use["When To Use"]:::metadata
+    Testing_Types_Categories -.-> Testing_When_To_Use
+    Testing_Anti_Patterns["Anti Patterns"]:::metadata
+    Testing_When_To_Use -.-> Testing_Anti_Patterns
+    Testing_Performance["Performance"]:::metadata
+    Testing_Anti_Patterns -.-> Testing_Performance
+    Testing_Interview_Questions["Interview Questions"]:::metadata
+    Testing_Performance -.-> Testing_Interview_Questions
+    Testing_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Testing_Interview_Questions -.-> Testing_RealWorld_Examples
+    Goroutines_Definition["Definition"]:::metadata
+    Goroutines -.-> Goroutines_Definition
+    Goroutines_Why_it_Exists["Why it Exists"]:::metadata
+    Goroutines_Definition -.-> Goroutines_Why_it_Exists
+    Goroutines_Syntax_Rules["Syntax Rules"]:::metadata
+    Goroutines_Why_it_Exists -.-> Goroutines_Syntax_Rules
+    Goroutines_Memory_Representation["Memory Representation"]:::metadata
+    Goroutines_Syntax_Rules -.-> Goroutines_Memory_Representation
+    Goroutines_Types_Categories["Types Categories"]:::metadata
+    Goroutines_Memory_Representation -.-> Goroutines_Types_Categories
+    Goroutines_When_To_Use["When To Use"]:::metadata
+    Goroutines_Types_Categories -.-> Goroutines_When_To_Use
+    Goroutines_Anti_Patterns["Anti Patterns"]:::metadata
+    Goroutines_When_To_Use -.-> Goroutines_Anti_Patterns
+    Goroutines_Performance["Performance"]:::metadata
+    Goroutines_Anti_Patterns -.-> Goroutines_Performance
+    Goroutines_Interview_Questions["Interview Questions"]:::metadata
+    Goroutines_Performance -.-> Goroutines_Interview_Questions
+    Goroutines_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Goroutines_Interview_Questions -.-> Goroutines_RealWorld_Examples
+    Channels_Definition["Definition"]:::metadata
+    Channels -.-> Channels_Definition
+    Channels_Why_it_Exists["Why it Exists"]:::metadata
+    Channels_Definition -.-> Channels_Why_it_Exists
+    Channels_Syntax_Rules["Syntax Rules"]:::metadata
+    Channels_Why_it_Exists -.-> Channels_Syntax_Rules
+    Channels_Memory_Representation["Memory Representation"]:::metadata
+    Channels_Syntax_Rules -.-> Channels_Memory_Representation
+    Channels_Types_Categories["Types Categories"]:::metadata
+    Channels_Memory_Representation -.-> Channels_Types_Categories
+    Channels_When_To_Use["When To Use"]:::metadata
+    Channels_Types_Categories -.-> Channels_When_To_Use
+    Channels_Anti_Patterns["Anti Patterns"]:::metadata
+    Channels_When_To_Use -.-> Channels_Anti_Patterns
+    Channels_Performance["Performance"]:::metadata
+    Channels_Anti_Patterns -.-> Channels_Performance
+    Channels_Interview_Questions["Interview Questions"]:::metadata
+    Channels_Performance -.-> Channels_Interview_Questions
+    Channels_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Channels_Interview_Questions -.-> Channels_RealWorld_Examples
+    Mutex_Definition["Definition"]:::metadata
+    Mutex -.-> Mutex_Definition
+    Mutex_Why_it_Exists["Why it Exists"]:::metadata
+    Mutex_Definition -.-> Mutex_Why_it_Exists
+    Mutex_Syntax_Rules["Syntax Rules"]:::metadata
+    Mutex_Why_it_Exists -.-> Mutex_Syntax_Rules
+    Mutex_Memory_Representation["Memory Representation"]:::metadata
+    Mutex_Syntax_Rules -.-> Mutex_Memory_Representation
+    Mutex_Types_Categories["Types Categories"]:::metadata
+    Mutex_Memory_Representation -.-> Mutex_Types_Categories
+    Mutex_When_To_Use["When To Use"]:::metadata
+    Mutex_Types_Categories -.-> Mutex_When_To_Use
+    Mutex_Anti_Patterns["Anti Patterns"]:::metadata
+    Mutex_When_To_Use -.-> Mutex_Anti_Patterns
+    Mutex_Performance["Performance"]:::metadata
+    Mutex_Anti_Patterns -.-> Mutex_Performance
+    Mutex_Interview_Questions["Interview Questions"]:::metadata
+    Mutex_Performance -.-> Mutex_Interview_Questions
+    Mutex_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Mutex_Interview_Questions -.-> Mutex_RealWorld_Examples
+    Context_Definition["Definition"]:::metadata
+    Context -.-> Context_Definition
+    Context_Why_it_Exists["Why it Exists"]:::metadata
+    Context_Definition -.-> Context_Why_it_Exists
+    Context_Syntax_Rules["Syntax Rules"]:::metadata
+    Context_Why_it_Exists -.-> Context_Syntax_Rules
+    Context_Memory_Representation["Memory Representation"]:::metadata
+    Context_Syntax_Rules -.-> Context_Memory_Representation
+    Context_Types_Categories["Types Categories"]:::metadata
+    Context_Memory_Representation -.-> Context_Types_Categories
+    Context_When_To_Use["When To Use"]:::metadata
+    Context_Types_Categories -.-> Context_When_To_Use
+    Context_Anti_Patterns["Anti Patterns"]:::metadata
+    Context_When_To_Use -.-> Context_Anti_Patterns
+    Context_Performance["Performance"]:::metadata
+    Context_Anti_Patterns -.-> Context_Performance
+    Context_Interview_Questions["Interview Questions"]:::metadata
+    Context_Performance -.-> Context_Interview_Questions
+    Context_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Context_Interview_Questions -.-> Context_RealWorld_Examples
+    Generics_Definition["Definition"]:::metadata
+    Generics -.-> Generics_Definition
+    Generics_Why_it_Exists["Why it Exists"]:::metadata
+    Generics_Definition -.-> Generics_Why_it_Exists
+    Generics_Syntax_Rules["Syntax Rules"]:::metadata
+    Generics_Why_it_Exists -.-> Generics_Syntax_Rules
+    Generics_Memory_Representation["Memory Representation"]:::metadata
+    Generics_Syntax_Rules -.-> Generics_Memory_Representation
+    Generics_Types_Categories["Types Categories"]:::metadata
+    Generics_Memory_Representation -.-> Generics_Types_Categories
+    Generics_When_To_Use["When To Use"]:::metadata
+    Generics_Types_Categories -.-> Generics_When_To_Use
+    Generics_Anti_Patterns["Anti Patterns"]:::metadata
+    Generics_When_To_Use -.-> Generics_Anti_Patterns
+    Generics_Performance["Performance"]:::metadata
+    Generics_Anti_Patterns -.-> Generics_Performance
+    Generics_Interview_Questions["Interview Questions"]:::metadata
+    Generics_Performance -.-> Generics_Interview_Questions
+    Generics_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Generics_Interview_Questions -.-> Generics_RealWorld_Examples
+    Reflection_Definition["Definition"]:::metadata
+    Reflection -.-> Reflection_Definition
+    Reflection_Why_it_Exists["Why it Exists"]:::metadata
+    Reflection_Definition -.-> Reflection_Why_it_Exists
+    Reflection_Syntax_Rules["Syntax Rules"]:::metadata
+    Reflection_Why_it_Exists -.-> Reflection_Syntax_Rules
+    Reflection_Memory_Representation["Memory Representation"]:::metadata
+    Reflection_Syntax_Rules -.-> Reflection_Memory_Representation
+    Reflection_Types_Categories["Types Categories"]:::metadata
+    Reflection_Memory_Representation -.-> Reflection_Types_Categories
+    Reflection_When_To_Use["When To Use"]:::metadata
+    Reflection_Types_Categories -.-> Reflection_When_To_Use
+    Reflection_Anti_Patterns["Anti Patterns"]:::metadata
+    Reflection_When_To_Use -.-> Reflection_Anti_Patterns
+    Reflection_Performance["Performance"]:::metadata
+    Reflection_Anti_Patterns -.-> Reflection_Performance
+    Reflection_Interview_Questions["Interview Questions"]:::metadata
+    Reflection_Performance -.-> Reflection_Interview_Questions
+    Reflection_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Reflection_Interview_Questions -.-> Reflection_RealWorld_Examples
+    GoModules_Definition["Definition"]:::metadata
+    GoModules -.-> GoModules_Definition
+    GoModules_Why_it_Exists["Why it Exists"]:::metadata
+    GoModules_Definition -.-> GoModules_Why_it_Exists
+    GoModules_Syntax_Rules["Syntax Rules"]:::metadata
+    GoModules_Why_it_Exists -.-> GoModules_Syntax_Rules
+    GoModules_Memory_Representation["Memory Representation"]:::metadata
+    GoModules_Syntax_Rules -.-> GoModules_Memory_Representation
+    GoModules_Types_Categories["Types Categories"]:::metadata
+    GoModules_Memory_Representation -.-> GoModules_Types_Categories
+    GoModules_When_To_Use["When To Use"]:::metadata
+    GoModules_Types_Categories -.-> GoModules_When_To_Use
+    GoModules_Anti_Patterns["Anti Patterns"]:::metadata
+    GoModules_When_To_Use -.-> GoModules_Anti_Patterns
+    GoModules_Performance["Performance"]:::metadata
+    GoModules_Anti_Patterns -.-> GoModules_Performance
+    GoModules_Interview_Questions["Interview Questions"]:::metadata
+    GoModules_Performance -.-> GoModules_Interview_Questions
+    GoModules_RealWorld_Examples["RealWorld Examples"]:::metadata
+    GoModules_Interview_Questions -.-> GoModules_RealWorld_Examples
+    Networking_Definition["Definition"]:::metadata
+    Networking -.-> Networking_Definition
+    Networking_Why_it_Exists["Why it Exists"]:::metadata
+    Networking_Definition -.-> Networking_Why_it_Exists
+    Networking_Syntax_Rules["Syntax Rules"]:::metadata
+    Networking_Why_it_Exists -.-> Networking_Syntax_Rules
+    Networking_Memory_Representation["Memory Representation"]:::metadata
+    Networking_Syntax_Rules -.-> Networking_Memory_Representation
+    Networking_Types_Categories["Types Categories"]:::metadata
+    Networking_Memory_Representation -.-> Networking_Types_Categories
+    Networking_When_To_Use["When To Use"]:::metadata
+    Networking_Types_Categories -.-> Networking_When_To_Use
+    Networking_Anti_Patterns["Anti Patterns"]:::metadata
+    Networking_When_To_Use -.-> Networking_Anti_Patterns
+    Networking_Performance["Performance"]:::metadata
+    Networking_Anti_Patterns -.-> Networking_Performance
+    Networking_Interview_Questions["Interview Questions"]:::metadata
+    Networking_Performance -.-> Networking_Interview_Questions
+    Networking_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Networking_Interview_Questions -.-> Networking_RealWorld_Examples
+    MemoryLayout_Definition["Definition"]:::metadata
+    MemoryLayout -.-> MemoryLayout_Definition
+    MemoryLayout_Why_it_Exists["Why it Exists"]:::metadata
+    MemoryLayout_Definition -.-> MemoryLayout_Why_it_Exists
+    MemoryLayout_Syntax_Rules["Syntax Rules"]:::metadata
+    MemoryLayout_Why_it_Exists -.-> MemoryLayout_Syntax_Rules
+    MemoryLayout_Memory_Representation["Memory Representation"]:::metadata
+    MemoryLayout_Syntax_Rules -.-> MemoryLayout_Memory_Representation
+    MemoryLayout_Types_Categories["Types Categories"]:::metadata
+    MemoryLayout_Memory_Representation -.-> MemoryLayout_Types_Categories
+    MemoryLayout_When_To_Use["When To Use"]:::metadata
+    MemoryLayout_Types_Categories -.-> MemoryLayout_When_To_Use
+    MemoryLayout_Anti_Patterns["Anti Patterns"]:::metadata
+    MemoryLayout_When_To_Use -.-> MemoryLayout_Anti_Patterns
+    MemoryLayout_Performance["Performance"]:::metadata
+    MemoryLayout_Anti_Patterns -.-> MemoryLayout_Performance
+    MemoryLayout_Interview_Questions["Interview Questions"]:::metadata
+    MemoryLayout_Performance -.-> MemoryLayout_Interview_Questions
+    MemoryLayout_RealWorld_Examples["RealWorld Examples"]:::metadata
+    MemoryLayout_Interview_Questions -.-> MemoryLayout_RealWorld_Examples
+    EscapeAnalysis_Definition["Definition"]:::metadata
+    EscapeAnalysis -.-> EscapeAnalysis_Definition
+    EscapeAnalysis_Why_it_Exists["Why it Exists"]:::metadata
+    EscapeAnalysis_Definition -.-> EscapeAnalysis_Why_it_Exists
+    EscapeAnalysis_Syntax_Rules["Syntax Rules"]:::metadata
+    EscapeAnalysis_Why_it_Exists -.-> EscapeAnalysis_Syntax_Rules
+    EscapeAnalysis_Memory_Representation["Memory Representation"]:::metadata
+    EscapeAnalysis_Syntax_Rules -.-> EscapeAnalysis_Memory_Representation
+    EscapeAnalysis_Types_Categories["Types Categories"]:::metadata
+    EscapeAnalysis_Memory_Representation -.-> EscapeAnalysis_Types_Categories
+    EscapeAnalysis_When_To_Use["When To Use"]:::metadata
+    EscapeAnalysis_Types_Categories -.-> EscapeAnalysis_When_To_Use
+    EscapeAnalysis_Anti_Patterns["Anti Patterns"]:::metadata
+    EscapeAnalysis_When_To_Use -.-> EscapeAnalysis_Anti_Patterns
+    EscapeAnalysis_Performance["Performance"]:::metadata
+    EscapeAnalysis_Anti_Patterns -.-> EscapeAnalysis_Performance
+    EscapeAnalysis_Interview_Questions["Interview Questions"]:::metadata
+    EscapeAnalysis_Performance -.-> EscapeAnalysis_Interview_Questions
+    EscapeAnalysis_RealWorld_Examples["RealWorld Examples"]:::metadata
+    EscapeAnalysis_Interview_Questions -.-> EscapeAnalysis_RealWorld_Examples
+    GarbageCollection_Definition["Definition"]:::metadata
+    GarbageCollection -.-> GarbageCollection_Definition
+    GarbageCollection_Why_it_Exists["Why it Exists"]:::metadata
+    GarbageCollection_Definition -.-> GarbageCollection_Why_it_Exists
+    GarbageCollection_Syntax_Rules["Syntax Rules"]:::metadata
+    GarbageCollection_Why_it_Exists -.-> GarbageCollection_Syntax_Rules
+    GarbageCollection_Memory_Representation["Memory Representation"]:::metadata
+    GarbageCollection_Syntax_Rules -.-> GarbageCollection_Memory_Representation
+    GarbageCollection_Types_Categories["Types Categories"]:::metadata
+    GarbageCollection_Memory_Representation -.-> GarbageCollection_Types_Categories
+    GarbageCollection_When_To_Use["When To Use"]:::metadata
+    GarbageCollection_Types_Categories -.-> GarbageCollection_When_To_Use
+    GarbageCollection_Anti_Patterns["Anti Patterns"]:::metadata
+    GarbageCollection_When_To_Use -.-> GarbageCollection_Anti_Patterns
+    GarbageCollection_Performance["Performance"]:::metadata
+    GarbageCollection_Anti_Patterns -.-> GarbageCollection_Performance
+    GarbageCollection_Interview_Questions["Interview Questions"]:::metadata
+    GarbageCollection_Performance -.-> GarbageCollection_Interview_Questions
+    GarbageCollection_RealWorld_Examples["RealWorld Examples"]:::metadata
+    GarbageCollection_Interview_Questions -.-> GarbageCollection_RealWorld_Examples
+    Compiler_Definition["Definition"]:::metadata
+    Compiler -.-> Compiler_Definition
+    Compiler_Why_it_Exists["Why it Exists"]:::metadata
+    Compiler_Definition -.-> Compiler_Why_it_Exists
+    Compiler_Syntax_Rules["Syntax Rules"]:::metadata
+    Compiler_Why_it_Exists -.-> Compiler_Syntax_Rules
+    Compiler_Memory_Representation["Memory Representation"]:::metadata
+    Compiler_Syntax_Rules -.-> Compiler_Memory_Representation
+    Compiler_Types_Categories["Types Categories"]:::metadata
+    Compiler_Memory_Representation -.-> Compiler_Types_Categories
+    Compiler_When_To_Use["When To Use"]:::metadata
+    Compiler_Types_Categories -.-> Compiler_When_To_Use
+    Compiler_Anti_Patterns["Anti Patterns"]:::metadata
+    Compiler_When_To_Use -.-> Compiler_Anti_Patterns
+    Compiler_Performance["Performance"]:::metadata
+    Compiler_Anti_Patterns -.-> Compiler_Performance
+    Compiler_Interview_Questions["Interview Questions"]:::metadata
+    Compiler_Performance -.-> Compiler_Interview_Questions
+    Compiler_RealWorld_Examples["RealWorld Examples"]:::metadata
+    Compiler_Interview_Questions -.-> Compiler_RealWorld_Examples
+
+    %% Relationships (Knowledge Graph)
+    Pointers ==> Methods
+    Pointers ==> Structs
+    Pointers ==> Interfaces
+    Pointers ==> EscapeAnalysis
+    Pointers ==> GarbageCollection
+    Pointers ==> MemoryLayout
+    Arrays ==> Slices
+    Slices ==> MemoryLayout
+    Maps ==> Structs
+    Structs ==> Methods
+    Methods ==> Interfaces
+    Goroutines ==> Channels
+    Goroutines ==> Mutex
+    Goroutines ==> Context
+    Goroutines ==> Runtime
+    Channels ==> MemoryLayout
+    Context ==> Networking
+    Interfaces ==> Reflection
+    Interfaces ==> Generics
+    MemoryLayout ==> EscapeAnalysis
+    EscapeAnalysis ==> GarbageCollection
+    GarbageCollection ==> Compiler
+    ErrorHandling ==> Testing
+    Networking ==> Context
+    Functions ==> Methods
+    Functions ==> Goroutines
+
+    %% Deep Dive Nodes
+    Pointers_Nil_Pointer["Nil Pointer"]:::metadata
+    Pointers -.- Pointers_Nil_Pointer
+    Pointers_Pointer_to_Struct["Pointer to Struct"]:::metadata
+    Pointers -.- Pointers_Pointer_to_Struct
+    Pointers_Double_Pointer["Double Pointer"]:::metadata
+    Pointers -.- Pointers_Double_Pointer
+    MemoryLayout_Stack_Allocation["Stack Allocation"]:::metadata
+    MemoryLayout -.- MemoryLayout_Stack_Allocation
+    MemoryLayout_Heap_Allocation["Heap Allocation"]:::metadata
+    MemoryLayout -.- MemoryLayout_Heap_Allocation
+    MemoryLayout_Padding_Alignment["Padding Alignment"]:::metadata
+    MemoryLayout -.- MemoryLayout_Padding_Alignment
+    GarbageCollection_Mark_and_Sweep["Mark and Sweep"]:::metadata
+    GarbageCollection -.- GarbageCollection_Mark_and_Sweep
+    GarbageCollection_Write_Barrier["Write Barrier"]:::metadata
+    GarbageCollection -.- GarbageCollection_Write_Barrier
+    GarbageCollection_Pacing["Pacing"]:::metadata
+    GarbageCollection -.- GarbageCollection_Pacing
+    Goroutines_M_N_Scheduling["M N Scheduling"]:::metadata
+    Goroutines -.- Goroutines_M_N_Scheduling
+    Goroutines_OS_Threads["OS Threads"]:::metadata
+    Goroutines -.- Goroutines_OS_Threads
+    Goroutines_Context_Switching["Context Switching"]:::metadata
+    Goroutines -.- Goroutines_Context_Switching
             </pre>
         </div>
     </div>

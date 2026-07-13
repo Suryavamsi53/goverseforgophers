@@ -102,13 +102,15 @@ a) Nothing, compiles fine  b) `timeout` declared and unused → compile error  c
 
 ### Level 1 — Coding Problems
 
-**1.21** Write a program that declares `maxConnections` (int), `timeoutSeconds` (float64), and `serviceName` (string), then prints all three in a formatted single line using `fmt.Printf`.
-**Answer:**
+**1.21** Which of the following is the correct way to format and print `maxConnections` (int), `timeoutSeconds` (float64), and `serviceName` (string) using `fmt.Printf`?
+a) `fmt.Printf("Service: %s | MaxConns: %d | Timeout: %.1fs\n", serviceName, maxConnections, timeoutSeconds)`
+b) `fmt.Printf("Service: %d | MaxConns: %s | Timeout: %.1f\n", serviceName, maxConnections, timeoutSeconds)`
+c) `fmt.Printf("Service: %v | MaxConns: %f | Timeout: %d\n", serviceName, maxConnections, timeoutSeconds)`
+d) `fmt.Printf("Service: %s | MaxConns: %i | Timeout: %d\n", serviceName, maxConnections, timeoutSeconds)`
+**Answer: a) `fmt.Printf("Service: %s | MaxConns: %d | Timeout: %.1fs\n", ...)`**
 ```go
 package main
-
 import "fmt"
-
 func main() {
 	maxConnections := 100
 	timeoutSeconds := 30.5
@@ -117,32 +119,35 @@ func main() {
 }
 ```
 
-**1.22** Using `iota`, define byte-size constants: `KB`, `MB`, `GB` as powers of 1024 (bit-shift pattern common in infra code).
-**Answer:**
+**1.22** How do you properly use `iota` to define byte-size constants (`KB`, `MB`, `GB`) as powers of 1024?
+a) `KB = iota * 1024`, `MB`, `GB`
+b) `KB = 1 << (10 * iota)`, `MB`, `GB`
+c) `KB = iota << 10`, `MB`, `GB`
+d) `KB = 1024 ^ iota`, `MB`, `GB`
+**Answer: b) `KB = 1 << (10 * iota)`, `MB`, `GB`**
 ```go
 package main
-
 import "fmt"
-
 const (
 	_  = iota
 	KB = 1 << (10 * iota)
 	MB
 	GB
 )
-
 func main() {
 	fmt.Println(KB, MB, GB)
 }
 ```
 
-**1.23** Write a program that takes memory in MB (int) and converts it to GB using proper float division, avoiding integer truncation.
-**Answer:**
+**1.23** How do you convert `memoryMB` (int) to GB (float64) using proper float division to avoid integer truncation?
+a) `memoryGB := memoryMB / 1024.0`
+b) `memoryGB := float64(memoryMB / 1024)`
+c) `memoryGB := float64(memoryMB) / 1024`
+d) `memoryGB := memoryMB / float32(1024)`
+**Answer: c) `memoryGB := float64(memoryMB) / 1024`**
 ```go
 package main
-
 import "fmt"
-
 func main() {
 	memoryMB := 2560
 	memoryGB := float64(memoryMB) / 1024
@@ -150,13 +155,15 @@ func main() {
 }
 ```
 
-**1.24** Write a program simulating a rate limiter: given `maxRequestsPerMinute` = 600, compute and print `requestsPerSecond` as a float64.
-**Answer:**
+**1.24** Given `maxRequestsPerMinute = 600`, which correctly computes `requestsPerSecond` as a float64?
+a) `requestsPerSecond := float64(maxRequestsPerMinute) / 60.0`
+b) `requestsPerSecond := maxRequestsPerMinute / 60`
+c) `requestsPerSecond := float64(maxRequestsPerMinute / 60)`
+d) `requestsPerSecond := float(maxRequestsPerMinute) / 60`
+**Answer: a) `requestsPerSecond := float64(maxRequestsPerMinute) / 60.0`**
 ```go
 package main
-
 import "fmt"
-
 func main() {
 	maxRequestsPerMinute := 600
 	requestsPerSecond := float64(maxRequestsPerMinute) / 60.0
@@ -164,19 +171,20 @@ func main() {
 }
 ```
 
-**1.25** Declare HTTP status-like constants `StatusOK = 200`, `StatusNotFound = 404`, `StatusServerError = 500` — explain why plain sequential `iota` can't produce these directly.
-**Answer:**
+**1.25** Why can't a plain sequential `iota` be used to declare `StatusOK = 200`, `StatusNotFound = 404`, `StatusServerError = 500` directly?
+a) `iota` only works with strings, not integers.
+b) `iota` generates strictly sequential values (0, 1, 2...) and cannot generate arbitrary non-sequential numbers directly.
+c) `iota` resets on every line, making it impossible.
+d) `iota` cannot be used inside a `const` block.
+**Answer: b) `iota` generates strictly sequential values (0, 1, 2...) and cannot generate arbitrary non-sequential numbers directly.**
 ```go
 package main
-
 import "fmt"
-
 const (
 	StatusOK          = 200
 	StatusNotFound    = 404
 	StatusServerError = 500
 )
-
 func main() {
 	fmt.Println(StatusOK, StatusNotFound, StatusServerError)
 }
@@ -302,13 +310,15 @@ a) Jumps to a labeled statement; discouraged for readability except rare cases l
 
 ### Level 2 — Coding Problems
 
-**2.21** Write a function that classifies an HTTP status code into "Success", "Client Error", "Server Error", or "Unknown" using a switch statement with ranges.
-**Answer:**
+**2.21** Which of the following functions correctly classifies an HTTP status code using a `switch` statement with ranges?
+a) `switch { case code >= 200 && code < 300: return "Success" }`
+b) `switch code { case 200..299: return "Success" }`
+c) `switch code >= 200 { case true: return "Success" }`
+d) `switch (code) { case 200-299: return "Success" }`
+**Answer: a) `switch { case code >= 200 && code < 300: return "Success" }`**
 ```go
 package main
-
 import "fmt"
-
 func classify(code int) string {
 	switch {
 	case code >= 200 && code < 300:
@@ -321,53 +331,46 @@ func classify(code int) string {
 		return "Unknown"
 	}
 }
-
 func main() {
 	fmt.Println(classify(404))
-	fmt.Println(classify(200))
-	fmt.Println(classify(503))
 }
 ```
 
-**2.22** Write a retry loop that attempts a (simulated) API call up to 3 times, breaking early on simulated success at attempt 2.
-**Answer:**
+**2.22** How do you correctly structure a retry loop in Go that attempts a call up to 3 times, breaking early on success?
+a) `for attempt := 1; attempt <= 3; attempt++ { if success() { break } }`
+b) `for (int attempt = 1; attempt <= 3; attempt++) { if (success()) break; }`
+c) `loop attempt := 1 to 3 { if success { stop } }`
+d) `while attempt <= 3 { attempt++; if success() { exit } }`
+**Answer: a) `for attempt := 1; attempt <= 3; attempt++ { if success() { break } }`**
 ```go
 package main
-
 import "fmt"
-
-func callAPI(attempt int) bool {
-	return attempt == 2 // simulate success on 2nd try
-}
-
+func callAPI(attempt int) bool { return attempt == 2 }
 func main() {
-	maxRetries := 3
-	for attempt := 1; attempt <= maxRetries; attempt++ {
-		fmt.Printf("Attempt %d...\n", attempt)
+	for attempt := 1; attempt <= 3; attempt++ {
 		if callAPI(attempt) {
-			fmt.Println("Success!")
 			break
 		}
 	}
 }
 ```
 
-**2.23** Write a nested loop that scans a 2D grid (e.g., simulating server rack positions) and uses a labeled break to stop entirely once a target server ID is found.
-**Answer:**
+**2.23** How do you use a labeled break to completely exit a nested 2D loop when a target is found?
+a) `break 2`
+b) `exit Search`
+c) `break Search` (where `Search:` is the label for the outer loop)
+d) `return outer`
+**Answer: c) `break Search` (where `Search:` is the label for the outer loop)**
 ```go
 package main
-
 import "fmt"
-
 func main() {
 	grid := [][]int{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}}
 	target := 5
-
 Search:
 	for row := range grid {
 		for col := range grid[row] {
 			if grid[row][col] == target {
-				fmt.Printf("Found %d at [%d][%d]\n", target, row, col)
 				break Search
 			}
 		}
@@ -375,13 +378,15 @@ Search:
 }
 ```
 
-**2.24** Write a function using `switch` with `fallthrough` to build a cumulative permission string (e.g., "read" implies checking "write" too).
-**Answer:**
+**2.24** How does the `fallthrough` keyword behave in a `switch` statement in Go?
+a) It causes the `switch` statement to exit immediately.
+b) It automatically transfers control to the very next `case` block, executing its code regardless of the next case's condition.
+c) It acts as a `default` case if no other conditions match.
+d) It re-evaluates the condition of the next `case` block before executing it.
+**Answer: b) It automatically transfers control to the very next `case` block, executing its code regardless of the next case's condition.**
 ```go
 package main
-
 import "fmt"
-
 func permissions(level int) []string {
 	var perms []string
 	switch {
@@ -396,10 +401,8 @@ func permissions(level int) []string {
 	}
 	return perms
 }
-
 func main() {
-	fmt.Println(permissions(3))
-	fmt.Println(permissions(1))
+	fmt.Println(permissions(3)) // Output: [admin write read]
 }
 ```
 
@@ -525,21 +528,26 @@ a) No  b) Yes, but variadic must be last: `func f(a int, b ...string)`  c) Yes, 
 a) Compile error  b) The variadic parameter is an empty (nil) slice  c) Runtime panic  d) Uses default values
 **Answer: b) It becomes a nil/empty slice, safely iterable with zero length**
 
-**3.20** True or False: Deferred functions can modify named return values even after a panic is recovered.
-a) True  b) False
-**Answer: a) True — this is exactly how idiomatic panic-recovery-with-cleanup patterns work in Go**
+**3.20** Can deferred functions modify named return values even after a panic is recovered?
+a) True, this is exactly how idiomatic panic-recovery-with-cleanup patterns work in Go.
+b) False, named returns are frozen the moment a panic occurs.
+c) True, but only if the function uses pointer return types.
+d) False, deferred functions execute, but cannot mutate the outer function's scope.
+**Answer: a) True, this is exactly how idiomatic panic-recovery-with-cleanup patterns work in Go.**
 
 ---
 
 ### Level 3 — Coding Problems
 
-**3.21** Write a variadic function `sum(nums ...int) int` that returns the total, and call it both with individual args and with a spread slice.
-**Answer:**
+**3.21** Which of the following is the correct syntax to define and call a variadic function that takes any number of integers?
+a) `func sum(nums ...int) { ... }` called with `sum([]int{1, 2}...)`
+b) `func sum(nums []int...) { ... }` called with `sum(1, 2, 3)`
+c) `func sum(nums ...[]int) { ... }` called with `sum(1, 2)`
+d) `func sum(...nums int) { ... }` called with `sum(1, 2)`
+**Answer: a) `func sum(nums ...int) { ... }` called with `sum([]int{1, 2}...)`**
 ```go
 package main
-
 import "fmt"
-
 func sum(nums ...int) int {
 	total := 0
 	for _, n := range nums {
@@ -547,7 +555,6 @@ func sum(nums ...int) int {
 	}
 	return total
 }
-
 func main() {
 	fmt.Println(sum(1, 2, 3))
 	nums := []int{10, 20, 30}
@@ -555,16 +562,18 @@ func main() {
 }
 ```
 
-**3.22** Write a function `safeDivide(a, b float64) (result float64, err error)` using named returns that returns an error instead of panicking on division by zero.
-**Answer:**
+**3.22** Which implementation correctly uses named returns to return an error instead of panicking on division by zero?
+a) `func safeDivide(a, b float64) (result float64, err error) { if b == 0 { err = errors.New("zero"); return }; result = a / b; return }`
+b) `func safeDivide(a, b float64) (float64, error) { if b == 0 { return 0, errors.New("zero") }; return a / b, nil }`
+c) `func safeDivide(a, b float64) (res float64) { if b == 0 { panic("zero") } return a / b }`
+d) `func safeDivide(a, b float64) (result float64, err error) { if b == 0 { return nil, "error" }; result = a / b; return }`
+**Answer: a) `func safeDivide(a, b float64) (result float64, err error) { if b == 0 { err = errors.New("zero"); return }; result = a / b; return }`**
 ```go
 package main
-
 import (
 	"errors"
 	"fmt"
 )
-
 func safeDivide(a, b float64) (result float64, err error) {
 	if b == 0 {
 		err = errors.New("division by zero")
@@ -573,7 +582,6 @@ func safeDivide(a, b float64) (result float64, err error) {
 	result = a / b
 	return
 }
-
 func main() {
 	r, err := safeDivide(10, 0)
 	if err != nil {
@@ -584,13 +592,15 @@ func main() {
 }
 ```
 
-**3.23** Write a closure-based rate limiter: a function `makeLimiter(max int)` that returns a function which returns true if calls are under the max, false otherwise (tracking count internally).
-**Answer:**
+**3.23** How do you create a closure-based rate limiter in Go that tracks state (like a call count) internally?
+a) By returning a function that references a variable declared in the outer function's scope.
+b) By using global variables that the returned function accesses.
+c) By passing a pointer to a struct every time the function is called.
+d) By using the `static` keyword on a variable inside the function.
+**Answer: a) By returning a function that references a variable declared in the outer function's scope.**
 ```go
 package main
-
 import "fmt"
-
 func makeLimiter(max int) func() bool {
 	count := 0
 	return func() bool {
@@ -601,7 +611,6 @@ func makeLimiter(max int) func() bool {
 		return true
 	}
 }
-
 func main() {
 	allow := makeLimiter(2)
 	fmt.Println(allow()) // true
@@ -610,16 +619,18 @@ func main() {
 }
 ```
 
-**3.24** Write a function that uses `defer` to log entry/exit timing of a simulated DB query function.
-**Answer:**
+**3.24** How can you use `defer` to accurately log the entry and exit timing (duration) of a function?
+a) `start := time.Now(); defer func() { fmt.Println(time.Since(start)) }()`
+b) `defer fmt.Println(time.Since(time.Now()))`
+c) `defer time.Since(time.Now())`
+d) `start := time.Now(); defer fmt.Println(time.Since(start))`
+**Answer: a) `start := time.Now(); defer func() { fmt.Println(time.Since(start)) }()`**
 ```go
 package main
-
 import (
 	"fmt"
 	"time"
 )
-
 func queryDB() {
 	start := time.Now()
 	defer func() {
@@ -627,19 +638,20 @@ func queryDB() {
 	}()
 	time.Sleep(50 * time.Millisecond)
 }
-
 func main() {
 	queryDB()
 }
 ```
 
-**3.25** Write a function using `recover()` inside a deferred closure to prevent a worker goroutine's panic from crashing the whole program, logging the recovered error instead.
-**Answer:**
+**3.25** How do you correctly use `recover()` inside a deferred function to prevent a panic from crashing the program?
+a) `defer func() { if r := recover(); r != nil { fmt.Println(r) } }()`
+b) `defer recover()`
+c) `if err := recover(); err != nil { defer fmt.Println(err) }`
+d) `defer func() { recover(func(err error) { fmt.Println(err) }) }()`
+**Answer: a) `defer func() { if r := recover(); r != nil { fmt.Println(r) } }()`**
 ```go
 package main
-
 import "fmt"
-
 func safeWorker(job func()) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -648,7 +660,6 @@ func safeWorker(job func()) {
 	}()
 	job()
 }
-
 func main() {
 	safeWorker(func() {
 		panic("job failed unexpectedly")
@@ -764,13 +775,15 @@ a) Nothing  b) Pre-allocates capacity to avoid repeated reallocation during appe
 
 ### Level 4 — Coding Problems
 
-**4.21** Write a function that deduplicates a slice of strings using a map as a set.
-**Answer:**
+**4.21** Which of the following is the standard, idiomatic way to deduplicate a slice of strings in Go using a map as a set?
+a) By iterating over the slice and deleting duplicates from it directly using `delete()`.
+b) By using a `map[string]bool` to track seen elements and appending unseen elements to a new slice.
+c) By casting the slice to a `set` type: `set(items)`.
+d) By using `slices.Unique(items)` which modifies the slice in-place without memory allocation.
+**Answer: b) By using a `map[string]bool` to track seen elements and appending unseen elements to a new slice.**
 ```go
 package main
-
 import "fmt"
-
 func dedupe(items []string) []string {
 	seen := make(map[string]bool)
 	var result []string
@@ -782,19 +795,20 @@ func dedupe(items []string) []string {
 	}
 	return result
 }
-
 func main() {
 	fmt.Println(dedupe([]string{"a", "b", "a", "c", "b"}))
 }
 ```
 
-**4.22** Write a function that counts word frequency in a slice of strings (simulating log-line tokens) and returns a `map[string]int`.
-**Answer:**
+**4.22** How do you accurately count the frequency of each word in a slice of strings and return the counts?
+a) `freq := make(map[string]int); for _, w := range words { freq[w]++ }`
+b) `freq := map[string]int{}; for _, w := range words { freq[w] = freq[w] + 1 }`
+c) Both a and b are correct and idiomatic in Go.
+d) `freq := make(map[string]int); for w in words { freq[w]++ }`
+**Answer: c) Both a and b are correct and idiomatic in Go.**
 ```go
 package main
-
 import "fmt"
-
 func wordFreq(words []string) map[string]int {
 	freq := make(map[string]int)
 	for _, w := range words {
@@ -802,20 +816,21 @@ func wordFreq(words []string) map[string]int {
 	}
 	return freq
 }
-
 func main() {
 	logs := []string{"ERROR", "INFO", "ERROR", "WARN", "ERROR"}
 	fmt.Println(wordFreq(logs))
 }
 ```
 
-**4.23** Write a function `batch(items []int, size int) [][]int` that splits a slice into chunks of a given size (common for batch-processing API requests).
-**Answer:**
+**4.23** How do you properly split a slice `items` into smaller chunks (batches) of size `size`?
+a) By using a `for` loop incrementing by `size` and slicing `items[i:i+size]`, ensuring the upper bound doesn't exceed `len(items)`.
+b) By using `slices.Chunk(items, size)`.
+c) By copying elements into a 2D array iteratively using a `while` loop.
+d) By dividing `len(items) / size` and dynamically sizing a matrix.
+**Answer: a) By using a `for` loop incrementing by `size` and slicing `items[i:i+size]`, ensuring the upper bound doesn't exceed `len(items)`.**
 ```go
 package main
-
 import "fmt"
-
 func batch(items []int, size int) [][]int {
 	var batches [][]int
 	for i := 0; i < len(items); i += size {
@@ -827,20 +842,21 @@ func batch(items []int, size int) [][]int {
 	}
 	return batches
 }
-
 func main() {
 	items := []int{1, 2, 3, 4, 5, 6, 7}
 	fmt.Println(batch(items, 3))
 }
 ```
 
-**4.24** Write a function that safely merges two `map[string]int` config maps, where the second map's values override the first's on key conflicts.
-**Answer:**
+**4.24** How do you safely merge two `map[string]int` config maps so that the `override` map overrides the `base` map values?
+a) `merged := append(base, override...)`
+b) Create a new map, loop over `base` to assign values, then loop over `override` to assign/overwrite values.
+c) `merged := map.Merge(base, override)`
+d) `for k, v := range override { base[k] = v }; merged := base` (This mutates the base map, which may be unsafe).
+**Answer: b) Create a new map, loop over `base` to assign values, then loop over `override` to assign/overwrite values.**
 ```go
 package main
-
 import "fmt"
-
 func mergeConfigs(base, override map[string]int) map[string]int {
 	merged := make(map[string]int, len(base))
 	for k, v := range base {
@@ -851,21 +867,22 @@ func mergeConfigs(base, override map[string]int) map[string]int {
 	}
 	return merged
 }
-
 func main() {
 	base := map[string]int{"timeout": 30, "retries": 3}
 	override := map[string]int{"timeout": 60}
-	fmt.Println(mergeConfigs(base, override))
+	fmt.Println(mergeConfigs(base, override)) // {timeout: 60, retries: 3}
 }
 ```
 
-**4.25** Write a function demonstrating the slice-capacity growth pitfall: show how appending to a sliced sub-slice can unexpectedly mutate a sibling slice sharing the same backing array.
-**Answer:**
+**4.25** What happens if you slice an array `a := original[:2]` and then `append(a, 999)` when the original array had a capacity of 5?
+a) A panic occurs because `a` is full.
+b) `a` receives a newly allocated backing array with the value `999` appended, leaving `original` untouched.
+c) The value `999` overwrites the element at `original[2]` because `a` still shares the same backing array and has spare capacity.
+d) The compiler throws an error about appending to a sub-slice.
+**Answer: c) The value `999` overwrites the element at `original[2]` because `a` still shares the same backing array and has spare capacity.**
 ```go
 package main
-
 import "fmt"
-
 func main() {
 	original := make([]int, 3, 5)
 	original[0], original[1], original[2] = 1, 2, 3
@@ -874,7 +891,7 @@ func main() {
 	a = append(a, 999) // overwrites original[2] since cap allows it in-place
 
 	fmt.Println("original:", original) // [1 2 999] <- unexpectedly mutated
-	fmt.Println("a:", a)
+	fmt.Println("a:", a)               // [1 2 999]
 }
 ```
 
@@ -993,23 +1010,23 @@ a) Works fine always  b) Compile error — map values aren't addressable, so poi
 
 ### Level 5 — Coding Problems
 
-**5.21** Define a `Server` struct with `Name string`, `Port int`, `Healthy bool`, and a pointer-receiver method `MarkUnhealthy()` that sets `Healthy = false`.
-**Answer:**
+**5.21** How do you correctly define a `Server` struct with a pointer-receiver method `MarkUnhealthy()` that modifies its internal state?
+a) `func (s Server) MarkUnhealthy() { s.Healthy = false }`
+b) `func (s *Server) MarkUnhealthy() { s.Healthy = false }`
+c) `func MarkUnhealthy(s *Server) { s.Healthy = false }` (This is a function, not a method)
+d) `func (s *Server) MarkUnhealthy() { *s.Healthy = false }`
+**Answer: b) `func (s *Server) MarkUnhealthy() { s.Healthy = false }`**
 ```go
 package main
-
 import "fmt"
-
 type Server struct {
 	Name    string
 	Port    int
 	Healthy bool
 }
-
 func (s *Server) MarkUnhealthy() {
 	s.Healthy = false
 }
-
 func main() {
 	s := Server{Name: "api-1", Port: 8080, Healthy: true}
 	s.MarkUnhealthy()
@@ -1017,45 +1034,45 @@ func main() {
 }
 ```
 
-**5.22** Use struct embedding to build a `BaseHandler` with a `Log(msg string)` method, embedded into an `AuthHandler`, and call `Log` via the outer struct.
-**Answer:**
+**5.22** In Go, how do you use struct embedding to include a `BaseHandler` (which has a `Log` method) inside an `AuthHandler`, and call `Log` on an instance of `AuthHandler`?
+a) `type AuthHandler struct { Base BaseHandler }; h.Base.Log("msg")`
+b) `type AuthHandler struct { BaseHandler }; h.BaseHandler.Log("msg")`
+c) `type AuthHandler struct { BaseHandler }; h.Log("msg")`
+d) Go does not support calling embedded methods directly on the outer struct.
+**Answer: c) `type AuthHandler struct { BaseHandler }; h.Log("msg")`**
 ```go
 package main
-
 import "fmt"
-
 type BaseHandler struct{}
-
 func (b BaseHandler) Log(msg string) {
 	fmt.Println("[LOG]", msg)
 }
-
 type AuthHandler struct {
 	BaseHandler
 	Realm string
 }
-
 func main() {
 	h := AuthHandler{Realm: "admin"}
-	h.Log("authenticating request")
+	h.Log("authenticating request") // Promoted method!
 }
 ```
 
-**5.23** Define a `Config` struct with JSON tags for fields `APIKey string` (json: "api_key") and `MaxRetries int` (json: "max_retries"), then marshal it to JSON.
-**Answer:**
+**5.23** How do you define a `Config` struct with fields `APIKey` and `MaxRetries` that marshal to JSON as `api_key` and `max_retries`?
+a) By naming the fields in lowercase: `api_key string` (This makes them unexported).
+b) By using JSON tags: `APIKey string `+"`"+`json:"api_key"`+"`"
+c) By implementing a custom `MarshalJSON` interface for every field.
+d) By passing a formatting option to `json.Marshal(c, "snake_case")`.
+**Answer: b) By using JSON tags: `APIKey string `+"`"+`json:"api_key"`+"`"**
 ```go
 package main
-
 import (
 	"encoding/json"
 	"fmt"
 )
-
 type Config struct {
 	APIKey     string `json:"api_key"`
 	MaxRetries int    `json:"max_retries"`
 }
-
 func main() {
 	c := Config{APIKey: "secret123", MaxRetries: 5}
 	data, _ := json.Marshal(c)
@@ -1063,45 +1080,44 @@ func main() {
 }
 ```
 
-**5.24** Write a `HealthCheck` struct with a method `Status() string` that returns "healthy" or "unhealthy" based on an internal `errCount int`, using a threshold constant.
-**Answer:**
+**5.24** How do you write a method `Status()` on a `HealthCheck` struct that checks if `errCount` has exceeded a `maxErrThreshold` constant?
+a) `func (h HealthCheck) Status() string { if h.errCount >= maxErrThreshold { return "unhealthy" }; return "healthy" }`
+b) `func Status(h HealthCheck) string { if h.errCount >= maxErrThreshold { return "unhealthy" }; return "healthy" }`
+c) `func (h *HealthCheck) string Status() { if h.errCount >= maxErrThreshold { return "unhealthy" }; return "healthy" }`
+d) Constants cannot be used inside struct methods.
+**Answer: a) `func (h HealthCheck) Status() string { if h.errCount >= maxErrThreshold { return "unhealthy" }; return "healthy" }`**
 ```go
 package main
-
 import "fmt"
-
 const maxErrThreshold = 3
-
 type HealthCheck struct {
 	errCount int
 }
-
 func (h HealthCheck) Status() string {
 	if h.errCount >= maxErrThreshold {
 		return "unhealthy"
 	}
 	return "healthy"
 }
-
 func main() {
 	h := HealthCheck{errCount: 4}
 	fmt.Println(h.Status())
 }
 ```
 
-**5.25** Define a `Duration` type based on `int` (representing seconds) with a method `Minutes() float64` that converts it — demonstrating methods on non-struct named types.
-**Answer:**
+**5.25** Can you define methods on non-struct named types in Go, like creating a `Minutes()` method on a `type Duration int`?
+a) No, methods can only be attached to structs in Go.
+b) Yes, methods can be defined on any user-defined named type (like `type Duration int`) in the same package.
+c) Yes, but only if the named type is an interface.
+d) No, primitive types like `int` can never have methods, even if aliased.
+**Answer: b) Yes, methods can be defined on any user-defined named type (like `type Duration int`) in the same package.**
 ```go
 package main
-
 import "fmt"
-
 type Duration int // seconds
-
 func (d Duration) Minutes() float64 {
 	return float64(d) / 60.0
 }
-
 func main() {
 	d := Duration(150)
 	fmt.Printf("%.2f minutes\n", d.Minutes())
@@ -1217,51 +1233,38 @@ a) No difference  b) Empty interface loses type information (needs assertions) a
 
 ### Level 6 — Coding Problems
 
-**6.21** Define a `Notifier` interface with `Send(msg string) error`, and implement it for both `EmailNotifier` and `SlackNotifier` structs.
-**Answer:**
+**6.21** How do you correctly implement an interface in Go, such as a `Notifier` interface with `Send(msg string) error` on an `EmailNotifier` struct?
+a) By explicitly declaring `type EmailNotifier implements Notifier struct { ... }`.
+b) By implicitly providing a matching method `Send(msg string) error` with `EmailNotifier` as the receiver.
+c) By embedding `Notifier` inside `EmailNotifier` and overriding the method.
+d) By passing a function pointer to a `Notifier` constructor.
+**Answer: b) By implicitly providing a matching method `Send(msg string) error` with `EmailNotifier` as the receiver.**
 ```go
 package main
-
 import "fmt"
-
 type Notifier interface {
 	Send(msg string) error
 }
-
 type EmailNotifier struct{ Address string }
 func (e EmailNotifier) Send(msg string) error {
 	fmt.Printf("Emailing %s: %s\n", e.Address, msg)
 	return nil
 }
-
-type SlackNotifier struct{ Channel string }
-func (s SlackNotifier) Send(msg string) error {
-	fmt.Printf("Posting to #%s: %s\n", s.Channel, msg)
-	return nil
-}
-
-func alertAll(notifiers []Notifier, msg string) {
-	for _, n := range notifiers {
-		n.Send(msg)
-	}
-}
-
 func main() {
-	notifiers := []Notifier{
-		EmailNotifier{Address: "ops@company.com"},
-		SlackNotifier{Channel: "alerts"},
-	}
-	alertAll(notifiers, "Server down!")
+	var n Notifier = EmailNotifier{Address: "ops@company.com"}
+	n.Send("Server down!")
 }
 ```
 
-**6.22** Write a type switch function `describe(i interface{})` that prints different messages for int, string, bool, and a default case.
-**Answer:**
+**6.22** What is the correct syntax for a type switch in Go that determines the underlying type of an `interface{}` value `i`?
+a) `switch i.(type) { case int: ... }`
+b) `switch typeof(i) { case int: ... }`
+c) `switch v := i.(type) { case int: ... }`
+d) Both A and C are correct.
+**Answer: d) Both A and C are correct.**
 ```go
 package main
-
 import "fmt"
-
 func describe(i interface{}) {
 	switch v := i.(type) {
 	case int:
@@ -1274,39 +1277,29 @@ func describe(i interface{}) {
 		fmt.Printf("unknown type: %T\n", v)
 	}
 }
-
 func main() {
 	describe(42)
 	describe("hello")
 	describe(true)
-	describe(3.14)
 }
 ```
 
-**6.23** Implement a custom error type `NotFoundError` satisfying the `error` interface, and demonstrate using it with `errors.As`.
-**Answer:**
+**6.23** How do you safely assert that a returned `error` is a specific custom error type (e.g., `*NotFoundError`) in modern Go?
+a) By using a type assertion: `err.(*NotFoundError)`
+b) By using `errors.Is(err, NotFoundError)`
+c) By using `errors.As(err, &nfErr)` where `nfErr` is a pointer to `*NotFoundError`.
+d) By checking `if err.Error() == "*NotFoundError"`
+**Answer: c) By using `errors.As(err, &nfErr)` where `nfErr` is a pointer to `*NotFoundError`.**
 ```go
 package main
-
 import (
 	"errors"
 	"fmt"
 )
+type NotFoundError struct { Resource string }
+func (e *NotFoundError) Error() string { return fmt.Sprintf("%s not found", e.Resource) }
 
-type NotFoundError struct {
-	Resource string
-}
-
-func (e *NotFoundError) Error() string {
-	return fmt.Sprintf("%s not found", e.Resource)
-}
-
-func findUser(id int) error {
-	if id != 1 {
-		return &NotFoundError{Resource: fmt.Sprintf("user %d", id)}
-	}
-	return nil
-}
+func findUser(id int) error { return &NotFoundError{Resource: "user"} }
 
 func main() {
 	err := findUser(99)
@@ -1317,63 +1310,55 @@ func main() {
 }
 ```
 
-**6.24** Demonstrate the "typed nil in interface" gotcha: write code showing a function returning a `*MyError` (nil) assigned to an `error` interface, and check why `err != nil` is true.
-**Answer:**
+**6.24** What happens when a function returns a typed nil pointer (like `*MyError(nil)`) that is assigned to an `error` interface variable?
+a) The `error` interface variable becomes `nil`.
+b) The `error` interface variable is non-nil because the interface value contains type information (`*MyError`), even though the value itself is nil.
+c) The compiler prevents this assignment.
+d) It panics at runtime when checked against `nil`.
+**Answer: b) The `error` interface variable is non-nil because the interface value contains type information (`*MyError`), even though the value itself is nil.**
 ```go
 package main
-
 import "fmt"
-
 type MyError struct{ msg string }
-
 func (e *MyError) Error() string { return e.msg }
 
 func doWork(fail bool) *MyError {
-	if fail {
-		return &MyError{msg: "failed"}
-	}
 	return nil // typed nil *MyError
 }
-
 func main() {
 	var err error = doWork(false) // wraps a nil *MyError into a non-nil error interface
 	if err != nil {
 		fmt.Println("err is non-nil, even though the underlying pointer is nil!")
-	} else {
-		fmt.Println("err is nil")
 	}
 }
 ```
 
-**6.25** Define a small `Cache` interface with `Get(key string) (string, bool)` and `Set(key, value string)`, and implement it with an in-memory `map`-backed struct.
-**Answer:**
+**6.25** When implementing a `Cache` interface with an in-memory map on a struct, why do the implementation methods typically use a pointer receiver (`*MemCache`)?
+a) Because interfaces can only hold pointers.
+b) Because map types in Go require pointer receivers to work.
+c) To avoid copying the struct on every method call, and to ensure any internal state changes affect the original struct.
+d) It's just a style preference; value receivers work exactly the same way for state mutation.
+**Answer: c) To avoid copying the struct on every method call, and to ensure any internal state changes affect the original struct.**
 ```go
 package main
-
 import "fmt"
-
 type Cache interface {
 	Get(key string) (string, bool)
 	Set(key, value string)
 }
-
 type MemCache struct {
 	data map[string]string
 }
-
 func NewMemCache() *MemCache {
 	return &MemCache{data: make(map[string]string)}
 }
-
 func (m *MemCache) Get(key string) (string, bool) {
 	v, ok := m.data[key]
 	return v, ok
 }
-
 func (m *MemCache) Set(key, value string) {
 	m.data[key] = value
 }
-
 func main() {
 	var c Cache = NewMemCache()
 	c.Set("user:1", "alice")
@@ -1440,26 +1425,25 @@ a) `e`  b) `error`  c) `err`  d) `Exception`
 
 ### Level 7 — Coding Problems
 
-**7.11** Write a custom error type `HTTPError` (a struct containing `Code int` and `Message string`) that implements the `error` interface.
-**Answer:**
+**7.11** How do you correctly implement a custom error type `HTTPError` containing a `Code` and `Message` that satisfies the `error` interface?
+a) `type HTTPError struct{ Code int; Message string }; func (e HTTPError) Error() string { return e.Message }`
+b) `type HTTPError interface { ... }`
+c) `type HTTPError struct{ Code int; Message string }; func (e *HTTPError) Error() string { return fmt.Sprintf("HTTP %d: %s", e.Code, e.Message) }`
+d) `func HTTPError(Code int, Message string) error { return fmt.Errorf("%d %s", Code, Message) }`
+**Answer: c) `type HTTPError struct{ Code int; Message string }; func (e *HTTPError) Error() string { return fmt.Sprintf("HTTP %d: %s", e.Code, e.Message) }`**
 ```go
 package main
-
 import "fmt"
-
 type HTTPError struct {
 	Code    int
 	Message string
 }
-
 func (e *HTTPError) Error() string {
 	return fmt.Sprintf("HTTP %d: %s", e.Code, e.Message)
 }
-
 func doRequest() error {
 	return &HTTPError{Code: 404, Message: "Not Found"}
 }
-
 func main() {
 	err := doRequest()
 	if err != nil {
@@ -1468,25 +1452,25 @@ func main() {
 }
 ```
 
-**7.12** Write a function that attempts to parse a config string and wraps any resulting error with additional context using `fmt.Errorf` and `%w`.
-**Answer:**
+**7.12** How do you properly wrap an existing error `ErrInvalidFormat` with additional context so that it can be later checked with `errors.Is`?
+a) `return fmt.Errorf("parsing failed: %w", ErrInvalidFormat)`
+b) `return fmt.Errorf("parsing failed: %v", ErrInvalidFormat)`
+c) `return errors.Wrap(ErrInvalidFormat, "parsing failed")`
+d) `return ErrInvalidFormat + "parsing failed"`
+**Answer: a) `return fmt.Errorf("parsing failed: %w", ErrInvalidFormat)`**
 ```go
 package main
-
 import (
 	"errors"
 	"fmt"
 )
-
 var ErrInvalidFormat = errors.New("invalid format")
-
 func parseConfig(data string) error {
 	if data == "" {
 		return fmt.Errorf("parsing config failed: %w", ErrInvalidFormat)
 	}
 	return nil
 }
-
 func main() {
 	err := parseConfig("")
 	if errors.Is(err, ErrInvalidFormat) {
@@ -1564,19 +1548,20 @@ a) `make`  b) `new`  c) `alloc`  d) `ptr`
 
 ### Level 8 — Coding Problems
 
-**8.11** Write a function `swap(a, b *int)` that swaps the values of two integers using their pointers.
-**Answer:**
+**8.11** Which of the following functions correctly swaps the values of two integers using their pointers?
+a) `func swap(a, b *int) { a, b = b, a }`
+b) `func swap(a, b *int) { *a, *b = *b, *a }`
+c) `func swap(a, b *int) { temp := a; a = b; b = temp }`
+d) `func swap(a, b int) { a, b = b, a }`
+**Answer: b) `func swap(a, b *int) { *a, *b = *b, *a }`**
 ```go
 package main
-
 import "fmt"
-
 func swap(a, b *int) {
 	temp := *a
 	*a = *b
 	*b = temp
 }
-
 func main() {
 	x, y := 1, 2
 	swap(&x, &y)
@@ -1584,16 +1569,24 @@ func main() {
 }
 ```
 
-**8.12** Write a program that demonstrates returning a pointer to a local variable from a function (which is safe in Go due to escape analysis).
-**Answer:**
+**8.12** Why is it safe to return a pointer to a local variable (`&count`) from a function in Go, unlike in C/C++?
+a) Go functions do not have stack frames.
+b) Go performs escape analysis at compile time, moving the local variable to the heap if its reference escapes the function.
+c) Go garbage collects the pointer immediately, avoiding memory leaks.
+d) It is not safe; this will cause a runtime panic.
+**Answer: b) Go performs escape analysis at compile time, moving the local variable to the heap if its reference escapes the function.**
 ```go
 package main
-
 import "fmt"
-
 func createCounter() *int {
 	count := 10
-	return &count // Pe---
+	return &count // Perfectly safe, `count` escapes to the heap
+}
+func main() {
+	c := createCounter()
+	fmt.Println(*c)
+}
+```---
 
 # Fundamental Coding Scenarios: Data Types
 ### Hands-on scenario questions covering Go's fundamental data types.
@@ -1918,3 +1911,38 @@ b) It provides deadlines, cancellation signals, and request-scoped values across
 c) It is primarily used for database migrations.
 d) It manages memory allocation.
 **Answer: b) Deadlines, cancellations, and request-scoped values.** It is the idiomatic way to handle request timeouts and cancellations in Go backend services.
+
+**INT.31** How are slices passed to functions in Go?
+a) By value, meaning the entire backing array is copied.
+b) By reference, meaning a pointer to the slice header is passed.
+c) By value, meaning a copy of the slice header (pointer to array, length, and capacity) is passed.
+d) Slices cannot be passed to functions.
+**Answer: c) By value, copying the slice header.** This is why modifying the slice's contents affects the original array, but appending to a slice may not affect the original slice length or capacity if the backing array needs to grow.
+
+**INT.32** What is the purpose of `sync.Pool`?
+a) To manage a pool of database connections.
+b) To cache allocated but unused items for later reuse, relieving pressure on the garbage collector.
+c) To limit the number of goroutines running concurrently.
+d) To synchronize network requests across multiple servers.
+**Answer: b) To cache allocated but unused items.** This is particularly useful for objects that are expensive to allocate and frequently created and destroyed, like buffers.
+
+**INT.33** In Go 1.18+, what is the difference between `any` and `interface{}`?
+a) `any` is strictly evaluated at compile time, `interface{}` at runtime.
+b) `any` can only be used with generics, `interface{}` cannot.
+c) There is no difference; `any` is simply an alias for `interface{}`.
+d) `any` prevents type assertions.
+**Answer: c) There is no difference.** `any` is simply a type alias for `interface{}` introduced to make code, especially generics, more readable.
+
+**INT.34** What is the correct way to prevent a struct from being compared using the `==` operator?
+a) Add a field of type `[]int` (or any non-comparable type, like a function or map) to the struct.
+b) Declare the struct as `uncomparable type {}`.
+c) It is not possible; all structs are inherently comparable.
+d) Use the `sync.Mutex` inside the struct.
+**Answer: a) Add a field of a non-comparable type.** Types like slices, maps, and functions are not comparable. A common idiom is adding `_ [0]func()` to explicitly make it uncomparable without consuming memory.
+
+**INT.35** How does `defer` handle panic within the same function?
+a) The deferred function is not executed if a panic occurs.
+b) The deferred function is executed, and it can optionally capture the panic using `recover()`.
+c) The deferred function panics immediately as well.
+d) The program crashes before the deferred function runs.
+**Answer: b) The deferred function is executed.** This guarantees cleanup and allows the `recover()` function to capture and handle the panic state.

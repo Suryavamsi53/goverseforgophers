@@ -30,7 +30,7 @@
     ::-webkit-scrollbar-thumb:hover { background: rgba(0, 208, 132, 0.5); }
 </style>
 
-<div class="flex-grow flex flex-col h-full w-full overflow-hidden bg-app relative text-sm font-sans" x-data="playground()" x-init="initEditor(); initTerminal();">
+<div class="flex-grow flex flex-col h-full w-full overflow-hidden bg-app relative text-sm font-sans" x-data="playground()" x-init="initEditor(); initTerminal(); $cleanup(() => destroy());">
     
     <!-- Ambient glowing orbs -->
     <div class="absolute top-0 left-1/4 w-96 h-96 bg-glow/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
@@ -614,38 +614,47 @@
                 this.isResizing = true;
                 this._initialY = e.clientY;
                 this._initialHeight = this.terminalHeight;
+                
+                this._boundMouseMove = this.onMouseMove.bind(this);
+                this._boundMouseUp = this.onMouseUp.bind(this);
+                
+                window.addEventListener('mousemove', this._boundMouseMove, { passive: true });
+                window.addEventListener('mouseup', this._boundMouseUp);
             },
 
             onMouseMove(e) {
                 if (!this.isResizing) return;
                 const container = document.getElementById('center-area');
-                const deltaY = this._initialY - e.clientY;
-                const deltaPercent = (deltaY / container.clientHeight) * 100;
+                if (!container) return;
                 
-                let newHeight = this._initialHeight + deltaPercent;
-                if (newHeight < 10) newHeight = 10;
-                if (newHeight > 80) newHeight = 80;
-                
-                this.terminalHeight = newHeight;
-                
-                if (globalMonacoEditor) globalMonacoEditor.layout();
-                if (this.fitAddon) this.fitAddon.fit();
-                
-                // Throttle resize events to WS
-                if (!this._resizeTimeout) {
-                    this._resizeTimeout = setTimeout(() => {
-                        window.dispatchEvent(new Event('resize'));
-                        this._resizeTimeout = null;
-                    }, 100);
-                }
+                if (this._resizeRAF) cancelAnimationFrame(this._resizeRAF);
+                this._resizeRAF = requestAnimationFrame(() => {
+                    const deltaY = this._initialY - e.clientY;
+                    const deltaPercent = (deltaY / container.clientHeight) * 100;
+                    
+                    let newHeight = this._initialHeight + deltaPercent;
+                    if (newHeight < 10) newHeight = 10;
+                    if (newHeight > 80) newHeight = 80;
+                    
+                    this.terminalHeight = newHeight;
+                    
+                    if (globalMonacoEditor) globalMonacoEditor.layout();
+                    if (this.fitAddon) this.fitAddon.fit();
+                });
             },
 
             onMouseUp(e) {
                 if (this.isResizing) {
                     this.isResizing = false;
+                    window.removeEventListener('mousemove', this._boundMouseMove);
+                    window.removeEventListener('mouseup', this._boundMouseUp);
+                    
                     if (globalMonacoEditor) globalMonacoEditor.layout();
                     if (this.fitAddon) this.fitAddon.fit();
-                    window.dispatchEvent(new Event('resize'));
+                    
+                    if (this.ws && this.ws.readyState === WebSocket.OPEN && this.term) {
+                        this.ws.send(JSON.stringify({ type: 'resize', rows: this.term.rows, cols: this.term.cols }));
+                    }
                 }
             },
             
@@ -812,12 +821,18 @@
             isSaving: false,
 
             async saveWorkspace(immediate = false) {
-                if (this.activeFile && this.files[this.activeFile] !== undefined && globalMonacoEditor) {
+                if (this.activeFile && this._monacoModels && this._monacoModels[this.activeFile]) {
+                    this.files[this.activeFile] = this._monacoModels[this.activeFile].getValue();
+                } else if (globalMonacoEditor) {
                     this.files[this.activeFile] = globalMonacoEditor.getValue();
                 }
 
-                // Update local storage for immediate resilience
-                localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                // Update local storage for immediate resilience, gracefully handle QuotaExceededError
+                try {
+                    localStorage.setItem('goverse_studio_files_v2', JSON.stringify(this.files));
+                } catch (e) {
+                    console.warn("Local storage quota exceeded. Unable to persist workspace locally.", e);
+                }
                 
                 // Format on save if extension is enabled
                 if (this.extensions && this.extensions['fmt'] && !immediate) {
@@ -970,9 +985,11 @@
                         }
                     });
 
+                    this._monacoModels = {};
+                    this._monacoModels[this.activeFile] = monaco.editor.createModel(this.files[this.activeFile] || '', this.getFileLanguage(this.activeFile));
+
                     globalMonacoEditor = monaco.editor.create(document.getElementById('editor-container'), {
-                        value: this.files[this.activeFile],
-                        language: this.getFileLanguage(this.activeFile),
+                        model: this._monacoModels[this.activeFile],
                         theme: 'vs-dark', // Theme colors intact, background overridden via CSS
                         automaticLayout: true,
                         minimap: { enabled: this.editorSettings.minimap },
@@ -1036,18 +1053,22 @@
 
                     // Auto-save logic
                     globalMonacoEditor.onDidChangeModelContent(() => {
-                        const content = globalMonacoEditor.getValue();
-                        this.files[this.activeFile] = content;
-                        this.saveWorkspace();
                         this.autoSaved = true;
-                        setTimeout(() => this.autoSaved = false, 1500);
+                        if (this._autoSaveTimeout) clearTimeout(this._autoSaveTimeout);
+                        this._autoSaveTimeout = setTimeout(() => {
+                            this.autoSaved = false;
+                            this.saveWorkspace(); // This will pull from the model, avoiding O(N) typing lag
+                        }, 1500);
                         
                         // Live HTML Preview Logic
                         if (this.extensions['html-preview'] && (this.activeFile.endsWith('.html') || this.activeFile.endsWith('.htm'))) {
-                            const iframe = document.getElementById('html-preview-frame');
-                            if (iframe) {
-                                iframe.srcdoc = content;
-                            }
+                            if (this._previewRAF) cancelAnimationFrame(this._previewRAF);
+                            this._previewRAF = requestAnimationFrame(() => {
+                                const iframe = document.getElementById('html-preview-frame');
+                                if (iframe) {
+                                    iframe.srcdoc = globalMonacoEditor.getValue();
+                                }
+                            });
                         }
                     });
 
@@ -1081,27 +1102,28 @@
             switchFile(filename) {
                 if (this.activeFile === filename || this.isRenaming === filename) return;
                 
-                if (globalMonacoEditor) {
-                    this.files[this.activeFile] = globalMonacoEditor.getValue();
+                if (globalMonacoEditor && this._monacoModels && this._monacoModels[this.activeFile]) {
+                    this.files[this.activeFile] = this._monacoModels[this.activeFile].getValue();
                 }
 
                 this.activeFile = filename;
                 
                 if (globalMonacoEditor) {
-                    const oldModel = globalMonacoEditor.getModel();
-                    if (oldModel) oldModel.dispose();
+                    if (!this._monacoModels) this._monacoModels = {};
                     
-                    const newModel = monaco.editor.createModel(this.files[filename], this.getFileLanguage(filename));
+                    if (!this._monacoModels[filename]) {
+                        this._monacoModels[filename] = monaco.editor.createModel(this.files[filename] || '', this.getFileLanguage(filename));
+                    }
                     
                     // Update iframe if switching to HTML file and preview is enabled
                     if (this.extensions['html-preview'] && (filename.endsWith('.html') || filename.endsWith('.htm'))) {
                         const iframe = document.getElementById('html-preview-frame');
-                        if (iframe) iframe.srcdoc = this.files[filename];
+                        if (iframe) iframe.srcdoc = this._monacoModels[filename].getValue();
                     } else {
                         const iframe = document.getElementById('html-preview-frame');
                         if (iframe) iframe.srcdoc = '';
                     }
-                    globalMonacoEditor.setModel(newModel);
+                    globalMonacoEditor.setModel(this._monacoModels[filename]);
                 }
             },
 
@@ -1156,6 +1178,12 @@
                 
                 if (newName === '' || newName === oldName) return;
                 
+                // Security Validation
+                if (newName.includes('..') || newName.startsWith('/') || newName.includes('\\')) {
+                    alert('Invalid filename: Path traversal characters are not allowed.');
+                    return;
+                }
+                
                 if (this.files[newName] !== undefined) {
                     alert('A file with this name already exists.');
                     return;
@@ -1164,14 +1192,17 @@
                 this.files[newName] = this.files[oldName];
                 delete this.files[oldName];
                 
-                if (this.activeFile === oldName) {
-                    this.activeFile = newName;
-                    if (globalMonacoEditor) {
-                        monaco.editor.setModelLanguage(globalMonacoEditor.getModel(), this.getFileLanguage(newName));
-                    }
+                if (this._monacoModels && this._monacoModels[oldName]) {
+                    this._monacoModels[newName] = this._monacoModels[oldName];
+                    delete this._monacoModels[oldName];
+                    monaco.editor.setModelLanguage(this._monacoModels[newName], this.getFileLanguage(newName));
                 }
                 
-                this.saveWorkspace();
+                if (this.activeFile === oldName) {
+                    this.activeFile = newName;
+                }
+                
+                this.saveWorkspace(true);
             },
 
             deleteFile(filename) {
@@ -1274,11 +1305,18 @@
                     const data = await response.json();
                     if (data.error) {
                         this.parseProblems(data.error);
-                    } else if (data.formatted_code) {
-                        // Preserve cursor position if possible, but for simplicity just setValue
-                        const position = globalMonacoEditor.getPosition();
-                        globalMonacoEditor.setValue(data.formatted_code);
-                        globalMonacoEditor.setPosition(position);
+                    } else if (data.formatted_code && data.formatted_code !== currentCode) {
+                        const model = globalMonacoEditor.getModel();
+                        if (model) {
+                            model.pushEditOperations(
+                                [],
+                                [{
+                                    range: model.getFullModelRange(),
+                                    text: data.formatted_code
+                                }],
+                                () => null
+                            );
+                        }
                         this.files[this.activeFile] = data.formatted_code;
                         this.parseProblems(""); // clear problems
                     }
@@ -1297,11 +1335,16 @@
                 const c = this.availableChallenges.find(x => x.id === id);
                 if (!c) return;
                 
+                if (this._monacoModels) {
+                    Object.values(this._monacoModels).forEach(m => m.dispose());
+                    this._monacoModels = {};
+                }
+                
                 this.files = {
                     "README.md": c.readme,
                     "main.go": c.code
                 };
-                this.fileTree = this.buildFileTree(this.files);
+                
                 this.sidebarMode = 'files';
                 
                 // Open README.md first to initialize it
@@ -1340,14 +1383,24 @@
                 }
             },
 
+            _restController: null,
             async sendRestRequest() {
                 if (!this.restUrl) return;
+                
+                if (this._restController) {
+                    this._restController.abort();
+                }
+                this._restController = new AbortController();
+                
                 this.restLoading = true;
                 this.restResponse = 'Sending request to ' + this.restUrl + '...';
                 
                 try {
                     const t0 = performance.now();
-                    const res = await fetch(this.restUrl, { method: this.restMethod });
+                    const res = await fetch(this.restUrl, { 
+                        method: this.restMethod,
+                        signal: this._restController.signal
+                    });
                     const t1 = performance.now();
                     const timeMs = (t1 - t0).toFixed(0);
                     
@@ -1363,7 +1416,11 @@
                     const statusLine = `HTTP ${res.status} ${res.statusText} (${timeMs}ms)\n\n`;
                     this.restResponse = statusLine + data;
                 } catch (e) {
-                    this.restResponse = `Error: ${e.message}\n\nNote: If this is an external API, it might be blocking CORS requests from the browser.`;
+                    if (e.name === 'AbortError') {
+                        this.restResponse = 'Request cancelled.';
+                    } else {
+                        this.restResponse = `Error: ${e.message}\n\nNote: If this is an external API, it might be blocking CORS requests from the browser. Consider a backend proxy.`;
+                    }
                 } finally {
                     this.restLoading = false;
                 }
@@ -1553,6 +1610,17 @@
                     if (this.activePanel === 'TERMINAL') {
                         this.activePanel = 'OUTPUT';
                     }
+                }
+            },
+            
+            destroy() {
+                if (this.term) this.term.dispose();
+                if (globalMonacoEditor) globalMonacoEditor.dispose();
+                if (this.ws) { this.ws.onclose = null; this.ws.close(); }
+                if (this._resizeHandler) window.removeEventListener('resize', this._resizeHandler);
+                if (window.activeVimMode) window.activeVimMode.dispose();
+                if (this._monacoModels) {
+                    Object.values(this._monacoModels).forEach(m => m.dispose());
                 }
             }
         }
