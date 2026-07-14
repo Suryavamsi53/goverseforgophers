@@ -1,200 +1,304 @@
 {{define "roadmap"}}
-<div class="h-full flex flex-col w-full bg-app overflow-hidden relative">
+<div class="min-h-screen flex flex-col w-full bg-app overflow-x-hidden relative text-white" x-data="roadmap()">
 
     <!-- Ambient Background Effects -->
-    <div class="absolute inset-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div
-            class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-glow/5 blur-[120px] mix-blend-screen">
-        </div>
-        <div
-            class="absolute top-[40%] -right-[10%] w-[30%] h-[50%] rounded-full bg-blue-500/5 blur-[120px] mix-blend-screen">
-        </div>
+    <div class="fixed inset-0 w-full h-full pointer-events-none z-0">
+        <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-glow/5 blur-[120px] mix-blend-screen"></div>
+        <div class="absolute top-[40%] -right-[10%] w-[30%] h-[50%] rounded-full bg-blue-500/5 blur-[120px] mix-blend-screen"></div>
     </div>
 
     <!-- Header -->
-    <div class="pt-10 pb-6 px-8 text-center relative z-10 shrink-0 border-b border-white/5 bg-app/80 backdrop-blur-xl">
-        <h1
-            class="text-3xl font-extrabold text-white tracking-tight sm:text-4xl mb-3 flex items-center justify-center gap-3">
-            <svg class="w-8 h-8 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="pt-12 pb-8 px-8 text-center relative z-10 shrink-0">
+        <h1 class="text-4xl font-extrabold text-white tracking-tight sm:text-5xl mb-4 flex items-center justify-center gap-4">
+            <svg class="w-10 h-10 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7">
                 </path>
             </svg>
-            Golang <span class="text-transparent bg-clip-text bg-gradient-to-r from-glow to-blue-400">Developer
-                Roadmap</span>
+            Golang <span class="text-transparent bg-clip-text bg-gradient-to-r from-glow to-blue-400">Developer Roadmap</span>
         </h1>
-        <p class="text-sm text-gray-400 max-w-2xl mx-auto">Your step-by-step guide to mastering Go engineering, from
-            fundamental syntax to distributed systems architecture.</p>
+        <p class="text-base text-gray-400 max-w-2xl mx-auto">Interactive step-by-step guide. Click on any topic to view deep-dive details, study notes, and referral links.</p>
     </div>
 
-    <!-- Interactive Roadmap Container (Pan/Zoom) -->
-    <div class="flex-1 w-full h-full relative z-10 p-4 flex items-center justify-center overflow-hidden"
-        id="roadmap-container">
-        <div
-            class="w-full h-full bg-panel/30 border border-white/5 rounded-2xl backdrop-blur-sm shadow-2xl relative overflow-hidden flex items-center justify-center">
+    <!-- Roadmap Content -->
+    <div class="relative w-full max-w-5xl mx-auto py-12 px-4 sm:px-6 lg:px-8 z-10 pb-32">
+        <!-- Vertical Line -->
+        <div class="absolute left-1/2 transform -translate-x-1/2 w-1 h-full bg-gradient-to-b from-glow via-blue-500 to-purple-600 rounded-full opacity-30"></div>
 
-            <!-- Zoom Controls -->
-            <div class="absolute bottom-6 right-6 z-50 flex gap-2">
-                <button onclick="roadmapZoomIn()"
-                    class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                </button>
-                <button onclick="roadmapZoomOut()"
-                    class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
-                    </svg>
-                </button>
-                <button onclick="roadmapZoomReset()"
-                    class="w-10 h-10 rounded-full bg-white/5 border border-white/10 text-glow flex items-center justify-center hover:bg-white/10 hover:border-glow transition-all shadow-lg backdrop-blur-md ml-2"
-                    title="Reset Zoom">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                        </path>
-                    </svg>
-                </button>
+        <template x-for="(node, index) in nodes" :key="node.id">
+            <div class="relative w-full flex justify-between items-center mb-16">
+                
+                <!-- Left Side -->
+                <div class="w-5/12 flex justify-end">
+                    <template x-if="index % 2 === 0">
+                        <button @click="openPanel(node)" class="group w-full max-w-md bg-panel border border-white/10 rounded-xl p-6 text-left hover:border-glow hover:shadow-[0_0_20px_rgba(0,208,132,0.2)] transition-all duration-300 relative overflow-hidden backdrop-blur-md">
+                            <div class="absolute top-0 left-0 w-1 h-full bg-glow transition-transform duration-300 transform origin-bottom scale-y-0 group-hover:scale-y-100"></div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-glow mb-2 block" x-text="node.category"></span>
+                            <h3 class="text-xl font-bold text-white mb-2" x-text="node.title"></h3>
+                            <p class="text-sm text-gray-400 line-clamp-2" x-text="node.description"></p>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Center Dot -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full bg-app border-4 border-glow z-10 flex items-center justify-center shadow-[0_0_15px_rgba(0,208,132,0.5)] cursor-pointer hover:scale-110 transition-transform" @click="openPanel(node)">
+                    <div class="w-2 h-2 bg-white rounded-full"></div>
+                </div>
+
+                <!-- Right Side -->
+                <div class="w-5/12 flex justify-start">
+                    <template x-if="index % 2 !== 0">
+                        <button @click="openPanel(node)" class="group w-full max-w-md bg-panel border border-white/10 rounded-xl p-6 text-left hover:border-blue-400 hover:shadow-[0_0_20px_rgba(47,129,247,0.2)] transition-all duration-300 relative overflow-hidden backdrop-blur-md">
+                            <div class="absolute top-0 right-0 w-1 h-full bg-blue-400 transition-transform duration-300 transform origin-bottom scale-y-0 group-hover:scale-y-100"></div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-2 block" x-text="node.category"></span>
+                            <h3 class="text-xl font-bold text-white mb-2" x-text="node.title"></h3>
+                            <p class="text-sm text-gray-400 line-clamp-2" x-text="node.description"></p>
+                        </button>
+                    </template>
+                </div>
+
             </div>
+        </template>
+    </div>
 
-            <pre class="mermaid bg-transparent w-full h-full flex justify-center items-center text-base"
-                id="mermaid-target">
-flowchart TD
-    %% Styling Classes
-    classDef level1 fill:#00D08415,stroke:#00D084,stroke-width:2px,color:#00D084,font-weight:bold,rx:12px,ry:12px;
-    classDef level2 fill:#2F81F715,stroke:#2F81F7,stroke-width:2px,color:#2F81F7,font-weight:bold,rx:12px,ry:12px;
-    classDef level3 fill:#D2992215,stroke:#D29922,stroke-width:2px,color:#D29922,font-weight:bold,rx:12px,ry:12px;
-    classDef level4 fill:#F8514915,stroke:#F85149,stroke-width:2px,color:#F85149,font-weight:bold,rx:12px,ry:12px;
-    classDef edge fill:none,stroke:#444,stroke-width:2px,stroke-dasharray: 5 5,color:#aaa;
+    <!-- Side Panel -->
+    <div class="fixed inset-0 z-50 overflow-hidden pointer-events-none">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 pointer-events-auto" 
+             x-show="isPanelOpen" 
+             x-transition.opacity 
+             @click="closePanel()"></div>
+             
+        <div class="absolute inset-y-0 right-0 max-w-md w-full flex pointer-events-auto">
+            <div class="w-full h-full bg-panel border-l border-white/10 shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col"
+                 x-show="isPanelOpen"
+                 x-transition:enter="transform transition ease-in-out duration-300"
+                 x-transition:enter-start="translate-x-full"
+                 x-transition:enter-end="translate-x-0"
+                 x-transition:leave="transform transition ease-in-out duration-300"
+                 x-transition:leave-start="translate-x-0"
+                 x-transition:leave-end="translate-x-full">
+                 
+                <!-- Panel Header -->
+                <div class="px-6 py-6 border-b border-white/10 flex justify-between items-start bg-white/5 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-glow/10 to-transparent pointer-events-none"></div>
+                    <div class="relative z-10">
+                        <span class="text-xs font-bold uppercase tracking-wider text-glow mb-1 block" x-text="selectedNode?.category"></span>
+                        <h2 class="text-2xl font-bold text-white" x-text="selectedNode?.title"></h2>
+                    </div>
+                    <button @click="closePanel()" class="text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-lg relative z-10">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
 
-    subgraph L1 ["Beginner: Go Fundamentals"]
-        direction TB
-        B1["1. Go Syntax & Basics<br>• Variables & Constants<br>• Control Structures (if/for/switch)<br>• Types & Type Conversion"]:::level1
-        B2["2. Core Data Structures<br>• Arrays & Slices<br>• Maps & Iteration<br>• Memory Representation"]:::level1
-        B3["3. Functions & Pointers<br>• Variadic Functions<br>• Anonymous Functions & Closures<br>• Pass by Value vs Pointers"]:::level1
-        B1 --> B2
-        B2 --> B3
-    end
+                <!-- Panel Content -->
+                <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                    <p class="text-gray-300 mb-8 leading-relaxed text-[15px]" x-text="selectedNode?.description"></p>
 
-    subgraph L2 ["Intermediate: Object-Oriented & Design"]
-        direction TB
-        I1["4. Structs & Methods<br>• Composition over Inheritance<br>• Value vs Pointer Receivers<br>• Memory Alignment & Padding"]:::level2
-        I2["5. Interfaces & Polymorphism<br>• Implicit Implementation<br>• Empty Interfaces<br>• Type Assertions & Switches"]:::level2
-        I3["6. Error Handling<br>• Custom Errors<br>• Wrapping & Unwrapping<br>• Panic & Recover"]:::level2
-        I1 --> I2
-        I2 --> I3
-    end
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-glow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        Key Topics Covered
+                    </h4>
+                    <ul class="space-y-3 mb-8">
+                        <template x-for="topic in selectedNode?.topics">
+                            <li class="flex items-start gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
+                                <svg class="w-5 h-5 text-blue-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <span class="text-gray-200" x-text="topic"></span>
+                            </li>
+                        </template>
+                    </ul>
 
-    subgraph L3 ["Advanced: Concurrency Mastery"]
-        direction TB
-        A1["7. Goroutines & Scheduler<br>• G-P-M Model<br>• OS Threads vs Goroutines<br>• Context Switching"]:::level3
-        A2["8. Channels & Synchronization<br>• Buffered vs Unbuffered<br>• Select Statement<br>• Deadlocks & Race Conditions"]:::level3
-        A3["9. Advanced Primitives<br>• sync.Mutex & RWMutex<br>• sync.WaitGroup<br>• Context Package (Cancellation)"]:::level3
-        A1 --> A2
-        A2 --> A3
-    end
-
-    subgraph L4 ["Expert: Internals & System Design"]
-        direction TB
-        E1["10. Go Runtime<br>• Garbage Collection (Mark & Sweep)<br>• Escape Analysis<br>• Memory Allocation (TCMalloc)"]:::level4
-        E2["11. Standard Library & Ecosystem<br>• Networking (net/http) & REST<br>• Generics (Go 1.18+)<br>• Reflection (reflect)"]:::level4
-        E3["12. Performance & Tooling<br>• Testing & Benchmarking<br>• Profiling (pprof)<br>• Tracing (go tool trace)"]:::level4
-        E1 --> E2
-        E2 --> E3
-    end
-
-    %% Connect the levels
-    L1 --> L2
-    L2 --> L3
-    L3 --> L4
-</pre>
+                    <h4 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        Reference Links & Documentation
+                    </h4>
+                    <div class="space-y-3">
+                        <template x-for="link in selectedNode?.links">
+                            <a :href="link.url" target="_blank" class="flex items-center justify-between bg-white/5 p-4 rounded-lg border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all group">
+                                <span class="text-blue-300 group-hover:text-blue-200" x-text="link.text"></span>
+                                <svg class="w-4 h-4 text-gray-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
+                        </template>
+                    </div>
+                </div>
+                
+                <div class="p-6 border-t border-white/10 bg-white/5">
+                    <a href="/practice" class="w-full flex items-center justify-center gap-2 bg-glow text-black font-bold py-3 px-4 rounded-lg hover:bg-glow/90 transition-all hover:scale-[1.02] shadow-[0_0_20px_rgba(0,208,132,0.3)]">
+                        Go to Practice Problems
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
 <script>
-    let panZoomInstance = null;
-
-    function initPanZoom() {
-        const svgElement = document.querySelector('#mermaid-target svg');
-        if (svgElement) {
-            // Remove constraints to allow proper zooming
-            svgElement.style.maxWidth = 'none';
-            svgElement.style.height = '100%';
-            svgElement.style.width = '100%';
-
-            if (panZoomInstance) {
-                panZoomInstance.destroy();
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('roadmap', () => ({
+            isPanelOpen: false,
+            selectedNode: null,
+            nodes: [
+                {
+                    id: "basics",
+                    title: "1. Go Syntax & Basics",
+                    category: "Beginner",
+                    description: "Learn the foundational syntax of Go, including variables, constants, and basic data types. This is your entry point to mastering the language.",
+                    topics: ["Variables & Constants", "Control Structures (if/for/switch)", "Types & Type Conversion"],
+                    links: [
+                        { text: "Go Tour: Basics", url: "https://go.dev/tour/basics/1" },
+                        { text: "Effective Go", url: "https://go.dev/doc/effective_go" },
+                        { text: "Go by Example", url: "https://gobyexample.com/" }
+                    ]
+                },
+                {
+                    id: "data-structures",
+                    title: "2. Core Data Structures",
+                    category: "Beginner",
+                    description: "Understand Go's core data structures, how arrays differ from slices, and how maps are structured internally in memory.",
+                    topics: ["Arrays & Slices", "Maps & Iteration", "Memory Representation & Padding"],
+                    links: [
+                        { text: "Go Slices: usage and internals", url: "https://go.dev/blog/slices-intro" },
+                        { text: "Go Maps in Action", url: "https://go.dev/blog/maps" }
+                    ]
+                },
+                {
+                    id: "functions",
+                    title: "3. Functions & Pointers",
+                    category: "Beginner",
+                    description: "Master functions in Go, including closures, variadic arguments, and learn exactly how pass-by-value works alongside memory pointers.",
+                    topics: ["Variadic Functions", "Anonymous Functions & Closures", "Pass by Value vs Pointers"],
+                    links: [
+                        { text: "Pointers in Go", url: "https://gobyexample.com/pointers" },
+                        { text: "First Class Functions in Go", url: "https://go.dev/doc/codewalk/functions/" }
+                    ]
+                },
+                {
+                    id: "oop",
+                    title: "4. Structs & Methods",
+                    category: "Intermediate",
+                    description: "Go does not have classes or inheritance. Learn how to use Structs and Methods to write clean, composable object-oriented code.",
+                    topics: ["Composition over Inheritance", "Value vs Pointer Receivers", "Struct Tags & Reflection basics"],
+                    links: [
+                        { text: "Structs Instead of Classes", url: "https://go.dev/tour/methods/1" }
+                    ]
+                },
+                {
+                    id: "interfaces",
+                    title: "5. Interfaces & Polymorphism",
+                    category: "Intermediate",
+                    description: "Interfaces in Go are satisfied implicitly, making them incredibly powerful. They form the absolute cornerstone of Go's type system.",
+                    topics: ["Implicit Implementation", "Empty Interfaces (interface{})", "Type Assertions & Type Switches"],
+                    links: [
+                        { text: "How to use interfaces in Go", url: "https://jordanorelli.com/post/32665860244/how-to-use-interfaces-in-go" }
+                    ]
+                },
+                {
+                    id: "errors",
+                    title: "6. Error Handling",
+                    category: "Intermediate",
+                    description: "Go treats errors as standard return values rather than exceptions. Learn the idiomatic ways to check, wrap, and safely create custom errors.",
+                    topics: ["Custom Errors (errors.New)", "Wrapping & Unwrapping (fmt.Errorf)", "Panic, Defer & Recover"],
+                    links: [
+                        { text: "Error handling and Go", url: "https://go.dev/blog/error-handling-and-go" },
+                        { text: "Working with Errors in Go 1.13", url: "https://go.dev/blog/go1.13-errors" },
+                        { text: "Defer, Panic, and Recover", url: "https://go.dev/blog/defer-panic-and-recover" }
+                    ]
+                },
+                {
+                    id: "concurrency",
+                    title: "7. Goroutines & Scheduler",
+                    category: "Advanced",
+                    description: "Dive deep into Go's massive concurrency model. Understand how the runtime's M:N scheduler (G-P-M model) multiplexes thousands of goroutines onto a few OS threads.",
+                    topics: ["The G-P-M Scheduler Model", "OS Threads vs Goroutines", "Context Switching Mechanics"],
+                    links: [
+                        { text: "The Go Scheduler", url: "https://morsmachine.dk/go-scheduler" },
+                        { text: "Illustrated Tales of Go Runtime Scheduler", url: "https://medium.com/@genchilu/illustrated-tales-of-go-runtime-scheduler-7497fc66d933" }
+                    ]
+                },
+                {
+                    id: "channels",
+                    title: "8. Channels & Synchronization",
+                    category: "Advanced",
+                    description: "Do not communicate by sharing memory; instead, share memory by communicating. Channels are Go's safe conduit for goroutine data transfer.",
+                    topics: ["Buffered vs Unbuffered Channels", "The Select Statement", "Preventing Deadlocks & Race Conditions"],
+                    links: [
+                        { text: "Share Memory By Communicating", url: "https://go.dev/blog/codelab-share" },
+                        { text: "Go Concurrency Patterns", url: "https://www.youtube.com/watch?v=f6kdp27TYZs" }
+                    ]
+                },
+                {
+                    id: "sync",
+                    title: "9. Advanced Sync Primitives",
+                    category: "Advanced",
+                    description: "When channels aren't the right fit, use traditional synchronization primitives from the sync package for fine-grained control and extreme performance.",
+                    topics: ["sync.Mutex & sync.RWMutex", "sync.WaitGroup & sync.Map", "The Context Package (Cancellation & Timeouts)"],
+                    links: [
+                        { text: "Go Concurrency Patterns: Context", url: "https://go.dev/blog/context" },
+                        { text: "sync Package Documentation", url: "https://pkg.go.dev/sync" }
+                    ]
+                },
+                {
+                    id: "runtime",
+                    title: "10. Internals & Go Runtime",
+                    category: "Expert",
+                    description: "Look behind the curtain to understand the hidden machinery that makes Go incredibly fast and memory-safe.",
+                    topics: ["Concurrent Mark & Sweep Garbage Collection", "Escape Analysis (Heap vs Stack)", "Memory Allocation (TCMalloc implementation)"],
+                    links: [
+                        { text: "Getting to Go: The Journey of Go's Garbage Collector", url: "https://go.dev/blog/ismmkeynote" },
+                        { text: "Go Escape Analysis Flaws", url: "https://docs.google.com/document/d/1CxgUBmERV_eYa29a4R5k6v7-HokU-7YJd8H-wG0-08M/" }
+                    ]
+                },
+                {
+                    id: "ecosystem",
+                    title: "11. Ecosystem & Standard Library",
+                    category: "Expert",
+                    description: "Master the most powerful and commonly used packages within Go's legendary standard library.",
+                    topics: ["Building REST APIs (net/http)", "Generics (Type Parameters in Go 1.18+)", "Dynamic Programming via Reflection (reflect)"],
+                    links: [
+                        { text: "An Introduction To Generics", url: "https://go.dev/blog/intro-generics" },
+                        { text: "The Laws of Reflection", url: "https://go.dev/blog/laws-of-reflection" }
+                    ]
+                },
+                {
+                    id: "performance",
+                    title: "12. Performance & Tooling",
+                    category: "Expert",
+                    description: "Measure, profile, trace, and optimize your Go applications for extreme low-latency performance in production.",
+                    topics: ["Testing, Mocking & Benchmarking", "CPU and Memory Profiling (pprof)", "Execution Tracing (go tool trace)"],
+                    links: [
+                        { text: "Profiling Go Programs", url: "https://go.dev/blog/pprof" },
+                        { text: "High Performance Go Workshop", url: "https://dave.cheney.net/training#high-performance-go" }
+                    ]
+                }
+            ],
+            openPanel(node) {
+                this.selectedNode = node;
+                this.isPanelOpen = true;
+                // Prevent scrolling on the main body
+                document.body.style.overflow = 'hidden';
+            },
+            closePanel() {
+                this.isPanelOpen = false;
+                // Restore scrolling
+                document.body.style.overflow = 'auto';
             }
-
-            panZoomInstance = svgPanZoom(svgElement, {
-                zoomEnabled: true,
-                controlIconsEnabled: false,
-                fit: true,
-                center: true,
-                minZoom: 0.5,
-                maxZoom: 5,
-                zoomScaleSensitivity: 0.2
-            });
-        }
-    }
-
-    // Polling observer since mermaid renders asynchronously in base.html
-    const observer = new MutationObserver((mutations, obs) => {
-        const svgElement = document.querySelector('#mermaid-target svg');
-        if (svgElement) {
-            // Give Mermaid a tiny bit of time to calculate final dimensions before initializing pan/zoom
-            setTimeout(initPanZoom, 100);
-            obs.disconnect(); // Stop observing once we found and initialized it
-        }
-    });
-
-    observer.observe(document.getElementById('mermaid-target'), {
-        childList: true,
-        subtree: true
-    });
-
-    // Button controls
-    window.roadmapZoomIn = () => { if (panZoomInstance) panZoomInstance.zoomIn() };
-    window.roadmapZoomOut = () => { if (panZoomInstance) panZoomInstance.zoomOut() };
-    window.roadmapZoomReset = () => {
-        if (panZoomInstance) {
-            panZoomInstance.resetZoom();
-            panZoomInstance.center();
-        }
-    };
+        }))
+    })
 </script>
 
 <style>
-    /* Prevent text selection when dragging */
-    #mermaid-target {
-        cursor: grab;
-        user-select: none;
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
     }
-
-    #mermaid-target:active {
-        cursor: grabbing;
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.02);
     }
-
-    d
-
-    /* Make flowchart edges lighter */
-    .mermaid .edgePath .path {
-        stroke: #3F3F46 !important;
-        stroke-width: 2px !important;
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
     }
-
-    .mermaid .edgeLabel {
-        color: #A1A1AA !important;
-        background-color: transparent !important;
-        font-size: 14px !important;
-    }
-
-    .mermaid .marker {
-        fill: #3F3F46 !important;
-        stroke: #3F3F46 !important;
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
     }
 </style>
 {{end}}
