@@ -2249,3 +2249,136 @@ b) The job will be dropped and permanently lost.
 c) The Go runtime will automatically spawn a new worker goroutine.
 d) The program will panic.
 **Answer: a) The sender will block.** This provides natural "backpressure," preventing the system from taking on more work than it can handle.
+
+
+### Level 13: Data Structures Mastery - Arrays, Slices & Maps
+
+**251** How are arrays fundamentally different from slices in Go regarding memory representation?
+a) Arrays are dynamic and slices are fixed length.
+b) Arrays are values (passed by copy) whereas slices act as references to an underlying array.
+c) Arrays cannot store primitive types.
+d) Arrays are allocated on the heap only.
+**Answer: b) Arrays are values (passed by copy) whereas slices act as references to an underlying array.** When you assign or pass an array, Go copies the entire memory block. Slices contain a pointer to the array, a length, and a capacity.
+
+**252** What happens if you declare an array like `var arr [5]int` and try to access `arr[5]`?
+a) It returns 0.
+b) It expands the array size dynamically.
+c) The compiler throws an "out of bounds" error.
+d) It triggers a runtime panic during garbage collection.
+**Answer: c) The compiler throws an "out of bounds" error.** Because the length is part of the array's type, the compiler statically verifies constant indices and will not compile code with invalid bounds.
+
+**253** When using the `append` function on a slice, what happens when the underlying array reaches its capacity?
+a) The operation panics.
+b) A new array is allocated, existing elements are copied over, and the capacity is typically doubled (for small slices).
+c) The slice overwrites the first element.
+d) The program pauses and waits for memory to free up.
+**Answer: b) A new array is allocated, existing elements are copied over, and the capacity is typically doubled.** This dynamic resizing is what makes slices so powerful in Go.
+
+**254** What does the slice expression `s[1:3:5]` mean when applied to an existing slice `s`?
+a) Slices from index 1 to 3 with an upper capacity bound restricted to index 5.
+b) Extracts 1 element, skips 3, and adds 5.
+c) Resizes the slice length to 1, capacity to 3, and appends 5.
+d) Creates a 3D slice.
+**Answer: a) Slices from index 1 to 3 with an upper capacity bound restricted to index 5.** This "full slice expression" controls the resulting slice's capacity, which is extremely useful to prevent accidental overwriting of data when appending later.
+
+**255** What is the fundamental requirement for a data type to be used as a key in a Go map?
+a) It must be an integer or string.
+b) It must be comparable using the `==` and `!=` operators.
+c) It must implement the `hashable` interface.
+d) It must be a pointer.
+**Answer: b) It must be comparable.** Slices, maps, and functions cannot be used as map keys because they are not comparable in Go.
+
+**256** Are Go maps safe for concurrent reads and writes by multiple goroutines out-of-the-box?
+a) Yes, maps use built-in mutexes automatically.
+b) No, concurrent map writes will cause a fatal runtime panic.
+c) Yes, but only for reads.
+d) No, they will silently overwrite data without crashing.
+**Answer: b) No, concurrent map writes will cause a fatal runtime panic.** You must protect maps with a `sync.RWMutex` or use `sync.Map` for concurrent access.
+
+### Level 14: Data Structures Mastery - Linked Lists, Queues & Stacks
+
+**257** Does Go have a built-in LinkedList data structure in the standard library?
+a) Yes, the `list` keyword is built into the language.
+b) No, you must always use slices.
+c) Yes, provided by the `container/list` package.
+d) Yes, but only for integers.
+**Answer: c) Yes, provided by the `container/list` package.** It implements a doubly linked list, though slices are generally preferred in Go due to better CPU cache locality.
+
+**258** What is the time complexity of inserting an element at the beginning of a doubly linked list (like `container/list`) versus a Go slice?
+a) Both are O(1).
+b) Linked List is O(N), Slice is O(1).
+c) Linked List is O(1), Slice is O(N) because elements must be shifted.
+d) Both are O(N).
+**Answer: c) Linked List is O(1), Slice is O(N) because elements must be shifted.** While linked lists excel at fast insertions/deletions at specific points, slices require shifting all subsequent elements in contiguous memory.
+
+**259** How is a Queue (FIFO) typically implemented idiomatically in Go?
+a) By importing `container/queue`.
+b) Using a slice and appending for enqueue, and slicing `q[1:]` for dequeue.
+c) Using a `sync.Map`.
+d) Go does not support queues.
+**Answer: b) Using a slice.** Enqueue is `q = append(q, x)` and Dequeue is `x, q = q[0], q[1:]`. However, be aware of potential memory leaks if the underlying array grows indefinitely.
+
+**260** Which Go concurrency primitive naturally behaves like a thread-safe Queue?
+a) A Mutex.
+b) A WaitGroup.
+c) A Channel.
+d) A Context.
+**Answer: c) A Channel.** A buffered channel acts as a strict FIFO queue that safely transfers data between concurrent goroutines without explicit locking.
+
+**261** How do you implement a Stack (LIFO) elegantly in Go?
+a) By importing `container/stack`.
+b) Using a slice, appending to push, and slicing `s[:len(s)-1]` to pop.
+c) Using a linked list only.
+d) By using a WaitGroup.
+**Answer: b) Using a slice.** A slice is the most cache-friendly and idiomatic way to implement a stack. `push` is `s = append(s, x)` and `pop` is `x, s = s[len(s)-1], s[:len(s)-1]`.
+
+**262** Why might a slice-based Stack or Queue cause a "Memory Leak" in Go if not handled carefully?
+a) Because slices use global memory.
+b) Because the garbage collector ignores slices.
+c) Popping an element via slicing (`s = s[:len(s)-1]`) does not remove the underlying array reference, meaning the data at that index is not garbage collected.
+d) Because slices cannot be passed by value.
+**Answer: c) Popping an element doesn't clear the underlying array reference.** To prevent this, you should set the popped index to the zero value (e.g., `s[len(s)-1] = nil` for pointers) before slicing, allowing the GC to reclaim the memory.
+
+### Level 15: Data Structures Mastery - Trees, Graphs & Heaps
+
+**263** When implementing a Binary Search Tree (BST) in Go, how is a node typically defined?
+a) `type Node struct { Value int; Left *Node; Right *Node }`
+b) `type Node [3]interface{}`
+c) `type Node map[string]int`
+d) Go does not support recursive structs.
+**Answer: a) type Node struct { Value int; Left *Node; Right *Node }.** Go supports recursive types via pointers, allowing complex tree structures to be linked dynamically in the heap.
+
+**264** What traversal method on a Binary Search Tree will visit the nodes in sorted ascending order?
+a) Pre-order traversal.
+b) Post-order traversal.
+c) In-order traversal.
+d) Level-order traversal.
+**Answer: c) In-order traversal.** By visiting the Left child, then the Node itself, and finally the Right child, you naturally extract values in ascending order.
+
+**265** How are Graphs typically represented in Go memory?
+a) Using the standard library `container/graph`.
+b) Through Adjacency Lists using a `map[NodeID][]NodeID` or Adjacency Matrices using a `[][]int`.
+c) Through channel multiplexing.
+d) Using standard library struct tags.
+**Answer: b) Adjacency Lists or Adjacency Matrices.** Adjacency lists (often maps of slices) are usually preferred for sparse graphs to save memory, while matrices (2D slices) are used for dense graphs.
+
+**266** Which algorithm is best suited for finding the shortest path in an unweighted graph in Go?
+a) Depth-First Search (DFS).
+b) Breadth-First Search (BFS) using a slice as a queue.
+c) Dijkstra's Algorithm using a heap.
+d) QuickSort.
+**Answer: b) Breadth-First Search (BFS).** BFS guarantees the shortest path in an unweighted graph and can be easily implemented in Go using a slice to simulate the queue.
+
+**267** How do you implement a Min-Heap or Max-Heap in Go?
+a) By using the `sort.Heap` function on a slice.
+b) By implementing the `heap.Interface` (`Len`, `Less`, `Swap`, `Push`, `Pop`) and using the `container/heap` package.
+c) By using a standard Binary Tree.
+d) Heaps are built into the language using the `heap` keyword.
+**Answer: b) By implementing the heap.Interface and using container/heap.** The package provides heap operations for any type that implements `sort.Interface` plus `Push` and `Pop`.
+
+**268** What is a common practical use-case for a Heap in Go backend applications?
+a) Storing static configuration.
+b) Implementing a Priority Queue, such as scheduling tasks by urgency.
+c) Routing HTTP requests.
+d) Encrypting user passwords.
+**Answer: b) Implementing a Priority Queue.** `container/heap` is perfect for building priority queues where the highest (or lowest) priority item is always at the root and can be extracted in O(log N) time.
