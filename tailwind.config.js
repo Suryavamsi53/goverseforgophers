@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        app: '#0A0A0A',
-        panel: '#111111',
-        elevated: '#1A1A1A',
+        app: '#000000',
+        panel: '#000000',
+        elevated: '#000000',
         glow: '#00D084',
         glowHover: '#00E691',
         glowMuted: 'rgba(0, 208, 132, 0.15)',
