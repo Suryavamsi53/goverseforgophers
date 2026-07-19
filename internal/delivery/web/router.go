@@ -238,17 +238,114 @@ func (h *WebHandler) HandleDashboard(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Rank Calculation
+	entries, _ := h.UserRepo.GetLeaderboard(r.Context(), 10000)
+	rank := len(entries) + 1
+	for i, entry := range entries {
+		if entry.UserID == userID {
+			rank = i + 1
+			break
+		}
+	}
+	rankPercentile := 0
+	if len(entries) > 0 {
+		rankPercentile = (rank * 100) / len(entries)
+	}
+	if rankPercentile < 1 {
+		rankPercentile = 1
+	}
+
+	// Count practice and challenges
+	codePracticeCount := 0
+	challengeCount := 0
+	for _, p := range progressList {
+		if p.EntityType == "practice" && p.Status == "completed" {
+			codePracticeCount++
+		}
+		if p.EntityType == "project" && p.Status == "completed" {
+			challengeCount++
+		}
+	}
+	
+	skillsMastered := completedLessons / 3 // Rough heuristic
+
+	// Recommend courses
+	var recommendedCourses []domain.Course
+	for _, c := range courses {
+		// Just recommend first 3 incomplete courses
+		if len(recommendedCourses) < 3 {
+			recommendedCourses = append(recommendedCourses, c)
+		}
+	}
+
+	// Recent Lessons
+	type RecentLesson struct {
+		Title       string
+		CourseTitle string
+		Completed   bool
+		Score       int
+	}
+	var recentLessons []RecentLesson
+	// Pre-fetch all lessons into a map to avoid N+1 queries
+	type lessonCourseInfo struct {
+		Lesson *domain.Lesson
+		Course *domain.Course
+	}
+	lessonMap := make(map[string]lessonCourseInfo)
+	for _, c := range courses {
+		// Use a local copy of course for the pointer
+		courseCopy := c
+		lessons, _ := h.CourseRepo.GetLessonsByCourseID(r.Context(), courseCopy.ID)
+		for _, l := range lessons {
+			lessonCopy := l
+			lessonMap[l.ID] = lessonCourseInfo{
+				Lesson: &lessonCopy,
+				Course: &courseCopy,
+			}
+		}
+	}
+
+	count := 0
+	for i := len(progressList) - 1; i >= 0; i-- {
+		p := progressList[i]
+		if p.EntityType == "lesson" {
+			if info, exists := lessonMap[p.EntityID]; exists {
+				score := 0
+				if p.Status == "completed" {
+					score = 100
+				}
+				recentLessons = append(recentLessons, RecentLesson{
+					Title:       info.Lesson.Title,
+					CourseTitle: info.Course.Title,
+					Completed:   p.Status == "completed",
+					Score:       score,
+				})
+				count++
+			}
+		}
+		if count >= 4 {
+			break
+		}
+	}
+
 	tmpl := parseTemplates()
 	err = tmpl.ExecuteTemplate(w, "base", map[string]interface{}{
-		"Title":            "Dashboard - GoVerse",
-		"Page":             "dashboard",
-		"User":             user,
-		"Profile":          profile,
-		"CompletedLessons": completedLessons,
-		"TotalLessons":     totalLessons,
-		"LessonPercent":    lessonPercent,
-		"NextLesson":       nextLesson,
-		"NextCourse":       nextCourse,
+		"Title":              "Dashboard - GoVerse",
+		"Page":               "dashboard",
+		"User":               user,
+		"Profile":            profile,
+		"CompletedLessons":   completedLessons,
+		"TotalLessons":       totalLessons,
+		"LessonPercent":      lessonPercent,
+		"NextLesson":         nextLesson,
+		"NextCourse":         nextCourse,
+		"Rank":               rank,
+		"RankPercentile":     rankPercentile,
+		"SkillsMastered":     skillsMastered,
+		"CodePracticeCount":  codePracticeCount,
+		"ChallengeCount":     challengeCount,
+		"RecommendedCourses": recommendedCourses,
+		"RecentLessons":      recentLessons,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
