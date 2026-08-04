@@ -12,6 +12,7 @@ import (
 	"github.com/suryavamsivaggu/goverse/pkg/auth"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
+	"golang.org/x/oauth2/google"
 )
 
 type contextKey string
@@ -37,6 +38,8 @@ func RegisterAuthRoutes(r chi.Router, authUseCase domain.AuthUseCase, jwtManager
 	r.Get("/logout", ah.HandleLogout)
 	r.Get("/auth/github", ah.HandleGitHubLogin)
 	r.Get("/auth/github/callback", ah.HandleGitHubCallback)
+	r.Get("/auth/google", ah.HandleGoogleLogin)
+	r.Get("/auth/google/callback", ah.HandleGoogleCallback)
 }
 
 func AuthMiddleware(jwtManager *auth.JWTManager) func(http.Handler) http.Handler {
@@ -177,13 +180,31 @@ func (ah *AuthHandler) HandleLogout(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
+func getBaseURL() string {
+	url := os.Getenv("APP_URL")
+	if url == "" {
+		return "http://localhost:8080"
+	}
+	return url
+}
+
 func getGithubOAuthConfig() *oauth2.Config {
 	return &oauth2.Config{
 		ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
 		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
-		RedirectURL:  "http://localhost:8080/auth/github/callback",
+		RedirectURL:  getBaseURL() + "/auth/github/callback",
 		Scopes:       []string{"user:email"},
 		Endpoint:     github.Endpoint,
+	}
+}
+
+func getGoogleOAuthConfig() *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		RedirectURL:  getBaseURL() + "/auth/google/callback",
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+		Endpoint:     google.Endpoint,
 	}
 }
 
@@ -275,3 +296,85 @@ func (ah *AuthHandler) HandleGitHubCallback(w http.ResponseWriter, r *http.Reque
 
 	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 }
+
+func (ah *AuthHandler) HandleGoogleLogin(w http.ResponseWriter, r *http.Request) {
+	url := getGoogleOAuthConfig().AuthCodeURL("state-string-goverse", oauth2.AccessTypeOffline)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func (ah *AuthHandler) HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
+	state := r.FormValue("state")
+	if state != "state-string-goverse" {
+		http.Error(w, "invalid oauth state", http.StatusBadRequest)
+		return
+	}
+
+	code := r.FormValue("code")
+	token, err := getGoogleOAuthConfig().Exchange(r.Context(), code)
+	if err != nil {
+		http.Error(w, "Login session expired or invalid code. Please go to /login and try again. (Details: "+err.Error()+")", http.StatusBadRequest)
+		return
+	}
+
+	client := getGoogleOAuthConfig().Client(r.Context(), token)
+	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
+	if err != nil {
+		http.Error(w, "failed to get user info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	var googleUser struct {
+		ID    string `json:"id"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&googleUser); err != nil {
+		http.Error(w, "failed to parse user info: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if googleUser.Email == "" {
+		http.Error(w, "email not provided by google", http.StatusBadRequest)
+		return
+	}
+	
+	// Create a safe username from the email if Name is empty, or use Name without spaces
+	username := googleUser.Name
+	if username == "" {
+		// Just take first part of email
+		for i, c := range googleUser.Email {
+			if c == '@' {
+				username = googleUser.Email[:i]
+				break
+			}
+		}
+	}
+
+	user, err := ah.UserRepo.GetByEmail(r.Context(), googleUser.Email)
+	if err != nil {
+		_, regErr := ah.UseCase.Register(r.Context(), username, googleUser.Email, "oauth-"+token.AccessToken[:10])
+		if regErr != nil {
+			http.Error(w, "failed to register user: "+regErr.Error(), http.StatusInternalServerError)
+			return
+		}
+		user, _ = ah.UserRepo.GetByEmail(r.Context(), googleUser.Email)
+	}
+
+	jwtToken, err := ah.JWT.GenerateToken(user.ID, user.Username, user.Role)
+	if err != nil {
+		http.Error(w, "failed to generate token: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    jwtToken,
+		Path:     "/",
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+	})
+
+	http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
+}
+

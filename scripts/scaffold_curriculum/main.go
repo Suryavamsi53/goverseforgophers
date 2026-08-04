@@ -360,7 +360,7 @@ func main() {
 		sqlFile.WriteString(fmt.Sprintf("('%s', '%s', '%s', '%s', 'See markdown file', %d)%s\n", 
 			id, courseID, slug, safeTitle, i+1, comma))
 	}
-	sqlFile.WriteString("ON CONFLICT (id) DO NOTHING;\n")
+	sqlFile.WriteString("ON CONFLICT (id) DO UPDATE SET slug = EXCLUDED.slug, title = EXCLUDED.title, order_index = EXCLUDED.order_index;\n")
 
 	fmt.Printf("Successfully regenerated %d markdown lessons with Ultimate Template in %s\n", len(lines), courseDir)
 }

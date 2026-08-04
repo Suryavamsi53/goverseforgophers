@@ -108,4 +108,4 @@ INSERT INTO lessons (id, course_id, slug, title, content, order_index) VALUES
 ('10000000-0000-0000-0000-000000000106', '22222222-2222-2222-2222-222222222222', '106-cicd', 'CI/CD', 'See markdown file', 106),
 ('10000000-0000-0000-0000-000000000107', '22222222-2222-2222-2222-222222222222', '107-deployment', 'Deployment', 'See markdown file', 107),
 ('10000000-0000-0000-0000-000000000108', '22222222-2222-2222-2222-222222222222', '108-production-best-practices', 'Production Best Practices', 'See markdown file', 108)
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET slug = EXCLUDED.slug, title = EXCLUDED.title, order_index = EXCLUDED.order_index;
