@@ -1,7 +1,9 @@
 .git/
 .env
 ui/assets/tailwindcss
+tailwindcss
 server
 main
 goverse-cli
 deployments/pgdata
+*.log

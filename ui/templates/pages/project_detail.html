@@ -139,7 +139,7 @@
             <button @click="startLab()" class="px-8 py-3.5 bg-white text-black font-bold rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-105 transition-transform">Start Lab Now</button>
         </div>
 
-        <iframe src="/practice?embed=true&type=project&ref_id={{.Project.Slug}}" class="w-full h-full border-none pointer-events-none" :class="{ 'pointer-events-auto': labStarted }" id="project-sandbox"></iframe>
+        <iframe src="/ide?embed=true&type=project&ref_id={{.Project.Slug}}" class="w-full h-full border-none pointer-events-none" :class="{ 'pointer-events-auto': labStarted }" id="project-sandbox"></iframe>
     </div>
 
     <!-- Celebration Modal -->
