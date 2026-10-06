@@ -35,7 +35,6 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Windows binary extension
                 bat 'go build -v -o bin\\goverseforgophers.exe .'
             }
         }
@@ -49,7 +48,7 @@ pipeline {
             echo 'Build succeeded!'
         }
         failure {
-            echo 'Build failed. Check stage logs for details.'
+            echo 'Build failed. Check console output for details.'
         }
     }
 }
