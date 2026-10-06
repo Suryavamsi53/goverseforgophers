@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        // Ensure 'go-latest' matches Manage Jenkins -> Tools -> Go
-        go 'go-latest'
-    }
-
     environment {
         GO111MODULE = 'on'
     }
