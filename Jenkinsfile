@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     environment {
+        CGO_ENABLED = '0'
         GO111MODULE = 'on'
     }
 
@@ -12,32 +13,30 @@ pipeline {
             }
         }
 
+        stage('Verify Environment') {
+            steps {
+                bat 'go version'
+            }
+        }
+
         stage('Dependencies') {
             steps {
-                sh 'go mod download'
-                sh 'go mod verify'
+                bat 'go mod download'
+                bat 'go mod verify'
             }
         }
 
         stage('Test & Vet') {
             steps {
-                sh 'go vet ./...'
-                sh 'go test -v -coverprofile=coverage.out ./...'
+                bat 'go vet ./...'
+                bat 'go test -v ./...'
             }
         }
 
         stage('Build') {
-            environment {
-                CGO_ENABLED = '0'
-            }
             steps {
-                sh 'go build -v -o bin/goverseforgophers ./cmd/server'
-            }
-        }
-
-        stage('Archive') {
-            steps {
-                archiveArtifacts artifacts: 'bin/*', fingerprint: true
+                // Windows binary extension
+                bat 'go build -v -o bin\\goverseforgophers.exe .'
             }
         }
     }
@@ -47,10 +46,10 @@ pipeline {
             cleanWs()
         }
         success {
-            echo 'Build, tests, and vet checks passed successfully!'
+            echo 'Build succeeded!'
         }
         failure {
-            echo 'Build failed. Check console output for errors.'
+            echo 'Build failed. Check stage logs for details.'
         }
     }
 }
