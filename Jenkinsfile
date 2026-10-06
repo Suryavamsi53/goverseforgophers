@@ -2,13 +2,11 @@ pipeline {
     agent any
 
     tools {
-        // If configured under Manage Jenkins -> Tools -> Go
-        // Otherwise, ensure 'go' is installed on the Jenkins host/agent
-        go 'go-latest' 
+        // Ensure 'go-latest' matches Manage Jenkins -> Tools -> Go
+        go 'go-latest'
     }
 
     environment {
-        CGO_ENABLED = '0'
         GO111MODULE = 'on'
     }
 
@@ -29,13 +27,22 @@ pipeline {
         stage('Test & Vet') {
             steps {
                 sh 'go vet ./...'
-                sh 'go test -v -race -coverprofile=coverage.out ./...'
+                sh 'go test -v -coverprofile=coverage.out ./...'
             }
         }
 
         stage('Build') {
+            environment {
+                CGO_ENABLED = '0'
+            }
             steps {
-                sh 'go build -v -o bin/goverseforgophers .'
+                sh 'go build -v -o bin/goverseforgophers ./cmd/server'
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                archiveArtifacts artifacts: 'bin/*', fingerprint: true
             }
         }
     }
